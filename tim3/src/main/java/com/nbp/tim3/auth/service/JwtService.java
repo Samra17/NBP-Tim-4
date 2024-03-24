@@ -88,8 +88,8 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public JwtService(@Value("${secret_key}") String secret, @Value("${jwt_expiration}")long accessTokenExpiration, @Value("${refresh_token.expiration}")long refreshTokenExpiration) {
-        SECRET=secret;
+    public JwtService( @Value("${jwt_expiration}")long accessTokenExpiration, @Value("${refresh_token.expiration}")long refreshTokenExpiration) {
+        SECRET=System.getenv("SECRET_KEY");
         ACCESS_TOKEN_EXPIRATION = accessTokenExpiration;
         REFRESH_TOKEN_EXPIRATION = refreshTokenExpiration;
     }

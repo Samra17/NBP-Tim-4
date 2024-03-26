@@ -27,7 +27,7 @@ public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
-    @PreAuthorize("hasRole('ADMINISTRATOR')")
+    //@PreAuthorize("hasRole('ADMINISTRATOR')")
     @Operation(description = "Create a new category")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successfully created a new category",
@@ -39,11 +39,8 @@ public class CategoryController {
     @ResponseStatus(HttpStatus.CREATED)
     public @ResponseBody ResponseEntity<Category> addNewCategory (
             @Parameter(description = "Category name", required = true)
-            @Valid @RequestBody CategoryCreateRequest request,
-            @RequestHeader("uuid") String user,
-            @RequestHeader("username") String username) {
+            @Valid @RequestBody CategoryCreateRequest request) {
 
-        request.setUserUUID(user);
         var category = categoryService.addNewCategory(request);
 
         return new ResponseEntity<>(category,HttpStatus.CREATED);
@@ -70,7 +67,6 @@ public class CategoryController {
             @RequestHeader("uuid") String userUUID,
             @RequestHeader("username") String username) {
 
-        request.setUserUUID(userUUID);
         Category category = null;
         category = categoryService.updateCategory(request,id);
 

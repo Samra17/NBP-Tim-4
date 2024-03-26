@@ -2,6 +2,7 @@ package com.nbp.tim3.service;
 
 import com.nbp.tim3.dto.category.CategoryCreateRequest;
 import com.nbp.tim3.model.Category;
+import com.nbp.tim3.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -13,24 +14,20 @@ import java.util.stream.StreamSupport;
 
 @Service
 public class CategoryService {
-    //@Autowired
-    //private CategoryRepository categoryRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     //@Autowired
     //private RestaurantRepository restaurantRepository;
 
     public Category addNewCategory(CategoryCreateRequest request) {
-        /*
+
         Category category = new Category();
         category.setName(request.getName());
-        category.setCreated(LocalDateTime.now());
-        category.setCreatedBy(request.getUserUUID());
-        categoryRepository.save(category);
+        categoryRepository.addCategory(category);
 
         return category;
-        */
 
-        return new Category();
     }
 
     public Category updateCategory(CategoryCreateRequest request, Long id) {

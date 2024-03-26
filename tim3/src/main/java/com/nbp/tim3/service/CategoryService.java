@@ -44,30 +44,26 @@ public class CategoryService {
     }
 
     public List<Category> getAllCategories() {
-        // return StreamSupport.stream(categoryRepository.findAll().spliterator(),false).collect(Collectors.toList());
-        return new ArrayList<>();
+        return categoryRepository.getAllCategories();
     }
 
-    public Category getCategory(Long id) {
-        /*var exception = new EntityNotFoundException("Category with id " + id + " does not exist!");
-        var category = categoryRepository.findById(id);
-        return category.orElseThrow(()-> exception);*/
+    public Category getCategory(int id) {
+        var category = categoryRepository.getById(id);
 
-        return new Category();
+        if(category == null) {
+            throw  new EntityNotFoundException(String.format("Category with id %d does not exist!",id));
+        } else {
+            return category;
+        }
+
     }
 
-    public String deleteCategory(Long id) {
-        /*var category = categoryRepository.findById(id).orElseThrow(()->new EntityNotFoundException("Category with id " + id + " does not exist!"));
-        List<Long> idList = new ArrayList<>();
-        idList.add(id);
-        var restaurantsWithCategory = categoryRepository.getRestaurantsWithCategories(idList);
-        restaurantsWithCategory.forEach( r ->
-        {
-            r.setCategories(new HashSet<>(r.getCategories().stream().filter(c -> c.getId()!=id).collect(Collectors.toList())));
-            restaurantRepository.save(r);
-        });
-        categoryRepository.delete(category);*/
 
-        return "Something";
+    public void deleteCategory(int id) {
+
+        if(!categoryRepository.deleteCategory(id))
+            throw new EntityNotFoundException(String.format("Category with id %d does not exist!",id));
+
     }
+
 }

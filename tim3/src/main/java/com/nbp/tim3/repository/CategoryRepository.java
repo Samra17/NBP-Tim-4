@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -90,5 +92,79 @@ public class CategoryRepository {
             return 0;
         }
 
+    }
+
+    public List<Category> getAllCategories() {
+        List<Category> categories = new ArrayList<>();
+        String sql = "SELECT * FROM nbp_category";
+
+        try {
+            Connection connection = dbConnectionService.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+
+            while (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                String name = resultSet.getString("name");
+
+                Category category = new Category(id, name);
+                categories.add(category);
+            }
+
+            return  categories;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return categories;
+        }
+    }
+
+    public Category getById(int id) {
+        String sql = "SELECT * FROM nbp_category WHERE id=?";
+
+        try {
+            Connection connection = dbConnectionService.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1,id);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+
+            if (resultSet.next()) {
+                String name = resultSet.getString("name");
+
+                // Create User object
+                return new Category(id, name);
+            }
+
+            return  null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public boolean deleteCategory(int id) {
+        try  {
+            Connection connection = dbConnectionService.getConnection();
+            String sqlQuery = "DELETE FROM nbp_category WHERE id = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);
+
+            preparedStatement.setInt(1, id);
+
+            int rowsAffected = preparedStatement.executeUpdate();
+
+            connection.commit();
+
+            if (rowsAffected > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return  false;
+        }
     }
 }

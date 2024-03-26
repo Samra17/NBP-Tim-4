@@ -71,7 +71,7 @@ public class CategoryController {
         return new ResponseEntity<>(category,HttpStatus.OK);
     }
 
-    /*
+
     @Operation(description = "Get all categories")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully found all categories in the system",
@@ -85,6 +85,7 @@ public class CategoryController {
         return new ResponseEntity<>(categories, HttpStatus.OK);
     }
 
+
     @Operation(description = "Get a category by ID")
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully found the category with provided ID",
@@ -97,24 +98,27 @@ public class CategoryController {
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody ResponseEntity<Category> getCategory(
             @Parameter(description = "Category ID", required = true)
-            @PathVariable  Long id) {
+            @PathVariable  int id) {
         var category = categoryService.getCategory(id);
         return new ResponseEntity<>(category, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('ADMINISTRATOR')")
+
+
+    //@PreAuthorize("hasRole('ADMINISTRATOR')")
     @Operation(description = "Delete a category")
     @ApiResponses ( value = {
-            @ApiResponse(responseCode = "200", description = "Successfully deleted the category with provided ID"),
+            @ApiResponse(responseCode = "204", description = "Successfully deleted the category with provided ID"),
             @ApiResponse(responseCode = "404", description = "Category with provided ID not found",
                     content = @Content)})
     @DeleteMapping(path="/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody ResponseEntity<String> deleteCategory(
+    public @ResponseBody ResponseEntity<?> deleteCategory(
             @Parameter(description = "Category ID", required = true)
-            @PathVariable Long id,
-            @RequestHeader("username") String username) {
+            @PathVariable int id) {
 
-        return new ResponseEntity<>(categoryService.deleteCategory(id),HttpStatus.OK);
-    }*/
+        categoryService.deleteCategory(id);
+        return  ResponseEntity.noContent().build();
+
+    }
 }

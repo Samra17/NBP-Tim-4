@@ -1,9 +1,9 @@
 package com.nbp.tim3.model;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
+@AllArgsConstructor
 @NoArgsConstructor
 public class Category {
     int id;

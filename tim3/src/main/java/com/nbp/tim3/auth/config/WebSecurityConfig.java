@@ -35,7 +35,7 @@ public class WebSecurityConfig{
         http.csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/auth/login","/auth/register","/auth/refresh-token")
+                .requestMatchers("/**","/auth/login","/auth/register","/auth/refresh-token","/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html")
                 .permitAll()
                 .anyRequest()
                 .authenticated()

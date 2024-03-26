@@ -36,6 +36,7 @@ public class MenuItemController {
     // @Autowired
     //  private MenuItemRepository menuItemRepository;
 
+    /*
     @GetMapping("/all")
     public ResponseEntity<List<MenuItem>> getAllMenuItems() {
         return ResponseEntity.ok(menuItemService.getAllItems());
@@ -122,11 +123,12 @@ public class MenuItemController {
         } catch (Exception e) {
             System.out.println("Something went wrong");
         }
-    }*/
+    }
 
     public ResponseEntity<String> deleteMenuItem(@RequestBody Long id) {
         // return ResponseEntity.ok(menuItemService.getMenuItemsByList(integerList.getIntegerList()));
         menuItemService.deleteMenuItem(id);
         return ResponseEntity.ok(("Menu item with id " + id + "deleted!"));
     }
+    */
 }

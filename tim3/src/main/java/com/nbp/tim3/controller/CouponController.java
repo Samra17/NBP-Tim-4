@@ -28,6 +28,7 @@ public class CouponController {
     @Autowired
     private CouponService couponService;
 
+    /*
     //@PreAuthorize("hasRole('CUSTOMER')")
     @Operation(description = "Get all coupons")
     @ApiResponses(value = {
@@ -140,4 +141,6 @@ public class CouponController {
         var coupon = couponService.getAllCouponsForRestaurant(uuid);
         return new ResponseEntity<>(coupon, HttpStatus.OK);
     }
+
+     */
 }

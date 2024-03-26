@@ -3,6 +3,7 @@ package com.nbp.tim3.service;
 import com.nbp.tim3.dto.category.CategoryCreateRequest;
 import com.nbp.tim3.model.Category;
 import com.nbp.tim3.repository.CategoryRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
@@ -30,18 +31,16 @@ public class CategoryService {
 
     }
 
-    public Category updateCategory(CategoryCreateRequest request, Long id) {
-        /*
-        var exception = new EntityNotFoundException("Category with id " + id + " does not exist!");
-        var category = categoryRepository.findById(id).orElseThrow(()-> exception);
-        category.setName(request.getName());
-        category.setModified(LocalDateTime.now());
-        category.setModifiedBy(request.getUserUUID());
-        categoryRepository.save(category);
-        return category;
-        */
+    public Category updateCategory(CategoryCreateRequest request, int id) {
 
-        return new Category();
+        Category category = new Category(id, request.getName());
+        int rowsUpdated = categoryRepository.updateCategory(category);
+
+        if(rowsUpdated == 0) {
+            throw new EntityNotFoundException(String.format("Category with id %d does not exist!",id));
+        }
+
+        return category;
     }
 
     public List<Category> getAllCategories() {

@@ -25,6 +25,8 @@ public class AuthController {
         this.authenticationService = authenticationService;
     }
 
+    /*
+
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest registerRequest) {
 
@@ -83,6 +85,6 @@ public class AuthController {
     @GetMapping("/uuid-token/{uuid}")
     public ResponseEntity<String> getTokenFromUUID(@PathVariable String uuid) {
         return ResponseEntity.ok(authenticationService.getTokenFromUUID(uuid));
-    }
+    }*/
 
 }

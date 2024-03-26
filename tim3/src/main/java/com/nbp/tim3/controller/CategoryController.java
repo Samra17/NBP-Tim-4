@@ -22,7 +22,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping(path="/category")
+@RequestMapping(path="/api/category")
 public class CategoryController {
     @Autowired
     private CategoryService categoryService;
@@ -46,7 +46,7 @@ public class CategoryController {
         return new ResponseEntity<>(category,HttpStatus.CREATED);
     }
 
-    @PreAuthorize("hasRole('ADMINISTRATOR')")
+    //@PreAuthorize("hasRole('ADMINISTRATOR')")
     @Operation(description = "Update category name")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully updated category name",
@@ -61,11 +61,9 @@ public class CategoryController {
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody ResponseEntity<Category> updateCategory (
             @Parameter(description = "Category ID", required = true)
-            @PathVariable Long id,
+            @PathVariable int id,
             @Parameter(description = "Category name", required = true)
-            @RequestBody @Valid CategoryCreateRequest request,
-            @RequestHeader("uuid") String userUUID,
-            @RequestHeader("username") String username) {
+            @RequestBody @Valid CategoryCreateRequest request) {
 
         Category category = null;
         category = categoryService.updateCategory(request,id);
@@ -73,6 +71,7 @@ public class CategoryController {
         return new ResponseEntity<>(category,HttpStatus.OK);
     }
 
+    /*
     @Operation(description = "Get all categories")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully found all categories in the system",
@@ -117,5 +116,5 @@ public class CategoryController {
             @RequestHeader("username") String username) {
 
         return new ResponseEntity<>(categoryService.deleteCategory(id),HttpStatus.OK);
-    }
+    }*/
 }

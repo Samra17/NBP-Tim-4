@@ -37,6 +37,7 @@ public class RestaurantController {
     @Autowired
     private RestaurantImageService restaurantImageService;
 
+    /*
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     @Operation(description = "Create a new restaurant")
     @ApiResponses(value = {
@@ -357,7 +358,7 @@ public class RestaurantController {
         favoriteRestaurantService.removeRestaurantFromFavorites(id,user);
 
         return new ResponseEntity<>("Successfully removed restaurant with id " + id + " from favorites!",HttpStatus.OK);
-    }*/
+    }
 
     @Operation(description = "Get restaurant UUID by restaurant ID")
     @ApiResponses(value = {
@@ -442,4 +443,5 @@ public class RestaurantController {
 
         return ResponseEntity.ok(restaurantService.getCustomersFavorited(restaurantUUID));
     }
+    */
 }

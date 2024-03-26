@@ -28,6 +28,7 @@ public class ReviewController {
     private ReviewService reviewService;
 
 
+    /*
     @Operation(description = "Get all reviews of a restaurant")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully found all reviews for the restaurant",
@@ -96,6 +97,6 @@ public class ReviewController {
             @RequestHeader("username") String username) {
 
         return new ResponseEntity<>(reviewService.deleteReview(id),HttpStatus.OK);
-    }
+    }*/
 }
 

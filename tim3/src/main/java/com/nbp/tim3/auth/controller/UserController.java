@@ -18,6 +18,7 @@ public class UserController {
         this.userService = userService;
     }
 
+    /*
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     @GetMapping("/all")
     public ResponseEntity<List<UserResponse>> getAllUsers() {
@@ -46,5 +47,5 @@ public class UserController {
     @DeleteMapping("/uuid/{uuid}")
     public ResponseEntity<String> deleteUserByUUID(@PathVariable String uuid) {
         return ResponseEntity.ok(userService.deleteUserByUUID(uuid));
-    }
+    }*/
 }

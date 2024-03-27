@@ -7,15 +7,16 @@ import java.io.Serializable;
 
 public class MenuDto implements Serializable {
 
-    private int id;
+    private Integer id;
     @NotNull(message = "Active status should not be null")
     private boolean active;
 
     @NotNull(message = "Name should not be null")
+    @Size(min=0,max=36,message = "Name can contain a maximum of 100 characters!")
     private String name;
 
-    @NotNull(message="Menu restaurant must be specified!")
-    private int restaurantID;
+    @NotNull(message="Menu restaurant should not be null")
+    private Integer restaurantID;
 
     public MenuDto() {
     }
@@ -53,15 +54,15 @@ public class MenuDto implements Serializable {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
-    public int getRestaurantID() {
+    public Integer getRestaurantID() {
         return restaurantID;
     }
 
-    public void setRestaurantID(int restaurantID) {
+    public void setRestaurantID(Integer restaurantID) {
         this.restaurantID = restaurantID;
     }
 }

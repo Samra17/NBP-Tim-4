@@ -1,7 +1,9 @@
 package com.nbp.tim3.service;
 
+import com.nbp.tim3.dto.category.CategoryCreateRequest;
 import com.nbp.tim3.dto.menu.MenuDto;
 import com.nbp.tim3.dto.menu.MenuItemDto;
+import com.nbp.tim3.model.Category;
 import com.nbp.tim3.model.Menu;
 import com.nbp.tim3.repository.MenuRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -39,18 +41,14 @@ public class MenuService {
     }
 
     public Menu addNewMenu(MenuDto menuDto) {
-        /*Menu menu = new Menu();
-        menu.setActive(menuDto.isActive());
-        menu.setRestaurant_uuid(menuDto.getRestaurant_uuid());
-        menu.setDate_created(LocalDateTime.now());
+        Menu menu = new Menu();
         menu.setName(menuDto.getName());
-        menuRepository.save(menu);
-        return menu;*/
-
-        return new Menu();
+        menu.setActive(menuDto.isActive());
+        menu.setRestaurantID(menuDto.getRestaurantID());
+        menuRepository.addMenu(menu);
+        return menu;
 
     }
-
     public String deleteMenu(Long id) {
         /*var menu = menuRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Menu with id " + id + " does not exist!"));
         menuRepository.deleteById(id);

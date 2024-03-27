@@ -62,8 +62,8 @@ public class MenuController {
 
         return new ResponseEntity<>(menu, HttpStatus.OK);
     }
-/*
-    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
+
+//    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Create a new menu")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successfully created a new menu",
@@ -75,13 +75,12 @@ public class MenuController {
     @ResponseStatus(HttpStatus.CREATED)
     public @ResponseBody ResponseEntity<Menu> addNewMenu(
             @Parameter(description = "Information required for menu creation", required = true)
-            @Valid @RequestBody MenuDto menuDto,
-            @RequestHeader("username") String username) {
+            @Valid @RequestBody MenuDto menuDto) {
         var menu = menuService.addNewMenu(menuDto);
 
         return new ResponseEntity<>(menu, HttpStatus.CREATED);
     }
-
+/*
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Update menu informations")
     @ApiResponses(value = {

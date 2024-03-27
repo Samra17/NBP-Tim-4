@@ -168,13 +168,12 @@ public class MenuController {
         var menus = menuService.getRestaurantMenusShort(restaurantUUID);
         return menus;
     }
-
-    @GetMapping(path = "/restaurant-menus/active/{restaurantUUID}")
+*/
+    @GetMapping(path = "/restaurant-menus/active/{restaurantID}")
     public  List<Menu> getActiveRestaurantMenus (@PathVariable
-                                                 String restaurantUUID,
-                                           @RequestHeader("username") String username) {
+                                                 int restaurantID) {
 
-        var menus = menuService.getActiveRestaurantMenus(restaurantUUID);
+        var menus = menuService.getActiveRestaurantMenus(restaurantID);
         return menus;
     }
-*/}
+}

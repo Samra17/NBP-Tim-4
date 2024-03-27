@@ -126,8 +126,7 @@ public class MenuService {
         return new ArrayList<>();
     }
 
-    public List<Menu> getActiveRestaurantMenus(String restaurantUUID) {
-        // return menuRepository.getActiveMenusForRestaurant(restaurantUUID);
-        return new ArrayList<>();
+    public List<Menu> getActiveRestaurantMenus(int restaurantID) {
+         return menuRepository.getActiveMenusForRestaurant(restaurantID);
     }
 }

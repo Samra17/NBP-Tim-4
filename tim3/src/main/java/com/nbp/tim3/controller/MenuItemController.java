@@ -9,6 +9,7 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.nbp.tim3.dto.menu.MenuItemDto;
 import com.nbp.tim3.model.Menu;
 import com.nbp.tim3.model.MenuItem;
+import com.nbp.tim3.repository.MenuItemRepository;
 import com.nbp.tim3.service.MenuItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,26 +28,26 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "menu-item")
+@RequestMapping(path = "/api/menu-item")
 public class MenuItemController {
 
     @Autowired
     private MenuItemService menuItemService;
 
-    // @Autowired
-    //  private MenuItemRepository menuItemRepository;
+     @Autowired
+      private MenuItemRepository menuItemRepository;
 
     /*
     @GetMapping("/all")
     public ResponseEntity<List<MenuItem>> getAllMenuItems() {
         return ResponseEntity.ok(menuItemService.getAllItems());
     }
-
+*/
     @GetMapping("/get/{id}")
-    public ResponseEntity<MenuItem> getItemById(@PathVariable Long id) {
+    public ResponseEntity<MenuItem> getItemById(@PathVariable int id) {
         return ResponseEntity.ok(menuItemService.getItemById(id));
     }
-
+/*
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Delete a menu item")
     @ApiResponses( value = {

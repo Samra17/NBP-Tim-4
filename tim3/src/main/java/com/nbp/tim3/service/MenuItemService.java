@@ -2,6 +2,8 @@ package com.nbp.tim3.service;
 
 import com.nbp.tim3.dto.menu.MenuItemDto;
 import com.nbp.tim3.model.MenuItem;
+import com.nbp.tim3.repository.MenuItemRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.stereotype.Service;
@@ -12,16 +14,19 @@ import java.util.List;
 
 @Service
 public class MenuItemService {
-   // @Autowired
-    //private MenuItemRepository menuItemRepository;
+   @Autowired
+    private MenuItemRepository menuItemRepository;
 
     public List<MenuItem> getAllItems() {
         // return menuItemRepository.findAll();
         return new ArrayList<>();
     }
 
-    public MenuItem getItemById(Long id) {
-        return new MenuItem();
+    public MenuItem getItemById(int id) {
+        MenuItem menuItem = menuItemRepository.findById(id);
+        if(menuItem == null)
+            throw new EntityNotFoundException(String.format("Menu item with id %d does not exist!", id));
+        return menuItem;
     }
 
     public String deleteMenuItem(Long id) {

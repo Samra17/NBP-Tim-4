@@ -1,5 +1,6 @@
 package com.nbp.tim3.repository;
 
+import com.nbp.tim3.dto.menu.MenuDto;
 import com.nbp.tim3.model.Category;
 import com.nbp.tim3.model.Menu;
 import com.nbp.tim3.model.MenuItem;
@@ -104,6 +105,35 @@ public class MenuRepository {
                     menuItems.add(menuItem);
                 }
                 Menu menu = new Menu(id, name, active,restaurantId, menuItems );
+                menus.add(menu);
+
+            }
+            return menus;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public List<MenuDto> getMenusForRestaurant(int restaurantID) {
+        try {
+            String sql = "SELECT * FROM nbp_menu WHERE  restaurant_id=?";
+            Connection connection = dbConnectionService.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, restaurantID);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            List<MenuDto> menus = new ArrayList<>();
+            while (resultSet.next()) {
+                int id = resultSet.getInt("ID");
+                String name = resultSet.getString("name");
+                boolean active = resultSet.getBoolean("active");
+                int restaurantId = resultSet.getInt("restaurant_id");
+
+
+                MenuDto menu = new MenuDto(id, name, active );
                 menus.add(menu);
 
             }

@@ -159,16 +159,15 @@ public class MenuController {
         return new ResponseEntity<>(menu, HttpStatus.CREATED);
     }
 
+*/
 
+    @GetMapping(path = "/restaurant-menus/id/{restaurantID}")
+    public  List<MenuDto> getRestaurantMenus (@PathVariable int restaurantID) {
 
-    @GetMapping(path = "/restaurant-menus/uuid/{restaurantUUID}")
-    public  List<MenuDto> getRestaurantMenus (@PathVariable String restaurantUUID,
-                                           @RequestHeader("username") String username) {
-
-        var menus = menuService.getRestaurantMenusShort(restaurantUUID);
+        var menus = menuService.getRestaurantMenus(restaurantID);
         return menus;
     }
-*/
+
     @GetMapping(path = "/restaurant-menus/active/{restaurantID}")
     public  List<Menu> getActiveRestaurantMenus (@PathVariable
                                                  int restaurantID) {

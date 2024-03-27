@@ -7,32 +7,30 @@ import java.io.Serializable;
 
 public class MenuDto implements Serializable {
 
-    private Long id;
+    private int id;
     @NotNull(message = "Active status should not be null")
     private boolean active;
 
     @NotNull(message = "Name should not be null")
     private String name;
 
+    @NotNull(message="Menu restaurant must be specified!")
+    private int restaurantID;
+
     public MenuDto() {
     }
 
-    public MenuDto(Long id, String uuid, String name, Boolean active) {
+    public MenuDto(int id,  String name, Boolean active) {
         this.id=id;
         this.active=active;
-        this.restaurant_uuid=uuid;
         this.name= name;
     }
 
-    public MenuDto(boolean active, String restaurant_uuid, String name) {
+    public MenuDto(boolean active, int restaurantID, String name) {
         this.active = active;
-        this.restaurant_uuid = restaurant_uuid;
+        this.restaurantID = restaurantID;
         this.name = name;
     }
-
-    @NotNull(message="Menu restaurant must be specified!")
-    @Size(min=36,max=36,message = "UUID must be 36 characters long!")
-    private String restaurant_uuid;
 
     public boolean isActive() {
         return active;
@@ -42,13 +40,6 @@ public class MenuDto implements Serializable {
         this.active = active;
     }
 
-    public String getRestaurant_uuid() {
-        return restaurant_uuid;
-    }
-
-    public void setRestaurant_uuid(String restaurant_uuid) {
-        this.restaurant_uuid = restaurant_uuid;
-    }
 
     public String getName() {
         return name;
@@ -58,11 +49,19 @@ public class MenuDto implements Serializable {
         this.name = name;
     }
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
+    }
+
+    public int getRestaurantID() {
+        return restaurantID;
+    }
+
+    public void setRestaurantID(int restaurantID) {
+        this.restaurantID = restaurantID;
     }
 }

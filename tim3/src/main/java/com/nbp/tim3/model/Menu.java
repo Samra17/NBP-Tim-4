@@ -13,6 +13,6 @@ public class Menu {
     int id;
     String name;
     Boolean active;
-    int restaurantId;
+    int restaurantID;
     List<MenuItem> menuItems;
 }

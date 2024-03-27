@@ -115,16 +115,10 @@ public class MenuService {
         return new Menu();
     }
 
-    public List<MenuDto> getRestaurantMenusShort(String restaurantUUID) {
-        // return menuRepository.getMenusForRestaurantShort(restaurantUUID);
-
-        return new ArrayList<>();
+    public List<MenuDto> getRestaurantMenus(int restaurantID) {
+        return menuRepository.getMenusForRestaurant(restaurantID);
     }
 
-    public List<Menu> getRestaurantMenus(String restaurantUUID) {
-        // return menuRepository.getMenusForRestaurant(restaurantUUID);
-        return new ArrayList<>();
-    }
 
     public List<Menu> getActiveRestaurantMenus(int restaurantID) {
          return menuRepository.getActiveMenusForRestaurant(restaurantID);

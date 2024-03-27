@@ -27,8 +27,8 @@ public class RestaurantRepository {
         String sqlAdr = "INSERT INTO nbp_address(street,municipality,map_coordinates) VALUES (?,?,?)";
         String checkManagerId =
                 "SELECT CASE " +
-                        "           WHEN NOT EXISTS (SELECT 1 FROM nbp_user WHERE id = ?) THEN 1 " +
-                        "           WHEN (SELECT name FROM nbp_role WHERE id = (SELECT role_id FROM nbp_user WHERE id = ?)) <> 'RESTAURANT_MANAGER' THEN 2 " +
+                        "           WHEN NOT EXISTS (SELECT 1 FROM nbp.nbp_user WHERE id = ?) THEN 1 " +
+                        "           WHEN (SELECT name FROM nbp.nbp_role WHERE id = (SELECT role_id FROM nbp.nbp_user WHERE id = ?)) <> 'RESTAURANT_MANAGER' THEN 2 " +
                         "           WHEN EXISTS (SELECT 1 FROM nbp_restaurant WHERE manager_id = ?) THEN 3 " +
                         "           ELSE 4 " +
                         "       END AS result " +

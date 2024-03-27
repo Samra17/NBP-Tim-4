@@ -12,5 +12,4 @@ public class OpeningHours {
     String dayOfWeek;
     LocalTime openingTime;
     LocalTime closingTime;
-    Restaurant restaurant;
 }

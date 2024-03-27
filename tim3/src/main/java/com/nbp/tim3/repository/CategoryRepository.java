@@ -134,7 +134,6 @@ public class CategoryRepository {
             if (resultSet.next()) {
                 String name = resultSet.getString("name");
 
-                // Create User object
                 return new Category(id, name);
             }
 

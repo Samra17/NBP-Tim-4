@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping(path="/restaurant")
+@RequestMapping(path="/api/restaurant")
 public class RestaurantController {
     @Autowired
     private RestaurantService restaurantService;
@@ -37,8 +37,9 @@ public class RestaurantController {
     @Autowired
     private RestaurantImageService restaurantImageService;
 
-    /*
-    @PreAuthorize("hasRole('ADMINISTRATOR')")
+
+
+    //@PreAuthorize("hasRole('ADMINISTRATOR')")
     @Operation(description = "Create a new restaurant")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successfully created a new restaurant",
@@ -48,15 +49,16 @@ public class RestaurantController {
                     content = @Content)})
     @PostMapping(path="/add")
     @ResponseStatus(HttpStatus.CREATED)
-    public @ResponseBody ResponseEntity<Restaurant> addNewRestaurant (
+    public @ResponseBody ResponseEntity<RestaurantResponse> addNewRestaurant (
             @Parameter(description = "Information required for restaurant creation", required = true)
-            @Valid @RequestBody RestaurantCreateRequest request, @RequestHeader("uuid") String uuid, @RequestHeader("username") String username) {
+            @Valid @RequestBody RestaurantCreateRequest request) {
 
-        var restaurant = restaurantService.addNewRestaurant(request,username);
+        var restaurant = restaurantService.addNewRestaurant(request);
 
         return new ResponseEntity<>(restaurant,HttpStatus.CREATED);
     }
 
+    /*
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Update restaurant information")
     @ApiResponses(value = {

@@ -2,7 +2,11 @@ package com.nbp.tim3.service;
 
 import com.nbp.tim3.dto.openinghours.OpeningHoursCreateRequest;
 import com.nbp.tim3.dto.restaurant.*;
+import com.nbp.tim3.model.Address;
 import com.nbp.tim3.model.Restaurant;
+import com.nbp.tim3.repository.CategoryRepository;
+import com.nbp.tim3.repository.RestaurantRepository;
+import com.nbp.tim3.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,31 +18,35 @@ import java.util.stream.Collectors;
 
 @Service
 public class RestaurantService {
-    /*@Autowired
+    @Autowired
     private RestaurantRepository restaurantRepository;
     @Autowired
     private CategoryRepository categoryRepository;
 
+
+    /*
     @Autowired
     private ReviewRepository reviewRepository;
 
     @Autowired
-    private FavoriteRestaurantRepository favoriteRestaurantRepository;*/
+    private FavoriteRestaurantRepository favoriteRestaurantRepository;
+
+     */
 
 
-    public Restaurant addNewRestaurant(RestaurantCreateRequest request, String username) {
-        /*Restaurant restaurant = new Restaurant();
+    public RestaurantResponse addNewRestaurant(RestaurantCreateRequest request) {
+        Restaurant restaurant = new Restaurant();
         restaurant.setName(request.getName());
-        restaurant.setManagerUUID(request.getManagerUUID());
-        restaurant.setAddress(request.getAddress());
-        restaurant.setMapCoordinates(request.getMapCoordinates());
-        restaurant.setCreated(LocalDateTime.now());
-        restaurant.setCreatedBy(username);
-        restaurantRepository.save(restaurant);
+        Address address = new Address(0,request.getAddress(),request.getCity(),request.getMapCoordinates());
 
-        return restaurant;*/
+        restaurantRepository.addRestaurant(restaurant,address,request.getManagerId());
 
-        return new Restaurant();
+        restaurant.setAddress(address);
+        RestaurantResponse response =  new RestaurantResponse(restaurant);
+        response.setManagerId(request.getManagerId());
+
+        return response;
+
     }
 
     public Restaurant updateRestaurant(RestaurantUpdateRequest request, Long id, String uuid) {

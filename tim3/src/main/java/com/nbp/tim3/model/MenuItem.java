@@ -1,9 +1,11 @@
 package com.nbp.tim3.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
 @NoArgsConstructor
 public class MenuItem {
     int id;
@@ -13,5 +15,5 @@ public class MenuItem {
     float discountPrice;
     String image;
     int prepTime;
-    Menu menu;
+    int menuId;
 }

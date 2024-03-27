@@ -1,11 +1,10 @@
 package com.nbp.tim3.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.nbp.tim3.dto.menu.MenuDto;
 import com.nbp.tim3.dto.menu.MenuItemDto;
 import com.nbp.tim3.model.Menu;
+import com.nbp.tim3.repository.MenuRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,8 +17,8 @@ import java.util.stream.StreamSupport;
 
 @Service
 public class MenuService {
-    //@Autowired
-    //private MenuRepository menuRepository;
+    @Autowired
+    private MenuRepository menuRepository;
 
     //@Autowired
     //private MenuItemRepository menuItemRepository;
@@ -32,12 +31,11 @@ public class MenuService {
         return new ArrayList<>();
     }
 
-    public Menu getMenu(Long id) {
-        /*var exception = new EntityNotFoundException("Menu with id " + id + " does not exist!");
+    public Menu getMenu(int id) {
         var menu = menuRepository.findById(id);
-        return menu.orElseThrow(() -> exception);*/
-
-        return new Menu();
+        if(menu == null)
+            throw new EntityNotFoundException(String.format("Menu with id %d does not exist!",id));
+        return menu;
     }
 
     public Menu addNewMenu(MenuDto menuDto) {
@@ -109,7 +107,6 @@ public class MenuService {
             var objectMapper = new ObjectMapper();
             objectMapper.registerModule(new JavaTimeModule());
             objectMapper.registerModule(new ParameterNamesModule());
-            rabbitTemplate.convertAndSend("menuItemCreate", objectMapper.writeValueAsString(newItemsWithUUID));
         } catch (Exception e) {
             System.out.println("Something went wrong when fetching items");
         }

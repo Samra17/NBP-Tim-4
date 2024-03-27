@@ -17,18 +17,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
 @Validated
-@RequestMapping(path = "menu")
+@RequestMapping(path = "/api/menu")
 public class MenuController {
 
-    @Autowired
-    public RestTemplate restTemplate;
+
     @Autowired
     private MenuService menuService;
 /*
@@ -46,6 +44,7 @@ public class MenuController {
 
         return new ResponseEntity<>(menus, HttpStatus.OK);
     }
+*/
 
     @Operation(description = "Get a menu by menu ID")
     @ApiResponses(value = {
@@ -58,13 +57,12 @@ public class MenuController {
     @GetMapping(path = "/{id}")
     public @ResponseBody ResponseEntity<Menu> getMenu(
             @Parameter(description = "Menu ID", required = true)
-            @PathVariable Long id,
-            @RequestHeader("username") String username) {
+            @PathVariable int id) {
         var menu = menuService.getMenu(id);
 
         return new ResponseEntity<>(menu, HttpStatus.OK);
     }
-
+/*
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Create a new menu")
     @ApiResponses(value = {

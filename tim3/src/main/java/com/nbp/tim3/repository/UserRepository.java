@@ -40,7 +40,7 @@ public class UserRepository {
                 String email = resultSet.getString("email");
                 String password = resultSet.getString("password");
                 String username = resultSet.getString("username");
-                String phoneNumber = resultSet.getString("phoneNumber");
+                String phoneNumber = resultSet.getString("phone_number");
 
                 User user = new User(id,firstName,lastName,email,password,username,phoneNumber,null,null);
 

@@ -34,9 +34,9 @@ public class OrderController {
 //    @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping(path = "/add")
     @ResponseStatus(HttpStatus.CREATED)
-    public @ResponseBody ResponseEntity<Order> addNewOrder(@RequestBody OrderCreateRequest orderCreateRequest,
-                                                           @RequestHeader("uuid") String userUUID) {
-        return new ResponseEntity<>(orderService.addNewOrder(orderCreateRequest), HttpStatus.CREATED);
+    public @ResponseBody ResponseEntity<?> addNewOrder(@RequestBody OrderCreateRequest orderCreateRequest) {
+        orderService.addNewOrder(orderCreateRequest);
+        return ResponseEntity.ok().build();
     }
 
 //    @Operation(description = "Update order by id")

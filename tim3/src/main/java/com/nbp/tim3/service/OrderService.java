@@ -22,8 +22,8 @@ public class OrderService {
     @Autowired
     private OrderMenuItemRepository orderMenuItemRepository;
 
-    public Order addNewOrder(OrderCreateRequest request) {
-        return new Order();
+    public void addNewOrder(OrderCreateRequest request) {
+        orderRepository.createOrder(request);
     }
 
     public List<OrderResponse> getOrdersByUserUUID(String uuid) {

@@ -1,27 +1,19 @@
 package com.nbp.tim3.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.nbp.tim3.dto.order.OrderCreateRequest;
 import com.nbp.tim3.dto.order.OrderResponse;
 import com.nbp.tim3.model.Order;
 import com.nbp.tim3.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.*;
 
 @RestController
-@RequestMapping(path="/order")
+@RequestMapping(path = "/order")
 public class OrderController {
 
     @Autowired
@@ -31,7 +23,8 @@ public class OrderController {
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'W', 'X', 'Y', 'Z',
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '!', '#', '$', '%', '&', '/', '(', ')', '=', '?', '*');
 
-//    @PreAuthorize("hasRole('CUSTOMER')")
+    //    @PreAuthorize("hasRole('CUSTOMER')")
+    @Operation(description = "Create order")
     @PostMapping(path = "/add")
     @ResponseStatus(HttpStatus.CREATED)
     public @ResponseBody ResponseEntity<?> addNewOrder(@RequestBody OrderCreateRequest orderCreateRequest) {
@@ -39,7 +32,7 @@ public class OrderController {
         return ResponseEntity.ok().build();
     }
 
-//    @Operation(description = "Update order by id")
+    //    @Operation(description = "Update order by id")
 //    @ApiResponses(value = {
 //            @ApiResponse( responseCode = "200", description = "Successfully patched order",
 //                    content = {@Content(mediaType = "application/json",
@@ -56,12 +49,27 @@ public class OrderController {
 //    }
 //
 //    @PreAuthorize("hasRole('ADMINISTRATOR')")
-//    @GetMapping(path = "/get")
-//    @ResponseStatus(HttpStatus.OK)
-//    public @ResponseBody Iterable<Order> GetAllOrders(@RequestHeader("username") String username) {
-//        return new ArrayList<Order>();
-//    }
-//
+    @Operation(description = "Get all customer's orders")
+    @GetMapping(path = "/get")
+    @ResponseStatus(HttpStatus.OK)
+    public @ResponseBody ResponseEntity<List<Order>> GetAllCustomerOrders(
+            @RequestHeader("customerId") Integer customerId,
+            @RequestHeader("page") Integer page,
+            @RequestHeader("size") Integer size) {
+        return new ResponseEntity<>(orderService.getOrdersByCustomerId(customerId, page, size), HttpStatus.OK);
+    }
+
+    @Operation(description = "Get all orders by delivery person")
+    @GetMapping("/get/deliveryperson")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<List<Order>> getOrdersByDeliveryPersonId(
+            @RequestHeader("courierId") Integer courierId,
+            @RequestHeader("page") Integer page,
+            @RequestHeader("size") Integer size) {
+        return new ResponseEntity<>(orderService.getOrdersByCourierId(courierId, page, size), HttpStatus.OK);
+    }
+
+    @Operation(description = "Get order by id")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/get/{id}")
     public @ResponseBody ResponseEntity<OrderResponse> GetOrderById(@PathVariable Long id) {
@@ -110,10 +118,6 @@ public class OrderController {
 //    }
 //
 //    @PreAuthorize("hasRole('COURIER')")
-//    @GetMapping("/get/deliveryperson")
-//    public ResponseEntity<List<OrderResponse>> getOrdersByDeliveryPersonId(@RequestHeader("uuid") String uuid) {
-//        return ResponseEntity.ok(new ArrayList<>());
-//    }
 //
 //    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
 //    @GetMapping("/get/restaurant/{uuid}/pending")

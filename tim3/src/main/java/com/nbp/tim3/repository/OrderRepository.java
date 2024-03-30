@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,6 +35,46 @@ public class OrderRepository {
     @Autowired
     UserRepository userRepository;
 
+    public List<Order> getByCustomerIdPage(Integer customerId, Integer page, Integer size) {
+        String sql = "SELECT * " +
+                "FROM nbp_order " +
+                "WHERE customer_id=? OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        return getByUserIdPage(customerId, page, size, sql);
+    }
+
+    public List<Order> getByCourierIdPage(Integer courierId, Integer page, Integer size) {
+        String sql = "SELECT * " +
+                "FROM nbp_order " +
+                "WHERE courier_id=? OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        return getByUserIdPage(courierId, page, size, sql);
+    }
+
+    private List<Order> getByUserIdPage(Integer userId, Integer page, Integer size, String sql) {
+
+        List<Order> orders = new ArrayList<>();
+        try {
+            Connection connection = dbConnectionService.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setLong(1, userId);
+            preparedStatement.setInt(2, page * size);
+            preparedStatement.setInt(3, size);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                Order order = new Order();
+                mapOrder(order, resultSet);
+                orders.add(order);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return orders;
+
+    }
+
     public Order getById(Long id) {
         String sql = "SELECT * FROM nbp_order WHERE id=?";
 
@@ -46,25 +87,7 @@ public class OrderRepository {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                order.setId(resultSet.getInt("id"));
-                order.setCode(resultSet.getString("code"));
-                order.setStatus(Status.valueOf(resultSet.getString("status").toUpperCase()));
-                order.setEstimatedDeliveryTime(resultSet.getInt("est_delivery_time"));
-                order.setDeliveryFee(resultSet.getInt("delivery_fee"));
-                order.setTotalPrice(resultSet.getFloat("total_price"));
-                order.setCreatedAt(new Timestamp(resultSet.getDate("created_at").getTime()).toLocalDateTime());
-
-                Coupon coupon = couponRepository.getById(resultSet.getInt("coupon_id"));
-                order.setCoupon(coupon);
-
-                User courier = userRepository.getById(resultSet.getInt("courier_id"));
-                User customer = userRepository.getById(resultSet.getInt("customer_id"));
-
-                order.setCourier(courier);
-                order.setCustomer(customer);
-
-                //ToDO Change after restaurant getById is implemented
-                order.setRestaurant(new Restaurant());
+                mapOrder(order, resultSet);
             }
 
         } catch (SQLException e) {
@@ -132,27 +155,24 @@ public class OrderRepository {
             logger.error(e.getMessage());
             exception = true;
 
-            if(e.getSQLState().startsWith("23")) {
+            if (e.getSQLState().startsWith("23")) {
                 if (e.getMessage().contains("FK_ORDER_COUPON")) {
                     throw new InvalidRequestException(String.format("Coupon with id %d does not exist!", orderCreateRequest.getCouponId()));
-                }
-                else if (e.getMessage().contains("FK_ORDER_CUSTOMER")) {
+                } else if (e.getMessage().contains("FK_ORDER_CUSTOMER")) {
                     throw new InvalidRequestException(String.format("Customer with id %d does not exist!", orderCreateRequest.getCustomerId()));
-                }
-                else if (e.getMessage().contains("FK_ORDER_RESTAURANT")) {
+                } else if (e.getMessage().contains("FK_ORDER_RESTAURANT")) {
                     throw new InvalidRequestException(String.format("Restaurant with id %d does not exist!", orderCreateRequest.getRestaurantId()));
-                }
-                else if (e.getMessage().contains("FK_ORDER_MENU_ITEM_MENU_ITEM")) {
+                } else if (e.getMessage().contains("FK_ORDER_MENU_ITEM_MENU_ITEM")) {
                     throw new InvalidRequestException("Menu item does not exist!");
                 }
             }
 
         } catch (Exception e) {
             exception = true;
-            e.printStackTrace();
+            logger.error(String.format("Creating new order failed: %s", e.getMessage()));
             throw e;
         } finally {
-            if(exception && connection!=null) {
+            if (exception && connection != null) {
                 try {
                     connection.rollback();
                 } catch (SQLException e) {
@@ -160,7 +180,27 @@ public class OrderRepository {
                 }
             }
         }
+    }
 
+    private void mapOrder(Order order, ResultSet resultSet) throws SQLException {
+        order.setId(resultSet.getInt("id"));
+        order.setCode(resultSet.getString("code"));
+        order.setStatus(Status.valueOf(resultSet.getString("status").toUpperCase()));
+        order.setEstimatedDeliveryTime(resultSet.getInt("est_delivery_time"));
+        order.setDeliveryFee(resultSet.getInt("delivery_fee"));
+        order.setTotalPrice(resultSet.getFloat("total_price"));
+        order.setCreatedAt(new Timestamp(resultSet.getDate("created_at").getTime()).toLocalDateTime());
 
+        Coupon coupon = couponRepository.getById(resultSet.getInt("coupon_id"));
+        order.setCoupon(coupon);
+
+        User courier = userRepository.getById(resultSet.getInt("courier_id"));
+        User customer = userRepository.getById(resultSet.getInt("customer_id"));
+
+        order.setCourier(courier);
+        order.setCustomer(customer);
+
+        //ToDO Change after restaurant getById is implemented
+        order.setRestaurant(new Restaurant());
     }
 }

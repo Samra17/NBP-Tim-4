@@ -26,8 +26,12 @@ public class OrderService {
         orderRepository.createOrder(request);
     }
 
-    public List<OrderResponse> getOrdersByUserUUID(String uuid) {
-        return new ArrayList<>();
+    public List<Order> getOrdersByCustomerId(Integer customerId, Integer page, Integer size) {
+        return orderRepository.getByCustomerIdPage(customerId, page, size);
+    }
+
+    public List<Order> getOrdersByCourierId(Integer customerId, Integer page, Integer size) {
+        return orderRepository.getByCourierIdPage(customerId, page, size);
     }
 
     public List<OrderResponse> getOrdersByDeliveryPersonId(String uuid) {

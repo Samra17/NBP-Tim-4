@@ -1,5 +1,6 @@
 package com.nbp.tim3.repository;
 
+import com.nbp.tim3.dto.menu.MenuCreateRequest;
 import com.nbp.tim3.dto.menu.MenuDto;
 import com.nbp.tim3.model.Category;
 import com.nbp.tim3.model.Menu;
@@ -149,7 +150,7 @@ public class MenuRepository {
         }
     }
 
-    public void addMenu(Menu menu) {
+    public void addMenu(MenuDto menu) {
         String sql = "INSERT INTO nbp_menu(name, active, restaurant_id) VALUES(?,?,?)";
         String sql1 = "SELECT COUNT(*) FROM nbp_restaurant WHERE id=?";
         String sql2 = "SELECT COUNT(*) FROM nbp_menu WHERE restaurant_id=? AND name=?";
@@ -177,7 +178,7 @@ public class MenuRepository {
                     String returnCols[] = { "id" };
                     PreparedStatement preparedStatement = connection.prepareStatement(sql,returnCols);
                     preparedStatement.setString(1, menu.getName());
-                    preparedStatement.setInt(2, menu.getActive() ? 1 : 0);
+                    preparedStatement.setInt(2, menu.isActive() ? 1 : 0);
                     preparedStatement.setInt(3, menu.getRestaurantID());
 
                     int rowCount = preparedStatement.executeUpdate();
@@ -203,7 +204,7 @@ public class MenuRepository {
         catch (SQLException e) {
             logger.error(e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(String.format("Creating new menu failed: %s", e.getMessage()));
             throw e;
         }
 

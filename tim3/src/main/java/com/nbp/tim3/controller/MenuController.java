@@ -1,5 +1,6 @@
 package com.nbp.tim3.controller;
 
+import com.nbp.tim3.dto.menu.MenuCreateRequest;
 import com.nbp.tim3.dto.menu.MenuDto;
 import com.nbp.tim3.dto.menu.MenuItemDto;
 import com.nbp.tim3.model.Menu;
@@ -73,9 +74,9 @@ public class MenuController {
                     content = @Content)})
     @PostMapping(path = "/add")
     @ResponseStatus(HttpStatus.CREATED)
-    public @ResponseBody ResponseEntity<Menu> addNewMenu(
+    public @ResponseBody ResponseEntity<MenuDto> addNewMenu(
             @Parameter(description = "Information required for menu creation", required = true)
-            @Valid @RequestBody MenuDto menuDto) {
+            @Valid @RequestBody MenuCreateRequest menuDto) {
         var menu = menuService.addNewMenu(menuDto);
 
         return new ResponseEntity<>(menu, HttpStatus.CREATED);

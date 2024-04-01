@@ -1,6 +1,6 @@
 package com.nbp.tim3.service;
 
-import com.nbp.tim3.dto.category.CategoryCreateRequest;
+import com.nbp.tim3.dto.menu.MenuCreateRequest;
 import com.nbp.tim3.dto.menu.MenuDto;
 import com.nbp.tim3.dto.menu.MenuItemDto;
 import com.nbp.tim3.model.Category;
@@ -40,8 +40,8 @@ public class MenuService {
         return menu;
     }
 
-    public Menu addNewMenu(MenuDto menuDto) {
-        Menu menu = new Menu();
+    public MenuDto addNewMenu(MenuCreateRequest menuDto) {
+        MenuDto menu = new MenuDto();
         menu.setName(menuDto.getName());
         menu.setActive(menuDto.isActive());
         menu.setRestaurantID(menuDto.getRestaurantID());

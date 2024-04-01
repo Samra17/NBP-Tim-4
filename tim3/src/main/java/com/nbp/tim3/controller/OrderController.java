@@ -121,41 +121,14 @@ public class OrderController {
 //
 //    @PreAuthorize("hasRole('COURIER')")
 //    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
-    @GetMapping("/get/restaurant/{restaurantId}/pending")
-    public ResponseEntity<List<OrderResponse>> getPendingOrdersForRestaurant(
+    @GetMapping("/get/restaurant/{restaurantId}")
+    public ResponseEntity<List<OrderResponse>> getOrdersByStatusForRestaurant(
             @PathVariable("restaurantId") Integer restaurantId,
             @RequestHeader("page") Integer page,
-            @RequestHeader("size") Integer size
+            @RequestHeader("size") Integer size,
+            @RequestHeader(value = "status", required = false) Status status
             ) {
-        return ResponseEntity.ok(orderService.getByRestaurantIdAndStatusPage(restaurantId, Status.NEW, page, size));
-    }
-
-//    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
-    @GetMapping("/get/restaurant/{restaurantId}/in-preparation")
-    public ResponseEntity<List<OrderResponse>> getInPreparationOrdersForRestaurant(
-            @PathVariable("restaurantId") Integer restaurantId,
-            @RequestHeader("page") Integer page,
-            @RequestHeader("size") Integer size
-            ) {
-        return ResponseEntity.ok(orderService.getByRestaurantIdAndStatusPage(restaurantId, Status.ACCEPTED, page, size));
-    }
-
-//    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
-    @GetMapping("/get/restaurant/{restaurantId}/ready-for-delivery")
-    public ResponseEntity<List<OrderResponse>> getReadyForDeliveryOrdersForRestaurant(
-            @PathVariable("restaurantId") Integer restaurantId,
-            @RequestHeader("page") Integer page,
-            @RequestHeader("size") Integer size) {
-        return ResponseEntity.ok(orderService.getByRestaurantIdAndStatusPage(restaurantId, Status.READY_FOR_DELIVERY, page, size));
-    }
-
-//    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
-    @GetMapping("/get/restaurant/{restaurantId}/delivered")
-    public ResponseEntity<List<OrderResponse>> getDeliveredOrdersForRestaurant(
-            @PathVariable("restaurantId") Integer restaurantId,
-            @RequestHeader("page") Integer page,
-            @RequestHeader("size") Integer size) {
-        return ResponseEntity.ok(orderService.getByRestaurantIdAndStatusPage(restaurantId, Status.DELIVERED, page, size));
+        return ResponseEntity.ok(orderService.getByRestaurantIdAndStatusPage(restaurantId, status, page, size));
     }
 
 }

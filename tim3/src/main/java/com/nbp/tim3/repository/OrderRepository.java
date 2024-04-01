@@ -47,13 +47,13 @@ public class OrderRepository {
 
     public List<OrderResponse> getByRestaurantIdAndStatusPage(Integer restaurantId, Status status, Integer page, Integer size) {
         String sql = orderSelectSql +
-                "WHERE UPPER(ord.status)=? AND ord.restaurant_id=? OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+                "WHERE (UPPER(ord.status)=NVL(?, ord.status)) AND ord.restaurant_id=? OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
         List<OrderResponse> orders = new ArrayList<>();
         try {
             Connection connection = dbConnectionService.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1, status.name());
+            preparedStatement.setString(1, status != null ? status.name() : null);
             preparedStatement.setInt(2, restaurantId);
             preparedStatement.setInt(3, page * size);
             preparedStatement.setInt(4, size);

@@ -11,9 +11,9 @@ public class MenuItem {
     int id;
     String name;
     String description;
-    float price;
-    float discountPrice;
+    Double price;
+    Double discountPrice;
     String image;
-    int prepTime;
+    Integer prepTime;
     int menuId;
 }

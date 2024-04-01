@@ -2,6 +2,7 @@ package com.nbp.tim3.repository;
 
 import com.nbp.tim3.dto.menu.MenuCreateRequest;
 import com.nbp.tim3.dto.menu.MenuDto;
+import com.nbp.tim3.dto.menu.MenuItemDto;
 import com.nbp.tim3.dto.menu.MenuUpdateDto;
 import com.nbp.tim3.model.Category;
 import com.nbp.tim3.model.Menu;
@@ -15,10 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.webjars.NotFoundException;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,10 +55,13 @@ public class MenuRepository {
                     int menuItemID = resultSetMenuItems.getInt("ID");
                     String menuItemName = resultSetMenuItems.getString("name");
                     String menuItemDescription = resultSetMenuItems.getString("description");
-                    float menuItemPrice = resultSetMenuItems.getFloat("price");
-                    float menuItemDiscountPrice = resultSetMenuItems.getFloat("discount_price");
+                    Double menuItemPrice = resultSetMenuItems.getDouble("price");
+
+                    Double menuItemDiscountPrice = resultSetMenuItems.getDouble("discount_price");
+                    if(resultSetMenuItems.wasNull())
+                        menuItemDiscountPrice=null;
                     String menuItemImage = resultSetMenuItems.getString("image");
-                    int menuItemPrepTime = resultSetMenuItems.getInt("prep_time");
+                    Integer menuItemPrepTime = resultSetMenuItems.getInt("prep_time");
                     MenuItem menuItem = new MenuItem(menuItemID,menuItemName, menuItemDescription, menuItemPrice, menuItemDiscountPrice, menuItemImage, menuItemPrepTime, id);
                     menuItems.add(menuItem);
                 }
@@ -103,10 +104,12 @@ public class MenuRepository {
                     int menuItemID = resultSetMenuItems.getInt("ID");
                     String menuItemName = resultSetMenuItems.getString("name");
                     String menuItemDescription = resultSetMenuItems.getString("description");
-                    float menuItemPrice = resultSetMenuItems.getFloat("price");
-                    float menuItemDiscountPrice = resultSetMenuItems.getFloat("discount_price");
+                    Double menuItemPrice = resultSetMenuItems.getDouble("price");
+                    Double menuItemDiscountPrice = resultSetMenuItems.getDouble("discount_price");
+                    if(resultSetMenuItems.wasNull())
+                        menuItemDiscountPrice = null;
                     String menuItemImage = resultSetMenuItems.getString("image");
-                    int menuItemPrepTime = resultSetMenuItems.getInt("prep_time");
+                    Integer menuItemPrepTime = resultSetMenuItems.getInt("prep_time");
                     MenuItem menuItem = new MenuItem(menuItemID,menuItemName, menuItemDescription, menuItemPrice, menuItemDiscountPrice, menuItemImage, menuItemPrepTime, id);
                     menuItems.add(menuItem);
                 }
@@ -285,5 +288,63 @@ public class MenuRepository {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public void addMenuItemsToMenu(int id, List<MenuItemDto> menuItemsDao) {
+        boolean exception = false;
+        Connection connection = null;
+        String returnCols[] = { "id" };
+        String sql = "INSERT INTO nbp_menu_item(name, description, price, discount_price, prep_time, image, menu_id) VALUES(?,?,?,?,?,?,?)";
+
+        try {
+            connection = dbConnectionService.getConnection();
+
+            for(var menuItemDao: menuItemsDao) {
+                PreparedStatement preparedStatement = connection.prepareStatement(sql,returnCols);
+                preparedStatement.setString(1,menuItemDao.getName());
+                preparedStatement.setString(2, menuItemDao.getDescription());
+                if(menuItemDao.getDiscount_price() == null)
+                    preparedStatement.setNull(4, Types.FLOAT);
+                else
+                    preparedStatement.setDouble(4, menuItemDao.getDiscount_price());
+                if(menuItemDao.getPrep_time() == null)
+                    preparedStatement.setNull(5, Types.NUMERIC);
+                else
+                    preparedStatement.setDouble(5, menuItemDao.getPrep_time());
+                preparedStatement.setDouble(3, menuItemDao.getPrice());
+                preparedStatement.setString(6, menuItemDao.getImage());
+                preparedStatement.setInt(7, id);
+                int rowCount = preparedStatement.executeUpdate();
+                if(rowCount > 0) {
+                    ResultSet rs = preparedStatement.getGeneratedKeys();
+                    if(!rs.next()) {
+                        logger.error("No generated ID!");
+                    }
+                }
+            }
+        connection.commit();
+        }
+        catch (SQLException e) {
+            logger.error(e.getMessage());
+            exception = true;
+            if(e.getSQLState().startsWith("23")) {
+                if (e.getMessage().contains("FK_MENU_ITEM_MENU")) {
+                    throw new InvalidRequestException(String.format("Menu with id %d does not exist!", id));
+                }
+            }
+        } catch (Exception e) {
+            exception = true;
+            e.printStackTrace();
+            throw e;
+        } finally {
+            if(exception && connection!=null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
     }
 }

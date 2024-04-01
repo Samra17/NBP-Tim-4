@@ -68,47 +68,8 @@ public class MenuService {
         }
     }
 
-    public Menu addMenuItemsToMenu(Long id, List<MenuItemDto> menuItemsDao) {
-        /*var exception = new EntityNotFoundException("Menu with id " + id + " does not exist!");
-        var menu = menuRepository.findById(id).orElseThrow(()->exception);
-
-        if(menu.getMenuItems() == null)
-            menu.setMenuItems(new ArrayList<>());
-
-        var items = menu.getMenuItems();
-        var newItems = new ArrayList<MenuItem>();
-
-        for (var menuItemDao: menuItemsDao) {
-            MenuItem menuItem = new MenuItem();
-            menuItem.setName(menuItemDao.getName());
-            menuItem.setDescription(menuItemDao.getDescription());
-            menuItem.setPrice(menuItemDao.getPrice());
-            menuItem.setPrep_time(menuItemDao.getPrep_time());
-            menuItem.setDiscount_price(menuItemDao.getDiscount_price());
-            //menuItem.setUuid(UUIDGenerator.generateType1UUID().toString());
-            menuItem.setDate_created(LocalDateTime.now());
-            menuItem.setImage(menuItemDao.getImage());
-            items.add(menuItem);
-            newItems.add(menuItem);
-        }
-        menu.setMenuItems(items);
-        menu.setDate_modified(LocalDateTime.now());
-        menuRepository.save(menu);
-
-        try {
-            List<Long> idList = new ArrayList<>();
-            for(var item : newItems) idList.add(item.getId());
-
-            var newItemsWithUUID = menuItemRepository.findAllById(idList);
-            var objectMapper = new ObjectMapper();
-            objectMapper.registerModule(new JavaTimeModule());
-            objectMapper.registerModule(new ParameterNamesModule());
-        } catch (Exception e) {
-            System.out.println("Something went wrong when fetching items");
-        }
-        return menu;*/
-
-        return new Menu();
+    public void addMenuItemsToMenu(int id, List<MenuItemDto> menuItemsDao) {
+       menuRepository.addMenuItemsToMenu(id, menuItemsDao);
     }
 
     public List<MenuDto> getRestaurantMenus(int restaurantID) {

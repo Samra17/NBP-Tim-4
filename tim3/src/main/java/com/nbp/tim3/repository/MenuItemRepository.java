@@ -1,5 +1,7 @@
 package com.nbp.tim3.repository;
 
+import com.nbp.tim3.dto.menu.MenuDto;
+import com.nbp.tim3.dto.menu.MenuItemDto;
 import com.nbp.tim3.model.Menu;
 import com.nbp.tim3.model.MenuItem;
 import com.nbp.tim3.service.DBConnectionService;
@@ -35,10 +37,12 @@ public class MenuItemRepository {
             if (resultSet.next()) {
                 String name = resultSet.getString("name");
                 String description = resultSet.getString("description");
-                float price = resultSet.getFloat("price");
-                float discountPrice = resultSet.getFloat("discount_price");
+                Double price = resultSet.getDouble("price");
+                Double discountPrice = resultSet.getDouble("discount_price");
+                if(resultSet.wasNull())
+                    discountPrice = null;
                 String image = resultSet.getString("image");
-                int prepTime = resultSet.getInt("prep_time");
+                Integer prepTime = resultSet.getInt("prep_time");
                 int menuId = resultSet.getInt("menu_id");
                 MenuItem menuItem = new MenuItem(id,name, description, price, discountPrice, image, prepTime, menuId);
                 return  menuItem;
@@ -72,4 +76,5 @@ public class MenuItemRepository {
             return  false;
         }
     }
-}
+
+    }

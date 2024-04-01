@@ -2,6 +2,7 @@ package com.nbp.tim3.controller;
 
 import com.nbp.tim3.dto.menu.MenuCreateRequest;
 import com.nbp.tim3.dto.menu.MenuDto;
+import com.nbp.tim3.dto.menu.MenuItemDto;
 import com.nbp.tim3.dto.menu.MenuUpdateDto;
 import com.nbp.tim3.model.Menu;
 import com.nbp.tim3.service.MenuService;
@@ -98,8 +99,8 @@ public class MenuController {
 
         return new ResponseEntity<>(menuService.deleteMenu(id), HttpStatus.OK);
     }
-/*
-    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
+
+    //@PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Set menu items for menu")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully updated menu items",
@@ -114,15 +115,15 @@ public class MenuController {
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody ResponseEntity<Menu> setMenuItemsForMenu(
             @Parameter(description = "Menu ID", required = true)
-            @PathVariable Long id,
+            @PathVariable int id,
             @Parameter(description = "Values of menu items", required = true)
-            @RequestBody List<@Valid MenuItemDto> menuItemDtos,
-            @RequestHeader("username") String username) {
+            @RequestBody List<@Valid MenuItemDto> menuItemDtos) {
 
-        var menu = menuService.addMenuItemsToMenu(id, menuItemDtos);
+        menuService.addMenuItemsToMenu(id, menuItemDtos);
+        var menu = menuService.getMenu(id);
         return new ResponseEntity<>(menu, HttpStatus.OK);
     }
-*/
+
 
     @GetMapping(path = "/restaurant-menus/id/{restaurantID}")
     public  List<MenuDto> getRestaurantMenus (@PathVariable int restaurantID) {

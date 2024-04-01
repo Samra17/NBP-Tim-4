@@ -136,9 +136,7 @@ public class MenuRepository {
                 String name = resultSet.getString("name");
                 boolean active = resultSet.getBoolean("active");
                 int restaurantId = resultSet.getInt("restaurant_id");
-
-
-                MenuDto menu = new MenuDto(id, name, active );
+                MenuDto menu = new MenuDto(id, active, restaurantId, name );
                 menus.add(menu);
 
             }

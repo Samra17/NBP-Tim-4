@@ -27,7 +27,14 @@ public class MenuDto implements Serializable {
         this.name= name;
     }
 
-    public MenuDto(boolean active, int restaurantID, String name) {
+    public MenuDto(Boolean active, int restaurantID, String name) {
+        this.active = active;
+        this.restaurantID = restaurantID;
+        this.name = name;
+    }
+
+    public MenuDto(int id, Boolean active, int restaurantID, String name) {
+        this.id=id;
         this.active = active;
         this.restaurantID = restaurantID;
         this.name = name;

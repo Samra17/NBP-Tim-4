@@ -163,15 +163,12 @@ public class MenuController {
 
     @GetMapping(path = "/restaurant-menus/id/{restaurantID}")
     public  List<MenuDto> getRestaurantMenus (@PathVariable int restaurantID) {
-
         var menus = menuService.getRestaurantMenus(restaurantID);
         return menus;
     }
 
     @GetMapping(path = "/restaurant-menus/active/{restaurantID}")
-    public  List<Menu> getActiveRestaurantMenus (@PathVariable
-                                                 int restaurantID) {
-
+    public  List<Menu> getActiveRestaurantMenus (@PathVariable int restaurantID) {
         var menus = menuService.getActiveRestaurantMenus(restaurantID);
         return menus;
     }

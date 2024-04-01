@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,13 +39,37 @@ public class MenuItemRepository {
                 float discountPrice = resultSet.getFloat("discount_price");
                 String image = resultSet.getString("image");
                 int prepTime = resultSet.getInt("prep_time");
-                MenuItem menuItem = new MenuItem(id,name, description, price, discountPrice, image, prepTime, id);
+                int menuId = resultSet.getInt("menu_id");
+                MenuItem menuItem = new MenuItem(id,name, description, price, discountPrice, image, prepTime, menuId);
                 return  menuItem;
             }
             return  null;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    public boolean deleteMenu(int id) {
+        try  {
+            Connection connection = dbConnectionService.getConnection();
+            String sqlQuery = "DELETE FROM nbp_menu_item WHERE id = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);
+
+            preparedStatement.setInt(1, id);
+
+            int rowsAffected = preparedStatement.executeUpdate();
+
+            connection.commit();
+
+            if (rowsAffected > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (SQLException e) {
+            logger.error(String.format("Deleting a menu item failed: %s", e.getMessage()));
+            return  false;
         }
     }
 }

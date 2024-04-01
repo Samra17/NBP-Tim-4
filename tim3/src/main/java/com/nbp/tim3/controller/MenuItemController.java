@@ -9,7 +9,6 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.nbp.tim3.dto.menu.MenuItemDto;
 import com.nbp.tim3.model.Menu;
 import com.nbp.tim3.model.MenuItem;
-import com.nbp.tim3.repository.MenuItemRepository;
 import com.nbp.tim3.service.MenuItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,6 +16,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,9 +34,6 @@ public class MenuItemController {
     @Autowired
     private MenuItemService menuItemService;
 
-     @Autowired
-      private MenuItemRepository menuItemRepository;
-
     /*
     @GetMapping("/all")
     public ResponseEntity<List<MenuItem>> getAllMenuItems() {
@@ -47,8 +44,8 @@ public class MenuItemController {
     public ResponseEntity<MenuItem> getItemById(@PathVariable int id) {
         return ResponseEntity.ok(menuItemService.getItemById(id));
     }
-/*
-    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
+
+   //@PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Delete a menu item")
     @ApiResponses( value = {
             @ApiResponse(responseCode = "200", description = "Successfully deleted the menu item with provided ID"),
@@ -58,11 +55,10 @@ public class MenuItemController {
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody ResponseEntity<String> deleteMenuItem(
             @Parameter(description = "Menu Item ID", required = true)
-            @PathVariable Long id,
-            @RequestHeader("username") String username) {
+            @PathVariable Integer id) {
         return new ResponseEntity<>(menuItemService.deleteMenuItem(id), HttpStatus.OK);
     }
-
+/*
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Update menu item informations")
     @ApiResponses(value = {

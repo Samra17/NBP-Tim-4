@@ -29,12 +29,10 @@ public class MenuItemService {
         return menuItem;
     }
 
-    public String deleteMenuItem(Long id) {
-        /*var menu = menuItemRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Menu with id " + id + " does not exist!"));
-        menuItemRepository.deleteById(id);
-        return "Menu Item with id " + id + " is successfully deleted!";*/
-
-        return "Something";
+    public String deleteMenuItem(int id) {
+        if(!menuItemRepository.deleteMenu(id))
+            throw new EntityNotFoundException(String.format("Menu item with id %d does not exist!",id));
+        return "Menu Item with id " + id + " is successfully deleted!";
     }
 
     public MenuItem updateMenuItem(MenuItemDto menuItemDto, Long id) {

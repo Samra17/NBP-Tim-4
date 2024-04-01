@@ -3,6 +3,7 @@ package com.nbp.tim3.controller;
 import com.nbp.tim3.dto.menu.MenuCreateRequest;
 import com.nbp.tim3.dto.menu.MenuDto;
 import com.nbp.tim3.dto.menu.MenuItemDto;
+import com.nbp.tim3.dto.menu.MenuUpdateDto;
 import com.nbp.tim3.model.Menu;
 import com.nbp.tim3.service.MenuService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -81,8 +82,8 @@ public class MenuController {
 
         return new ResponseEntity<>(menu, HttpStatus.CREATED);
     }
-/*
-    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
+
+  //  @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Update menu informations")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully updated menu information",
@@ -96,15 +97,14 @@ public class MenuController {
     @PutMapping(path = "/update/{id}")
     public @ResponseBody ResponseEntity<Menu> updateMenu(
             @Parameter(description = "Menu ID", required = true)
-            @PathVariable Long id,
+            @PathVariable int id,
             @Parameter(description = "Menu information to be updated", required = true)
-            @Valid @RequestBody MenuDto menuDto,
-            @RequestHeader("username") String username) {
+            @Valid @RequestBody MenuUpdateDto menuDto) {
 
         var menu = menuService.updateMenu(menuDto, id);
         return new ResponseEntity<>(menu, HttpStatus.CREATED);
     }
-*/
+
    // @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Delete a menu")
     @ApiResponses(value = {

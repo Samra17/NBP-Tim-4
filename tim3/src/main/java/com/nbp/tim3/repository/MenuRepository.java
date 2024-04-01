@@ -2,6 +2,7 @@ package com.nbp.tim3.repository;
 
 import com.nbp.tim3.dto.menu.MenuCreateRequest;
 import com.nbp.tim3.dto.menu.MenuDto;
+import com.nbp.tim3.dto.menu.MenuUpdateDto;
 import com.nbp.tim3.model.Category;
 import com.nbp.tim3.model.Menu;
 import com.nbp.tim3.model.MenuItem;
@@ -227,6 +228,62 @@ public class MenuRepository {
         } catch (SQLException e) {
             logger.error(String.format("Deleting a menu failed: %s", e.getMessage()));
             return  false;
+        }
+    }
+
+    public int updateMenu(MenuCreateRequest menu, int id) throws SQLException {
+        String sql = "UPDATE nbp_menu SET name=?, active=? WHERE id=?";
+        String sql2 = "SELECT COUNT(*) FROM nbp_menu WHERE restaurant_id=? AND name=? AND id!=?";
+
+        try {
+            Connection connection = dbConnectionService.getConnection();
+            PreparedStatement preparedStatement2 = connection.prepareStatement(sql2);
+            preparedStatement2.setInt(1, menu.getRestaurantID());
+            preparedStatement2.setString(2, menu.getName());
+            preparedStatement2.setInt(3, id);
+            ResultSet resultSet2 = preparedStatement2.executeQuery();
+            if (resultSet2.next()) {
+                int rowCount2 = resultSet2.getInt(1);
+                if (rowCount2 != 0)
+                    throw new InvalidRequestException(String.format("Name %s already in use!", menu.getName()));
+            }
+
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, menu.getName());
+            preparedStatement.setInt(2, menu.isActive() ? 1 : 0);
+            preparedStatement.setInt(3, id);
+
+            int rowCount = preparedStatement.executeUpdate();
+
+            connection.commit();
+
+            logger.info(String.format("Successfully updated %d rows into Menu.", rowCount));
+
+            return rowCount;
+        }
+        catch (Exception e) {
+            logger.error(String.format("Creating new menu failed: %s", e.getMessage()));
+            throw e;
+        }
+    }
+
+    public Integer findMenuRestaurant(int id) {
+        String sql = "SELECT * FROM nbp_menu WHERE id=?";
+        try {
+            Connection connection = dbConnectionService.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1,id);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                Integer restaurantId = resultSet.getInt("restaurant_id");
+                return restaurantId;
+            }
+            return  null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }

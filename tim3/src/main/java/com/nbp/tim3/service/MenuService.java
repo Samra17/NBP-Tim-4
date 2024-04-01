@@ -3,6 +3,7 @@ package com.nbp.tim3.service;
 import com.nbp.tim3.dto.menu.MenuCreateRequest;
 import com.nbp.tim3.dto.menu.MenuDto;
 import com.nbp.tim3.dto.menu.MenuItemDto;
+import com.nbp.tim3.dto.menu.MenuUpdateDto;
 import com.nbp.tim3.model.Category;
 import com.nbp.tim3.model.Menu;
 import com.nbp.tim3.repository.MenuRepository;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.management.MemoryNotificationInfo;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,17 +58,22 @@ public class MenuService {
 
     }
 
-    public Menu updateMenu(MenuDto menuDto, Long id) {
-        /*var exception = new EntityNotFoundException("Menu with id " + id + " does not exist!");
-        var menu = menuRepository.findById(id).orElseThrow(() -> exception);
-        menu.setActive(menuDto.isActive());
-        menu.setRestaurant_uuid(menuDto.getRestaurant_uuid());
-        menu.setDate_modified(LocalDateTime.now());
-        menu.setName(menuDto.getName());
-        menuRepository.save(menu);
-        return menu;*/
+    public Menu updateMenu(MenuUpdateDto menuDto, int id) {
+        Integer restaurantId = menuRepository.findMenuRestaurant(id);
+        if(restaurantId == null)
+            throw new EntityNotFoundException(String.format("Menu with id %d does not exist!",id));
 
-        return new Menu();
+        MenuCreateRequest menu = new MenuCreateRequest( menuDto.isActive(), restaurantId, menuDto.getName());
+        try {
+            int rowsUpdated = menuRepository.updateMenu(menu, id);
+            if(rowsUpdated == 0) {
+                throw new EntityNotFoundException(String.format("Menu with id %d does not exist!",id));
+            }
+
+            return menuRepository.findById(id);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Menu addMenuItemsToMenu(Long id, List<MenuItemDto> menuItemsDao) {

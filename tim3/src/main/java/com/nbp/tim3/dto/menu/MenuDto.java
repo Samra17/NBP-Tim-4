@@ -12,7 +12,7 @@ public class MenuDto implements Serializable {
     private boolean active;
 
     @NotNull(message = "Name should not be null")
-    @Size(min=0,max=36,message = "Name can contain a maximum of 100 characters!")
+    @Size(min=0,max=100,message = "Name can contain a maximum of 100 characters!")
     private String name;
 
     @NotNull(message="Menu restaurant should not be null")

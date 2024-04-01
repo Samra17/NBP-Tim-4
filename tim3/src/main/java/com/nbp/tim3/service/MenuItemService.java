@@ -30,7 +30,7 @@ public class MenuItemService {
     }
 
     public String deleteMenuItem(int id) {
-        if(!menuItemRepository.deleteMenu(id))
+        if(!menuItemRepository.deleteMenuItem(id))
             throw new EntityNotFoundException(String.format("Menu item with id %d does not exist!",id));
         return "Menu Item with id " + id + " is successfully deleted!";
     }

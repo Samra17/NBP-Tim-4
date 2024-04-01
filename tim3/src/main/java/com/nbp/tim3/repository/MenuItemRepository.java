@@ -50,7 +50,7 @@ public class MenuItemRepository {
         }
     }
 
-    public boolean deleteMenu(int id) {
+    public boolean deleteMenuItem(int id) {
         try  {
             Connection connection = dbConnectionService.getConnection();
             String sqlQuery = "DELETE FROM nbp_menu_item WHERE id = ?";

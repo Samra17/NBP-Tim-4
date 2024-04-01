@@ -2,7 +2,6 @@ package com.nbp.tim3.controller;
 
 import com.nbp.tim3.dto.menu.MenuCreateRequest;
 import com.nbp.tim3.dto.menu.MenuDto;
-import com.nbp.tim3.dto.menu.MenuItemDto;
 import com.nbp.tim3.dto.menu.MenuUpdateDto;
 import com.nbp.tim3.model.Menu;
 import com.nbp.tim3.service.MenuService;
@@ -16,7 +15,6 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,27 +25,8 @@ import java.util.List;
 @Validated
 @RequestMapping(path = "/api/menu")
 public class MenuController {
-
-
     @Autowired
     private MenuService menuService;
-/*
-    @Operation(description = "Get all menus")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully found all menus",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Menu.class))})}
-    )
-    @GetMapping(path = "/all")
-    public @ResponseBody ResponseEntity<List<Menu>> getAllMenus(
-            @RequestHeader("username") String username
-    ) {
-        var menus = menuService.getAllMenus();
-
-        return new ResponseEntity<>(menus, HttpStatus.OK);
-    }
-*/
-
     @Operation(description = "Get a menu by menu ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully found the menu with provided ID",
@@ -143,21 +122,6 @@ public class MenuController {
         var menu = menuService.addMenuItemsToMenu(id, menuItemDtos);
         return new ResponseEntity<>(menu, HttpStatus.OK);
     }
-
-    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
-    @PostMapping(path = "/add-menu/{restaurantid}")
-    public @ResponseBody ResponseEntity<Menu> addNewMenuForRestaurant(
-            @PathVariable Long restaurantid,
-            @Parameter(description = "Information required for menu creation", required = true)
-            @Valid @RequestBody MenuDto menuDto,
-            @RequestHeader("username") String username) {
-        String restaurantUUID = restTemplate.getForObject("http://restaurant-service/restaurant/uuid/" + restaurantid, String.class);
-        menuDto.setRestaurant_uuid(restaurantUUID);
-        var menu = menuService.addNewMenu(menuDto);
-
-        return new ResponseEntity<>(menu, HttpStatus.CREATED);
-    }
-
 */
 
     @GetMapping(path = "/restaurant-menus/id/{restaurantID}")

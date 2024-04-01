@@ -27,14 +27,6 @@ public class MenuService {
     //@Autowired
     //private MenuItemRepository menuItemRepository;
 
-    //@Autowired
-    //private RabbitTemplate rabbitTemplate;
-
-    public List<Menu> getAllMenus() {
-        // return StreamSupport.stream(menuRepository.findAll().spliterator(), false).collect(Collectors.toList());
-        return new ArrayList<>();
-    }
-
     public Menu getMenu(int id) {
         var menu = menuRepository.findById(id);
         if(menu == null)

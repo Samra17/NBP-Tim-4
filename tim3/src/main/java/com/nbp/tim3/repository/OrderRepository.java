@@ -1,21 +1,22 @@
 package com.nbp.tim3.repository;
 
-import com.nbp.tim3.dto.address.AddressResponse;
 import com.nbp.tim3.dto.order.OrderCreateRequest;
-import com.nbp.tim3.dto.order.OrderMenuItemResponse;
 import com.nbp.tim3.dto.order.OrderResponse;
+import com.nbp.tim3.dto.order.OrderUpdateDto;
 import com.nbp.tim3.enums.Status;
+import com.nbp.tim3.model.Order;
 import com.nbp.tim3.service.DBConnectionService;
 import com.nbp.tim3.util.exception.InvalidRequestException;
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.lang.reflect.Field;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -238,17 +239,22 @@ public class OrderRepository {
 
     }
 
-    public void addDeliveryPerson(Integer orderId, Integer courierId){
-        String sql = "UPDATE nbp_order SET courier_id = ? WHERE id = ?";
-
+    public void updateOrder(Integer orderId, OrderUpdateDto orderUpdateDto){
         boolean exception = false;
 
         Connection connection = null;
         try {
             connection = dbConnectionService.getConnection();
+
+            String sql = "UPDATE nbp_order " +
+                    "SET status = NVL(?, status), " +
+                    "courier_id = NVL(?, courier_id) " +
+                    "WHERE id = ?";
+
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setInt(1, courierId);
-            preparedStatement.setInt(2, orderId);
+            preparedStatement.setString(1, orderUpdateDto.getOrderStatus() != null ? orderUpdateDto.getOrderStatus().name() : null);
+            preparedStatement.setObject(2, orderUpdateDto.getCourierId());
+            preparedStatement.setInt(3, orderId);
 
             int rowCount = preparedStatement.executeUpdate();
 
@@ -265,7 +271,7 @@ public class OrderRepository {
 
             if (e.getSQLState().startsWith("23")) {
                 if (e.getMessage().contains("FK_ORDER_USER_COURIER")) {
-                    throw new InvalidRequestException(String.format("Courier with id %d does not exist!", courierId));
+                    throw new InvalidRequestException(String.format("Courier with id %d does not exist!", orderUpdateDto.getCourierId()));
                 }
             }
         } catch (Exception e) {

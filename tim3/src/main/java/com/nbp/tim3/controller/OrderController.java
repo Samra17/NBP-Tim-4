@@ -101,10 +101,13 @@ public class OrderController {
 //    }
 //
 //    @PreAuthorize("hasAnyRole('COURIER','RESTAURANT_MANAGER','CUSTOMER')")
-//    @PutMapping("/status/{id}/{status}")
-//    public ResponseEntity<?> changeOrderStatus(@PathVariable Long id ,@PathVariable String status) throws JsonProcessingException {
-//        return ResponseEntity.ok(new OrderResponse(new Order()));
-//    }
+    @PutMapping("{orderId}/status")
+    public ResponseEntity<?> changeOrderStatus(
+            @PathVariable("orderId") Integer orderId,
+            @RequestHeader("status") String status) {
+        orderService.changeOrderStatus(orderId, status);
+        return ResponseEntity.ok().build();
+    }
 //
 //    @PreAuthorize("hasRole('COURIER')")
     @PutMapping("{orderId}/delivery-person/add/{courierId}")

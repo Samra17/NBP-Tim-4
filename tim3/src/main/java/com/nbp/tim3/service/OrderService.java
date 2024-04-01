@@ -3,17 +3,15 @@ package com.nbp.tim3.service;
 import com.nbp.tim3.dto.order.OrderCreateRequest;
 import com.nbp.tim3.dto.order.OrderMenuItemResponse;
 import com.nbp.tim3.dto.order.OrderResponse;
+import com.nbp.tim3.dto.order.OrderUpdateDto;
 import com.nbp.tim3.enums.Status;
-import com.nbp.tim3.model.Order;
-import com.nbp.tim3.model.OrderMenuItem;
 import com.nbp.tim3.repository.OrderMenuItemRepository;
 import com.nbp.tim3.repository.OrderRepository;
+import com.nbp.tim3.util.exception.InvalidRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
@@ -50,6 +48,18 @@ public class OrderService {
     }
 
     public void addDeliveryPerson(Integer orderId, Integer courierId) {
-        orderRepository.addDeliveryPerson(orderId, courierId);
+        OrderUpdateDto orderUpdateDto = new OrderUpdateDto();
+        orderUpdateDto.setCourierId(courierId);
+        orderRepository.updateOrder(orderId, orderUpdateDto);
+    }
+
+    public void changeOrderStatus(Integer orderId, String status) {
+        OrderUpdateDto orderUpdateDto = new OrderUpdateDto();
+        try {
+            orderUpdateDto.setOrderStatus(Status.valueOf(status));
+        } catch (IllegalArgumentException e) {
+            throw new InvalidRequestException(e.getMessage());
+        }
+        orderRepository.updateOrder(orderId, orderUpdateDto);
     }
 }

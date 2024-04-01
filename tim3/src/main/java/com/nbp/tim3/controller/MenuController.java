@@ -104,8 +104,8 @@ public class MenuController {
         var menu = menuService.updateMenu(menuDto, id);
         return new ResponseEntity<>(menu, HttpStatus.CREATED);
     }
-
-    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
+*/
+   // @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Delete a menu")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully deleted the menu with provided ID"),
@@ -115,12 +115,11 @@ public class MenuController {
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody ResponseEntity<String> deleteMenu(
             @Parameter(description = "Menu ID", required = true)
-            @PathVariable Long id,
-            @RequestHeader("username") String username) {
+            @PathVariable Integer id) {
 
         return new ResponseEntity<>(menuService.deleteMenu(id), HttpStatus.OK);
     }
-
+/*
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Set menu items for menu")
     @ApiResponses(value = {

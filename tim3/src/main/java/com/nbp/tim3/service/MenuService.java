@@ -49,12 +49,11 @@ public class MenuService {
         return menu;
 
     }
-    public String deleteMenu(Long id) {
-        /*var menu = menuRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Menu with id " + id + " does not exist!"));
-        menuRepository.deleteById(id);
-        return "Menu with id " + id + " is successfully deleted!";*/
+    public String deleteMenu(int id) {
+        if(!menuRepository.deleteMenu(id))
+            throw new EntityNotFoundException(String.format("Menu with id %d does not exist!",id));
+        return "Menu with id " + id + " is successfully deleted!";
 
-        return "Something";
     }
 
     public Menu updateMenu(MenuDto menuDto, Long id) {

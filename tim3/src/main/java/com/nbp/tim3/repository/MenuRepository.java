@@ -205,6 +205,28 @@ public class MenuRepository {
             logger.error(String.format("Creating new menu failed: %s", e.getMessage()));
             throw e;
         }
+    }
 
+    public boolean deleteMenu(int id) {
+        try  {
+            Connection connection = dbConnectionService.getConnection();
+            String sqlQuery = "DELETE FROM nbp_menu WHERE id = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);
+
+            preparedStatement.setInt(1, id);
+
+            int rowsAffected = preparedStatement.executeUpdate();
+
+            connection.commit();
+
+            if (rowsAffected > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (SQLException e) {
+            logger.error(String.format("Deleting a menu failed: %s", e.getMessage()));
+            return  false;
+        }
     }
 }

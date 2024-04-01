@@ -1,7 +1,9 @@
 package com.nbp.tim3.service;
 
 import com.nbp.tim3.dto.order.OrderCreateRequest;
+import com.nbp.tim3.dto.order.OrderMenuItemResponse;
 import com.nbp.tim3.dto.order.OrderResponse;
+import com.nbp.tim3.enums.Status;
 import com.nbp.tim3.model.Order;
 import com.nbp.tim3.model.OrderMenuItem;
 import com.nbp.tim3.repository.OrderMenuItemRepository;
@@ -26,40 +28,23 @@ public class OrderService {
         orderRepository.createOrder(request);
     }
 
-    public List<Order> getOrdersByCustomerId(Integer customerId, Integer page, Integer size) {
+    public List<OrderResponse> getOrdersByCustomerId(Integer customerId, Integer page, Integer size) {
         return orderRepository.getByCustomerIdPage(customerId, page, size);
     }
 
-    public List<Order> getOrdersByCourierId(Integer customerId, Integer page, Integer size) {
+    public List<OrderResponse> getOrdersByCourierId(Integer customerId, Integer page, Integer size) {
         return orderRepository.getByCourierIdPage(customerId, page, size);
     }
 
-    public List<OrderResponse> getOrdersByDeliveryPersonId(String uuid) {
-        return new ArrayList<>();
+    public List<OrderResponse> getByRestaurantIdAndStatusPage(Integer restaurantId, Status status, Integer page, Integer size){
+        return orderRepository.getByRestaurantIdAndStatusPage(restaurantId, status, page, size);
     }
 
-    public List<OrderResponse> getPendingOrdersForRestaurant(String uuid) {
-        return new ArrayList<>();
-    }
+    public OrderResponse getById(Integer id) {
+        OrderResponse orderResponse = orderRepository.getById(id);
 
-    public List<OrderResponse> getInPreparationOrdersForRestaurant(String uuid) {
-        return new ArrayList<>();
-    }
-
-    public List<OrderResponse> getReadyForDeliveryOrdersForRestaurant(String uuid) {
-        return new ArrayList<>();
-    }
-
-    public List<OrderResponse> getDeliveredOrdersForRestaurant(String uuid) {
-        return new ArrayList<>();
-    }
-
-    public OrderResponse getById(Long id) {
-        Order order = orderRepository.getById(id);
-        OrderResponse orderResponse = new OrderResponse();
-        orderResponse.setOrder(order);
-        List<OrderMenuItem> items = orderMenuItemRepository.getOrderMenuItemsByOrder(order);
-        orderResponse.setItems(items.stream().map(OrderResponse.OrderMenuItemResponse::new).collect(Collectors.toList()));
+        List<OrderMenuItemResponse> items = orderMenuItemRepository.getOrderMenuItemsByOrder(orderResponse.getId());
+        orderResponse.setItems(items);
 
         return orderResponse;
     }

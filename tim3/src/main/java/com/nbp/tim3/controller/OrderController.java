@@ -2,6 +2,7 @@ package com.nbp.tim3.controller;
 
 import com.nbp.tim3.dto.order.OrderCreateRequest;
 import com.nbp.tim3.dto.order.OrderResponse;
+import com.nbp.tim3.enums.Status;
 import com.nbp.tim3.model.Order;
 import com.nbp.tim3.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -50,20 +51,20 @@ public class OrderController {
 //
 //    @PreAuthorize("hasRole('ADMINISTRATOR')")
     @Operation(description = "Get all customer's orders")
-    @GetMapping(path = "/get")
+    @GetMapping(path = "/get/customer/{customerId}")
     @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody ResponseEntity<List<Order>> GetAllCustomerOrders(
-            @RequestHeader("customerId") Integer customerId,
+    public @ResponseBody ResponseEntity<List<OrderResponse>> GetAllCustomerOrders(
+            @PathVariable("customerId") Integer customerId,
             @RequestHeader("page") Integer page,
             @RequestHeader("size") Integer size) {
         return new ResponseEntity<>(orderService.getOrdersByCustomerId(customerId, page, size), HttpStatus.OK);
     }
 
     @Operation(description = "Get all orders by delivery person")
-    @GetMapping("/get/deliveryperson")
+    @GetMapping("/get/deliveryperson/{courierId}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<List<Order>> getOrdersByDeliveryPersonId(
-            @RequestHeader("courierId") Integer courierId,
+    public ResponseEntity<List<OrderResponse>> getOrdersByDeliveryPersonId(
+            @PathVariable("courierId") Integer courierId,
             @RequestHeader("page") Integer page,
             @RequestHeader("size") Integer size) {
         return new ResponseEntity<>(orderService.getOrdersByCourierId(courierId, page, size), HttpStatus.OK);
@@ -72,7 +73,7 @@ public class OrderController {
     @Operation(description = "Get order by id")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/get/{id}")
-    public @ResponseBody ResponseEntity<OrderResponse> GetOrderById(@PathVariable Long id) {
+    public @ResponseBody ResponseEntity<OrderResponse> GetOrderById(@PathVariable Integer id) {
         return new ResponseEntity<>(orderService.getById(id), HttpStatus.OK);
     }
 //
@@ -99,12 +100,6 @@ public class OrderController {
 //        return new HashMap<>();
 //    }
 //
-//    @PreAuthorize("hasRole('CUSTOMER')")
-//    @GetMapping("/getforuser")
-//    public ResponseEntity<List<OrderResponse>> getAllUserOrders(@RequestHeader("uuid") String userUuid) {
-//        return ResponseEntity.ok(orderService.getOrdersByUserUUID(userUuid));
-//    }
-//
 //    @PreAuthorize("hasAnyRole('COURIER','RESTAURANT_MANAGER','CUSTOMER')")
 //    @PutMapping("/status/{id}/{status}")
 //    public ResponseEntity<?> changeOrderStatus(@PathVariable Long id ,@PathVariable String status) throws JsonProcessingException {
@@ -118,29 +113,42 @@ public class OrderController {
 //    }
 //
 //    @PreAuthorize("hasRole('COURIER')")
-//
 //    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
-//    @GetMapping("/get/restaurant/{uuid}/pending")
-//    public ResponseEntity<List<OrderResponse>> getPendingOrdersForRestaurant(@PathVariable("uuid") String uuid) {
-//        return ResponseEntity.ok(orderService.getPendingOrdersForRestaurant(uuid));
-//    }
-//
+    @GetMapping("/get/restaurant/{restaurantId}/pending")
+    public ResponseEntity<List<OrderResponse>> getPendingOrdersForRestaurant(
+            @PathVariable("restaurantId") Integer restaurantId,
+            @RequestHeader("page") Integer page,
+            @RequestHeader("size") Integer size
+            ) {
+        return ResponseEntity.ok(orderService.getByRestaurantIdAndStatusPage(restaurantId, Status.NEW, page, size));
+    }
+
 //    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
-//    @GetMapping("/get/restaurant/{uuid}/in-preparation")
-//    public ResponseEntity<List<OrderResponse>> getInPreparationOrdersForRestaurant(@PathVariable("uuid") String uuid) {
-//        return ResponseEntity.ok(orderService.getInPreparationOrdersForRestaurant(uuid));
-//    }
-//
+    @GetMapping("/get/restaurant/{restaurantId}/in-preparation")
+    public ResponseEntity<List<OrderResponse>> getInPreparationOrdersForRestaurant(
+            @PathVariable("restaurantId") Integer restaurantId,
+            @RequestHeader("page") Integer page,
+            @RequestHeader("size") Integer size
+            ) {
+        return ResponseEntity.ok(orderService.getByRestaurantIdAndStatusPage(restaurantId, Status.ACCEPTED, page, size));
+    }
+
 //    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
-//    @GetMapping("/get/restaurant/{uuid}/ready-for-delivery")
-//    public ResponseEntity<List<OrderResponse>> getReadyForDeliveryOrdersForRestaurant(@PathVariable("uuid") String uuid) {
-//        return ResponseEntity.ok(orderService.getReadyForDeliveryOrdersForRestaurant(uuid));
-//    }
-//
+    @GetMapping("/get/restaurant/{restaurantId}/ready-for-delivery")
+    public ResponseEntity<List<OrderResponse>> getReadyForDeliveryOrdersForRestaurant(
+            @PathVariable("restaurantId") Integer restaurantId,
+            @RequestHeader("page") Integer page,
+            @RequestHeader("size") Integer size) {
+        return ResponseEntity.ok(orderService.getByRestaurantIdAndStatusPage(restaurantId, Status.READY_FOR_DELIVERY, page, size));
+    }
+
 //    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
-//    @GetMapping("/get/restaurant/{uuid}/delivered")
-//    public ResponseEntity<List<OrderResponse>> getDeliveredOrdersForRestaurant(@PathVariable("uuid") String uuid) {
-//        return ResponseEntity.ok(orderService.getDeliveredOrdersForRestaurant(uuid));
-//    }
+    @GetMapping("/get/restaurant/{restaurantId}/delivered")
+    public ResponseEntity<List<OrderResponse>> getDeliveredOrdersForRestaurant(
+            @PathVariable("restaurantId") Integer restaurantId,
+            @RequestHeader("page") Integer page,
+            @RequestHeader("size") Integer size) {
+        return ResponseEntity.ok(orderService.getByRestaurantIdAndStatusPage(restaurantId, Status.DELIVERED, page, size));
+    }
 
 }

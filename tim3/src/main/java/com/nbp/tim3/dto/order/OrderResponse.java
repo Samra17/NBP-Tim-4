@@ -1,38 +1,31 @@
 package com.nbp.tim3.dto.order;
 
-import com.nbp.tim3.model.MenuItem;
-import com.nbp.tim3.model.Order;
-import com.nbp.tim3.model.OrderMenuItem;
+import com.nbp.tim3.dto.address.AddressResponse;
+import com.nbp.tim3.enums.Status;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Data
 public class OrderResponse {
 
-    private Order order;
+    private Integer id;
+    private Integer customerId;
+    private Integer restaurantId;
+    private Integer estimatedDeliveryTime;
+    private LocalDateTime createdTime;
+    private Integer couponId;
+    private Status orderStatus;
+    private Float totalPrice;
+    private Integer courierId;
+    private Float deliveryFee;
+    private String orderCode;
     private List<OrderMenuItemResponse> items;
-
-
-    @Getter
-    @Setter
-    public static class OrderMenuItemResponse {
-        private int id;
-        private int quantity;
-        private MenuItem menuItem;
-
-        public OrderMenuItemResponse(OrderMenuItem orderMenuItem){
-            this.id = orderMenuItem.getId();
-            this.quantity = orderMenuItem.getQuantity();
-            this.menuItem = orderMenuItem.getMenuItem();
-        }
-
-    }
+    private String restaurantName;
+    private String customerPhoneNumber;
+    private String customerAddress;
+    private String restaurantAddress;
 
 }
 

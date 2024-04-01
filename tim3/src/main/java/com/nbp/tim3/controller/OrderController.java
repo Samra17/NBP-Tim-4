@@ -57,24 +57,24 @@ public class OrderController {
             @PathVariable("customerId") Integer customerId,
             @RequestHeader("page") Integer page,
             @RequestHeader("size") Integer size) {
-        return new ResponseEntity<>(orderService.getOrdersByCustomerId(customerId, page, size), HttpStatus.OK);
+        return ResponseEntity.ok(orderService.getOrdersByCustomerId(customerId, page, size));
     }
 
     @Operation(description = "Get all orders by delivery person")
-    @GetMapping("/get/deliveryperson/{courierId}")
+    @GetMapping("/get/delivery-person/{courierId}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<OrderResponse>> getOrdersByDeliveryPersonId(
             @PathVariable("courierId") Integer courierId,
             @RequestHeader("page") Integer page,
             @RequestHeader("size") Integer size) {
-        return new ResponseEntity<>(orderService.getOrdersByCourierId(courierId, page, size), HttpStatus.OK);
+        return ResponseEntity.ok(orderService.getOrdersByCourierId(courierId, page, size));
     }
 
     @Operation(description = "Get order by id")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/get/{id}")
     public @ResponseBody ResponseEntity<OrderResponse> GetOrderById(@PathVariable Integer id) {
-        return new ResponseEntity<>(orderService.getById(id), HttpStatus.OK);
+        return ResponseEntity.ok(orderService.getById(id));
     }
 //
 //    @PostMapping(path = "/count/{sorttype}")
@@ -107,10 +107,14 @@ public class OrderController {
 //    }
 //
 //    @PreAuthorize("hasRole('COURIER')")
-//    @PutMapping("/adddeliveryperson/{id}")
-//    public ResponseEntity<OrderResponse> addDeliveryPersonToOrder(@PathVariable Long id, @RequestHeader("uuid") String uuid, @RequestHeader("username") String username) {
-//        return ResponseEntity.ok(new OrderResponse(new Order()));
-//    }
+    @PutMapping("{orderId}/delivery-person/add/{courierId}")
+    public ResponseEntity<OrderResponse> addDeliveryPersonToOrder(
+            @PathVariable("orderId") Integer orderId,
+            @PathVariable("courierId") Integer courierId) {
+
+        orderService.addDeliveryPerson(orderId, courierId);
+        return ResponseEntity.ok().build();
+    }
 //
 //    @PreAuthorize("hasRole('COURIER')")
 //    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")

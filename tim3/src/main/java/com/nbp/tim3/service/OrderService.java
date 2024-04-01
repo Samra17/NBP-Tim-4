@@ -48,4 +48,8 @@ public class OrderService {
 
         return orderResponse;
     }
+
+    public void addDeliveryPerson(Integer orderId, Integer courierId) {
+        orderRepository.addDeliveryPerson(orderId, courierId);
+    }
 }

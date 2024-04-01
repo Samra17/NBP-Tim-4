@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -234,6 +235,52 @@ public class OrderRepository {
         orderResponse.setEstimatedDeliveryTime(resultSet.getInt("ord_est_delivery_time"));
         orderResponse.setRestaurantName(resultSet.getString("res_name"));
         orderResponse.setRestaurantId(resultSet.getInt("res_id"));
+
+    }
+
+    public void addDeliveryPerson(Integer orderId, Integer courierId){
+        String sql = "UPDATE nbp_order SET courier_id = ? WHERE id = ?";
+
+        boolean exception = false;
+
+        Connection connection = null;
+        try {
+            connection = dbConnectionService.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, courierId);
+            preparedStatement.setInt(2, orderId);
+
+            int rowCount = preparedStatement.executeUpdate();
+
+            if (rowCount < 1){
+                exception = true;
+                throw new InvalidRequestException(String.format("Order with id %d does not exist!", orderId));
+            }
+
+            connection.commit();
+
+        } catch (SQLException e) {
+            logger.error(e.getMessage());
+            exception = true;
+
+            if (e.getSQLState().startsWith("23")) {
+                if (e.getMessage().contains("FK_ORDER_USER_COURIER")) {
+                    throw new InvalidRequestException(String.format("Courier with id %d does not exist!", courierId));
+                }
+            }
+        } catch (Exception e) {
+            exception = true;
+            logger.error(String.format("Updating order failed: %s", e.getMessage()));
+            throw e;
+        } finally {
+            if (exception && connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
 
     }
 }

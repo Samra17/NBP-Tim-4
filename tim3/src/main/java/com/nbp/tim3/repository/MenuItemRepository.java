@@ -25,7 +25,7 @@ public class MenuItemRepository {
     DBConnectionService dbConnectionService;
 
     public MenuItem findById(int id) {
-        String sql = "SELECT * FROM nbp_menu_item WHERE id=?";
+        String sql = "SELECT * FROM nbp_menu_item WHERE id=? AND is_deleted=0";
 
         try {
             Connection connection = dbConnectionService.getConnection();
@@ -54,26 +54,36 @@ public class MenuItemRepository {
         }
     }
 
-    public boolean deleteMenuItem(int id) {
+    public boolean deleteMenuItem(int id)  {
+        Connection connection = null;
+        var exception = false;
         try  {
-            Connection connection = dbConnectionService.getConnection();
-            String sqlQuery = "DELETE FROM nbp_menu_item WHERE id = ?";
+            connection = dbConnectionService.getConnection();
+            String sqlQuery = "UPDATE nbp_menu_item SET is_deleted = 1 WHERE id = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);
-
             preparedStatement.setInt(1, id);
-
-            int rowsAffected = preparedStatement.executeUpdate();
+            int rowCount = preparedStatement.executeUpdate();
 
             connection.commit();
 
-            if (rowsAffected > 0) {
+            if (rowCount > 0) {
                 return true;
             } else {
                 return false;
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             logger.error(String.format("Deleting a menu item failed: %s", e.getMessage()));
-            return  false;
+            exception = true;
+            return false;
+        }
+        finally {
+            if(exception && connection!=null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
     }
 

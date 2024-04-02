@@ -3,18 +3,14 @@ package com.nbp.tim3.repository;
 import com.nbp.tim3.dto.menu.MenuCreateRequest;
 import com.nbp.tim3.dto.menu.MenuDto;
 import com.nbp.tim3.dto.menu.MenuItemDto;
-import com.nbp.tim3.dto.menu.MenuUpdateDto;
-import com.nbp.tim3.model.Category;
 import com.nbp.tim3.model.Menu;
 import com.nbp.tim3.model.MenuItem;
 import com.nbp.tim3.service.DBConnectionService;
 import com.nbp.tim3.util.exception.InvalidRequestException;
-import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.webjars.NotFoundException;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -384,6 +380,5 @@ public class MenuRepository {
                 }
             }
         }
-
     }
 }

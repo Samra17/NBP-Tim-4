@@ -1,21 +1,15 @@
 package com.nbp.tim3.repository;
 
-import com.nbp.tim3.dto.menu.MenuDto;
 import com.nbp.tim3.dto.menu.MenuItemDto;
-import com.nbp.tim3.model.Menu;
 import com.nbp.tim3.model.MenuItem;
 import com.nbp.tim3.service.DBConnectionService;
+import com.nbp.tim3.util.exception.InvalidRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.*;
 
 @Repository
 public class MenuItemRepository {
@@ -87,4 +81,59 @@ public class MenuItemRepository {
         }
     }
 
+    public int updateMenuItem(MenuItemDto menuItem, int id) throws SQLException {
+        String sql = "UPDATE nbp_menu_item SET name=?, description=?, price=?, discount_price=?, prep_time=?, image=? WHERE id=?";
+        String sql2 = "SELECT COUNT(*) FROM nbp_menu_item WHERE id=? AND is_deleted=0";
+        boolean exception = false;
+        Connection connection = null;
+        try {
+            connection = dbConnectionService.getConnection();
+            PreparedStatement preparedStatement2 = connection.prepareStatement(sql2);
+            preparedStatement2.setInt(1, id);
+            ResultSet resultSet2 = preparedStatement2.executeQuery();
+            if (resultSet2.next()) {
+                int rowCount2 = resultSet2.getInt(1);
+                if (rowCount2 != 1)
+                    throw new InvalidRequestException(String.format("Menu item with id %d does not exist!", id));
+            }
+
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1,menuItem.getName());
+            preparedStatement.setString(2, menuItem.getDescription());
+            if(menuItem.getDiscount_price() == null)
+                preparedStatement.setNull(4, Types.FLOAT);
+            else
+                preparedStatement.setDouble(4, menuItem.getDiscount_price());
+            if(menuItem.getPrep_time() == null)
+                preparedStatement.setNull(5, Types.NUMERIC);
+            else
+                preparedStatement.setDouble(5, menuItem.getPrep_time());
+            preparedStatement.setDouble(3, menuItem.getPrice());
+            preparedStatement.setString(6, menuItem.getImage());
+            preparedStatement.setInt(7, id);
+
+            int rowCount = preparedStatement.executeUpdate();
+
+            connection.commit();
+
+            logger.info(String.format("Successfully updated %d rows into menu_item.", rowCount));
+
+            return rowCount;
+        }
+        catch (Exception e) {
+            logger.error(String.format("Updating a menu item failed: %s", e.getMessage()));
+            exception=true;
+            throw e;
+        }
+        finally {
+            if(exception && connection!=null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
     }
+
+}

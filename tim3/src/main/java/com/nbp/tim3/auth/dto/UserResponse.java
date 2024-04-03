@@ -27,15 +27,16 @@ public class UserResponse {
     private String role;
 
     public UserResponse(User user) {
-        /*id = user.getId();
-        uuid = user.getUuid();
+        id = user.getId();
         email = user.getEmail();
         username = user.getUsername();
-        firstname = user.getFirstname();
-        lastname = user.getLastname();
-        address = user.getAddress();
-        mapCoordinates = user.getMapCoordinates();
+        firstname = user.getFirstName();
+        lastname = user.getLastName();
+        if(user.getAddress() != null) {
+            address = user.getAddress().getStreet() + ", " + user.getAddress().getMunicipality();
+            mapCoordinates = user.getAddress().getMapCoordinates();
+        }
         phoneNumber = user.getPhoneNumber();
-        role = user.getRole().name();*/
+        role = user.getRole().getName();
     }
 }

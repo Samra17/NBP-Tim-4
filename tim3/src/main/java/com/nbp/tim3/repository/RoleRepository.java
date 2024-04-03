@@ -39,4 +39,29 @@ public class RoleRepository {
             return null;
         }
     }
+
+    public Role getByName(String name) {
+        String sql = "SELECT * FROM nbp.nbp_role WHERE name=?";
+
+        try {
+            Connection connection = dbConnectionService.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1,name);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+
+            if (resultSet.next()) {
+                int id = resultSet.getInt("id");
+
+
+                return new Role(id, name);
+            }
+
+            return  null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

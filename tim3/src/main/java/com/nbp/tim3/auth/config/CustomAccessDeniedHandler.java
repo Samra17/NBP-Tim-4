@@ -21,7 +21,7 @@ class CustomAccessDeniedHandler implements AccessDeniedHandler {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.getWriter().write("\"error\": \"Only administrators are authorized to execute this action!\"");
+        response.getWriter().write("{\"error\": \"Only administrators are authorized to execute this action!\"}");
         response.getWriter().flush();
     }
 }

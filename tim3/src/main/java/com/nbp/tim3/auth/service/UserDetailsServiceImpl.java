@@ -1,5 +1,7 @@
 package com.nbp.tim3.auth.service;
 
+import com.nbp.tim3.model.User;
+import com.nbp.tim3.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -10,21 +12,19 @@ import java.util.Optional;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return null;
-    }
 
-    /*@Autowired
+    @Autowired
     private UserRepository userRepository;
+
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> user = userRepository.findByUsername(username);
+        User user = userRepository.getByUsername(username);
 
-        if (!user.isPresent()) {
+        if (user == null) {
             throw new UsernameNotFoundException("Could not find user");
         }
 
-        return user.get();
-    }*/
+        return user;
+    }
 }

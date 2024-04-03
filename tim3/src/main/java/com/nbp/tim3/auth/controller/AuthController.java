@@ -25,7 +25,7 @@ public class AuthController {
         this.authenticationService = authenticationService;
     }
 
-    /*
+
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest registerRequest) {
@@ -33,6 +33,9 @@ public class AuthController {
         return new ResponseEntity<>(authenticationService.register(registerRequest,"CUSTOMER"), HttpStatus.CREATED);
     }
 
+
+
+    //dodati provjeru da li korisnik koji upućuje zahtjev ima isti id kao onaj koji se ažurira
     @PostMapping("/user/update")
     public ResponseEntity<AuthResponse> updateUser(@Valid @RequestBody UserUpdateRequest userUpdateRequest) {
 
@@ -82,9 +85,5 @@ public class AuthController {
         return ResponseEntity.ok(authenticationService.validateToken(request));
     }
 
-    @GetMapping("/uuid-token/{uuid}")
-    public ResponseEntity<String> getTokenFromUUID(@PathVariable String uuid) {
-        return ResponseEntity.ok(authenticationService.getTokenFromUUID(uuid));
-    }*/
 
 }

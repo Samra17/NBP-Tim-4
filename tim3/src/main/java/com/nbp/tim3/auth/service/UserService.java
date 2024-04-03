@@ -1,6 +1,7 @@
 package com.nbp.tim3.auth.service;
 
 import com.nbp.tim3.auth.dto.UserResponse;
+import com.nbp.tim3.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,26 +12,21 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserService {
-    //@Autowired
-    //UserRepository userRepository;
+    @Autowired
+    UserRepository userRepository;
 
 
-    private  void checkIfUserUnique(String username, String email) {
-        /*userRepository.findByUsername(username)
-                .ifPresent(u-> {throw new DuplicateEntryException("Username " + username + " is already taken.");});
-        userRepository.findByEmail(email)
-                .ifPresent(u-> {throw new DuplicateEntryException("An account using that email address already exists.");});*/
-    }
+    /*
 
     public List<UserResponse> getAllUsers() {
-        /*return userRepository
+        return userRepository
                 .findAll()
                 .stream()
                 .map(UserResponse::new)
-                .collect(Collectors.toList());*/
+                .collect(Collectors.toList());
 
         return new ArrayList<>();
-    }
+    }*/
 
     public List<UserResponse> getAllManagers() {
         /*return userRepository

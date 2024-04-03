@@ -1,9 +1,11 @@
 package com.nbp.tim3.security;
 
+import com.nbp.tim3.auth.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,6 +20,8 @@ import java.util.Set;
 
 @Component
 public class JwtValidationFilter extends OncePerRequestFilter {
+    @Autowired
+    JwtService jwtService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
@@ -27,8 +31,15 @@ public class JwtValidationFilter extends OncePerRequestFilter {
             return;
         }
 
+        /*
         String username=httpServletRequest.getHeader("username");
         String role=httpServletRequest.getHeader("role");
+
+         */
+
+        String username = jwtService.extractUsername(authHeader.substring(7));
+        String role = jwtService.extractRole(authHeader.substring(7));
+
 
         Set<SimpleGrantedAuthority> simpleGrantedAuthorities = new HashSet<>();
         simpleGrantedAuthorities.add(new SimpleGrantedAuthority("ROLE_"+role));

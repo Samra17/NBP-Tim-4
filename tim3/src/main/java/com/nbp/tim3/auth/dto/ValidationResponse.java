@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ValidationResponse {
-    private String uuid;
     private String username;
     private String role;
 }

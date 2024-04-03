@@ -31,12 +31,6 @@ public class JwtService {
         return claims.get("Role",String.class);
     }
 
-    public String extractUuid(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(SECRET)
-                .parseClaimsJws(token).getBody();
-        return claims.get("Uuid",String.class);
-    }
 
     public <T> T extractClaim(String token, Function<Claims,T> claimResolver) {
         final Claims claims = extractAllClaims(token);

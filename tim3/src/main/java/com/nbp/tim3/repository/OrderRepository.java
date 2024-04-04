@@ -123,18 +123,20 @@ public class OrderRepository {
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            while (resultSet.next()) {
+            if (resultSet.next()) {
                 mapOrder(orderResponse, resultSet);
+                return orderResponse;
             }
-
+            return null;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
-        return orderResponse;
     }
 
-    public void createOrder(OrderCreateRequest orderCreateRequest) {
+    public int createOrder(OrderCreateRequest orderCreateRequest) {
+
+        //ToDO check if customer and restaurant have address
+
         String sql = "INSERT INTO nbp_order (code, status, est_delivery_time," +
                 " delivery_fee, total_price, coupon_id, customer_id, restaurant_id, created_at) VALUES" +
                 " (?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -187,6 +189,7 @@ public class OrderRepository {
             preparedStatementOrderMenuItems.executeUpdate();
 
             connection.commit();
+            return orderId;
 
         } catch (SQLException e) {
             logger.error(e.getMessage());
@@ -201,6 +204,8 @@ public class OrderRepository {
                     throw new InvalidRequestException(String.format("Restaurant with id %d does not exist!", orderCreateRequest.getRestaurantId()));
                 } else if (e.getMessage().contains("FK_ORDER_MENU_ITEM_MENU_ITEM")) {
                     throw new InvalidRequestException("Menu item does not exist!");
+                } else if (e.getMessage().contains("FK_ORDER_USER_CUSTOMER")) {
+                    throw new InvalidRequestException(String.format("Customer with id %d already has an order!", orderCreateRequest.getCustomerId()));
                 }
             }
 
@@ -217,6 +222,7 @@ public class OrderRepository {
                 }
             }
         }
+        return 0;
     }
 
     private void mapOrder(OrderResponse orderResponse, ResultSet resultSet) throws SQLException {

@@ -8,6 +8,7 @@ import com.nbp.tim3.enums.Status;
 import com.nbp.tim3.repository.OrderMenuItemRepository;
 import com.nbp.tim3.repository.OrderRepository;
 import com.nbp.tim3.util.exception.InvalidRequestException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,8 +23,8 @@ public class OrderService {
     @Autowired
     private OrderMenuItemRepository orderMenuItemRepository;
 
-    public void addNewOrder(OrderCreateRequest request) {
-        orderRepository.createOrder(request);
+    public int addNewOrder(OrderCreateRequest request) {
+        return orderRepository.createOrder(request);
     }
 
     public List<OrderResponse> getOrdersByCustomerId(Integer customerId, Integer page, Integer size) {
@@ -40,6 +41,9 @@ public class OrderService {
 
     public OrderResponse getById(Integer id) {
         OrderResponse orderResponse = orderRepository.getById(id);
+        if (orderResponse == null) {
+            throw new EntityNotFoundException(String.format("Order with id %d does not exist!",id));
+        }
 
         List<OrderMenuItemResponse> items = orderMenuItemRepository.getOrderMenuItemsByOrder(orderResponse.getId());
         orderResponse.setItems(items);
@@ -53,10 +57,10 @@ public class OrderService {
         orderRepository.updateOrder(orderId, orderUpdateDto);
     }
 
-    public void changeOrderStatus(Integer orderId, String status) {
+    public void changeOrderStatus(Integer orderId, Status status) {
         OrderUpdateDto orderUpdateDto = new OrderUpdateDto();
         try {
-            orderUpdateDto.setOrderStatus(Status.valueOf(status));
+            orderUpdateDto.setOrderStatus(status);
         } catch (IllegalArgumentException e) {
             throw new InvalidRequestException(e.getMessage());
         }

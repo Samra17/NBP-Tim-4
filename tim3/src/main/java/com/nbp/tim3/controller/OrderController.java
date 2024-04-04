@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
-@RequestMapping(path = "/order")
+@RequestMapping(path = "/api/order")
 public class OrderController {
 
     @Autowired
@@ -28,9 +28,9 @@ public class OrderController {
     @Operation(description = "Create order")
     @PostMapping(path = "/add")
     @ResponseStatus(HttpStatus.CREATED)
-    public @ResponseBody ResponseEntity<?> addNewOrder(@RequestBody OrderCreateRequest orderCreateRequest) {
-        orderService.addNewOrder(orderCreateRequest);
-        return ResponseEntity.ok().build();
+    public @ResponseBody ResponseEntity<OrderResponse> addNewOrder(@RequestBody OrderCreateRequest orderCreateRequest) {
+        int orderId = orderService.addNewOrder(orderCreateRequest);
+        return ResponseEntity.ok(orderService.getById(orderId));
     }
 
     //    @Operation(description = "Update order by id")
@@ -55,8 +55,8 @@ public class OrderController {
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody ResponseEntity<List<OrderResponse>> GetAllCustomerOrders(
             @PathVariable("customerId") Integer customerId,
-            @RequestHeader("page") Integer page,
-            @RequestHeader("size") Integer size) {
+            @RequestHeader(value = "page", defaultValue = "0") Integer page,
+            @RequestHeader(value = "size", defaultValue = "10") Integer size) {
         return ResponseEntity.ok(orderService.getOrdersByCustomerId(customerId, page, size));
     }
 
@@ -65,8 +65,8 @@ public class OrderController {
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<OrderResponse>> getOrdersByDeliveryPersonId(
             @PathVariable("courierId") Integer courierId,
-            @RequestHeader("page") Integer page,
-            @RequestHeader("size") Integer size) {
+            @RequestHeader(value = "page", defaultValue = "0") Integer page,
+            @RequestHeader(value = "size", defaultValue = "10") Integer size) {
         return ResponseEntity.ok(orderService.getOrdersByCourierId(courierId, page, size));
     }
 
@@ -104,9 +104,9 @@ public class OrderController {
     @PutMapping("{orderId}/status")
     public ResponseEntity<?> changeOrderStatus(
             @PathVariable("orderId") Integer orderId,
-            @RequestHeader("status") String status) {
+            @RequestHeader("status") Status status) {
         orderService.changeOrderStatus(orderId, status);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(orderService.getById(orderId));
     }
 //
 //    @PreAuthorize("hasRole('COURIER')")
@@ -116,7 +116,7 @@ public class OrderController {
             @PathVariable("courierId") Integer courierId) {
 
         orderService.addDeliveryPerson(orderId, courierId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(orderService.getById(orderId));
     }
 //
 //    @PreAuthorize("hasRole('COURIER')")
@@ -124,8 +124,8 @@ public class OrderController {
     @GetMapping("/get/restaurant/{restaurantId}")
     public ResponseEntity<List<OrderResponse>> getOrdersByStatusForRestaurant(
             @PathVariable("restaurantId") Integer restaurantId,
-            @RequestHeader("page") Integer page,
-            @RequestHeader("size") Integer size,
+            @RequestHeader(value = "page", defaultValue = "0") Integer page,
+            @RequestHeader(value = "size", defaultValue = "10") Integer size,
             @RequestHeader(value = "status", required = false) Status status
             ) {
         return ResponseEntity.ok(orderService.getByRestaurantIdAndStatusPage(restaurantId, status, page, size));

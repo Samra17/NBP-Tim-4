@@ -137,6 +137,14 @@ public class OrderRepository {
 
         //ToDO check if customer and restaurant have address
 
+        String checkAddressId =
+                "SELECT CASE " +
+                        "           WHEN NOT EXISTS (SELECT ADDRESS_ID FROM nbp.nbp_user WHERE id = ?) THEN 1 " +
+                        "           WHEN NOT EXISTS (SELECT ADDRESS_ID FROM NBP_RESTAURANT WHERE id = ?) THEN 2 " +
+                        "           ELSE 3 " +
+                        "       END AS result " +
+                        "FROM dual";
+
         String sql = "INSERT INTO nbp_order (code, status, est_delivery_time," +
                 " delivery_fee, total_price, coupon_id, customer_id, restaurant_id, created_at) VALUES" +
                 " (?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -146,6 +154,22 @@ public class OrderRepository {
         Connection connection = null;
         try {
             connection = dbConnectionService.getConnection();
+
+            PreparedStatement preparedStatementAddress = connection.prepareStatement(checkAddressId);
+            preparedStatementAddress.setInt(1, orderCreateRequest.getCustomerId());
+            preparedStatementAddress.setInt(2, orderCreateRequest.getRestaurantId());
+            ResultSet resultSet = preparedStatementAddress.executeQuery();
+
+            if (resultSet.next()) {
+                int result = resultSet.getInt("result");
+                if(result == 1)
+                    throw new InvalidRequestException(String.format("User with id %d does not have an address!", orderCreateRequest.getCustomerId()));
+                else if(result == 2)
+                    throw new InvalidRequestException(String.format("Restaurant with id %d does not have an address!", orderCreateRequest.getRestaurantId()));
+            } else {
+                logger.error("Error checking address_id constraints.");
+            }
+
 
             String[] returnCol = {"id"};
             PreparedStatement preparedStatement = connection.prepareStatement(sql, returnCol);

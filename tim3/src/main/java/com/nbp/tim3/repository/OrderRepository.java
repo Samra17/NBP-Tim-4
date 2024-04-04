@@ -135,8 +135,6 @@ public class OrderRepository {
 
     public int createOrder(OrderCreateRequest orderCreateRequest) {
 
-        //ToDO check if customer and restaurant have address
-
         String checkAddressId =
                 "SELECT CASE " +
                         "           WHEN NOT EXISTS (SELECT ADDRESS_ID FROM nbp.nbp_user WHERE id = ?) THEN 1 " +

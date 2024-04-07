@@ -230,11 +230,11 @@ public class OrderRepository {
                     throw new InvalidRequestException(String.format("Customer with id %d already has an order!", orderCreateRequest.getCustomerId()));
                 }
             }
-
+            throw new RuntimeException(e);
         } catch (Exception e) {
             exception = true;
             logger.error(String.format("Creating new order failed: %s", e.getMessage()));
-            throw e;
+            throw new RuntimeException(e);
         } finally {
             if (exception && connection != null) {
                 try {
@@ -244,7 +244,6 @@ public class OrderRepository {
                 }
             }
         }
-        return 0;
     }
 
     private void mapOrder(OrderResponse orderResponse, ResultSet resultSet) throws SQLException {
@@ -302,10 +301,11 @@ public class OrderRepository {
                     throw new InvalidRequestException(String.format("Courier with id %d does not exist!", orderUpdateDto.getCourierId()));
                 }
             }
+            throw new RuntimeException(e);
         } catch (Exception e) {
             exception = true;
             logger.error(String.format("Updating order failed: %s", e.getMessage()));
-            throw e;
+            throw new RuntimeException(e);
         } finally {
             if (exception && connection != null) {
                 try {

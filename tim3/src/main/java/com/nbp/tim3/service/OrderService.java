@@ -35,14 +35,14 @@ public class OrderService {
         return orderRepository.getByCourierIdPage(customerId, page, size);
     }
 
-    public List<OrderResponse> getByRestaurantIdAndStatusPage(Integer restaurantId, Status status, Integer page, Integer size){
+    public List<OrderResponse> getByRestaurantIdAndStatusPage(Integer restaurantId, Status status, Integer page, Integer size) {
         return orderRepository.getByRestaurantIdAndStatusPage(restaurantId, status, page, size);
     }
 
     public OrderResponse getById(Integer id) {
         OrderResponse orderResponse = orderRepository.getById(id);
         if (orderResponse == null) {
-            throw new EntityNotFoundException(String.format("Order with id %d does not exist!",id));
+            throw new EntityNotFoundException(String.format("Order with id %d does not exist!", id));
         }
 
         List<OrderMenuItemResponse> items = orderMenuItemRepository.getOrderMenuItemsByOrder(orderResponse.getId());

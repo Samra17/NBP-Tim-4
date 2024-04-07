@@ -1,86 +1,64 @@
 package com.nbp.tim3.service;
 
-import com.nbp.tim3.dto.coupon.CouponDto;
+import com.nbp.tim3.dto.coupon.CouponCreateUpdateRequest;
+import com.nbp.tim3.dto.coupon.CouponResponse;
 import com.nbp.tim3.model.Coupon;
+import com.nbp.tim3.repository.CouponRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class CouponService {
-    //@Autowired
-    // private CouponRepository couponRepository;
 
-    public List<Coupon> getAllCoupons() {
-        // return new ArrayList<>(couponRepository.findAll());
-        return new ArrayList<>();
+    @Autowired
+    private CouponRepository couponRepository;
+
+    public List<CouponResponse> getAllCoupons(Integer page, Integer size) {
+        return couponRepository.getAll(page, size);
     }
 
-    public Coupon getCoupon(Integer id) {
-        /*var exception = new EntityNotFoundException("Coupon with id " + id + " does not exist!");
-        var coupon = couponRepository.findById(id);
-        return coupon.orElseThrow(() -> exception);*/
-
-        return new Coupon();
+    public CouponResponse getCouponById(Integer id) {
+        CouponResponse coupon = couponRepository.getById(id);
+        if (coupon == null)
+            throw new EntityNotFoundException(String.format("Coupon with id %d does not exist!", id));
+        return coupon;
     }
 
-    public Coupon addNewCoupon(CouponDto couponDto) {
-        /*Coupon coupon = new Coupon(couponDto);
-        couponRepository.save(coupon);
-        return coupon;*/
-
-        return new Coupon();
+    public Integer addNewCoupon(CouponCreateUpdateRequest couponCreateUpdateRequest) {
+        return couponRepository.createCoupon(couponCreateUpdateRequest);
     }
 
     public String deleteCoupon(Integer id) {
-        /*var coupon = couponRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("Coupon with id " + id + " does not exist!"));
-        couponRepository.deleteById(id);
-        return "Coupon with id " + id + " is successfully deleted!";*/
-
-        return "Something";
+        if (!couponRepository.deleteReview(id))
+            throw new EntityNotFoundException(String.format("Coupon item with id %d does not exist!", id));
+        return "Coupon with id " + id + " is successfully deleted!";
     }
 
-    public Coupon updateCoupon(CouponDto couponDto, Integer id) {
-        /*var exception = new EntityNotFoundException("Coupon with id " + id + " does not exist!");
-        var coupon = couponRepository.findById(id).orElseThrow(() -> exception);
-        coupon.setCode(couponDto.getCode());
-        coupon.setCoupon_uuid(couponDto.getCoupon_uuid());
-        coupon.setQuantity(couponDto.getQuantity());
-        coupon.setDiscount_percentage(couponDto.getDiscount_percentage());
-        coupon.setRestaurant_uuid(couponDto.getRestaurant_uuid());
-        couponRepository.save(coupon);
-        return coupon;*/
-
-        return new Coupon();
+    public void updateCoupon(CouponCreateUpdateRequest couponCreateUpdateRequest, Integer id) {
+        boolean updated = couponRepository.updateCoupon(id, couponCreateUpdateRequest);
+        if (!updated) {
+            throw new EntityNotFoundException(String.format("Coupon with id %d does not exist!", id));
+        }
     }
 
-    public List<String> filterRestaurants(List<String> restaurants) {
-        /*List<String> reList = couponRepository.findAll().stream().map(Coupon::getRestaurant_uuid).collect(Collectors.toList());
-        return restaurants.stream().filter(reList::contains).collect(Collectors.toList());*/
-
-        return new ArrayList<>();
+    public List<Integer> filterRestaurants(List<Integer> restaurants) {
+        return couponRepository.filterRestaurantsWithCoupons(restaurants);
     }
 
     public Integer applyCoupon(Integer id) {
-        /*var exception = new EntityNotFoundException("Coupon with id " + id + " does not exist!");
-        var coupon = couponRepository.findById(id);
-        if (coupon.isPresent()) {
-            coupon.get().setQuantity(coupon.get().getQuantity() - 1);
-            couponRepository.save(coupon.get());
-            return coupon.get().getQuantity();
+        boolean updated = couponRepository.applyCoupon(id);
+        if (!updated) {
+            throw new EntityNotFoundException(String.format("Coupon with id %d does not exist!", id));
         }
-        else
-            throw exception;*/
 
         return 3;
     }
 
-    public List<Coupon> getAllCouponsForRestaurant(String restaurant_uuid) {
-        // return new ArrayList<>(couponRepository.findAll().stream().filter(coupon -> coupon.getRestaurant_uuid().equals(restaurant_uuid)).toList());
-
-        return new ArrayList<>();
+    public List<CouponResponse> getAllCouponsForRestaurant(Integer restaurantId, Integer page, Integer size) {
+        return couponRepository.getByRestaurantIdPage(restaurantId, page, size);
     }
 }

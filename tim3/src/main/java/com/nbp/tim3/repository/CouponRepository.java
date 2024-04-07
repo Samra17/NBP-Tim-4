@@ -295,14 +295,14 @@ public class CouponRepository {
 
         StringBuilder sql = new StringBuilder("SELECT id " +
                 "FROM nbp_restaurant " +
-                "WHERE id IN (SELECT restaurant_id FROM nbp_coupon) AND ID IN ");
+                "WHERE id IN (SELECT distinct(restaurant_id) FROM nbp_coupon WHERE restaurant_id IN ");
 
         List<Integer> filteredRestaurants = new ArrayList<>();
         try {
             Connection connection = dbConnectionService.getConnection();
             sql.append("(");
             sql.append("?, ".repeat(restaurants.size()-1));
-            sql.append("?)");
+            sql.append("?))");
             PreparedStatement preparedStatement = connection.prepareStatement(sql.toString());
 
             for (int i=1; i<=restaurants.size(); i++){

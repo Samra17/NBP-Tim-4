@@ -18,7 +18,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    /*
+
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     @GetMapping("/all")
     public ResponseEntity<List<UserResponse>> getAllUsers() {
@@ -31,21 +31,18 @@ public class UserController {
         return ResponseEntity.ok(userService.getAllManagers());
     }
 
-    //@PreAuthorize("hasRole('ADMINISTRATOR')")
+    @PreAuthorize("hasRole('ADMINISTRATOR')")
     @GetMapping("/couriers")
     public ResponseEntity<List<UserResponse>> getAllCouriers() {
         return ResponseEntity.ok(userService.getAllCouriers());
     }
 
+    /*
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Integer id) {
         return ResponseEntity.ok(userService.deleteUser(id));
-    }
-
-    @PreAuthorize("hasRole('ADMINISTRATOR')")
-    @DeleteMapping("/uuid/{uuid}")
-    public ResponseEntity<String> deleteUserByUUID(@PathVariable String uuid) {
-        return ResponseEntity.ok(userService.deleteUserByUUID(uuid));
     }*/
+
+
 }

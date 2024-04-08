@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 public class UserRepository {
@@ -351,6 +353,104 @@ public class UserRepository {
             }
         }
 
+    }
 
+    public List<User> getAll() {
+        String sql = "SELECT * FROM nbp.nbp_user u JOIN nbp.nbp_role r ON u.role_id=r.id " +
+                "WHERE r.name IN ('ADMINISTRATOR','COURIER','RESTAURANT_MANAGER','CUSTOMER')";
+        List<User> users = new ArrayList<>();
+
+        try {
+            Connection connection = dbConnectionService.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+
+            while (resultSet.next()) {
+                User user = fillUserData(resultSet);
+                users.add(user);
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
+
+    public List<User> getManagers() {
+        String sql = "SELECT * FROM nbp.nbp_user u JOIN nbp.nbp_role r ON u.role_id=r.id " +
+                "WHERE r.name = 'RESTAURANT_MANAGER'";
+        List<User> users = new ArrayList<>();
+
+        try {
+            Connection connection = dbConnectionService.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+
+            while (resultSet.next()) {
+                User user = fillUserData(resultSet);
+                users.add(user);
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
+
+    public List<User> getCouriers() {
+        String sql = "SELECT * FROM nbp.nbp_user u JOIN nbp.nbp_role r ON u.role_id=r.id " +
+                "WHERE r.name = 'COURIER'";
+        List<User> users = new ArrayList<>();
+
+        try {
+            Connection connection = dbConnectionService.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+
+            while (resultSet.next()) {
+                User user = fillUserData(resultSet);
+                users.add(user);
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
+
+
+
+    private User fillUserData(ResultSet resultSet) throws SQLException {
+        int id = resultSet.getInt("id");
+        String firstName = resultSet.getString("first_name");
+        String lastName = resultSet.getString("last_name");
+        String email = resultSet.getString("email");
+        String password = resultSet.getString("password");
+        String username = resultSet.getString("username");
+        String phoneNumber = resultSet.getString("phone_number");
+
+        User user = new User(id,firstName,lastName,email,password,username,phoneNumber,null,null);
+
+        if(resultSet.getObject("role_id") != null) {
+            int roleId = resultSet.getInt("role_id");
+            Role role = roleRepository.getById(roleId);
+            user.setRole(role);
+        }
+
+        if(resultSet.getObject("address_id") != null) {
+            int addressId = resultSet.getInt("address_id");
+            Address address = addressRepository.getById(addressId);
+            user.setAddress(address);
+        }
+        return user;
     }
 }

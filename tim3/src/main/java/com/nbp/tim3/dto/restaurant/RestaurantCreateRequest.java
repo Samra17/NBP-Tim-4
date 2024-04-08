@@ -30,6 +30,7 @@ public class RestaurantCreateRequest implements Serializable {
 
     @Pattern(regexp ="^((-)?[0-9]?[0-9]\\.\\d+,(\\s)*(-)?[1]?[0-9]?[0-9]\\.\\d+)",message = "Map coordinates must represent latitude and longitude values!")
     @NotNull(message = "Map coordinates must be specified!")
+    @Size(max=255,message = "Map coordinates can not be more than 255 characters long!")
     private String mapCoordinates;
 
 

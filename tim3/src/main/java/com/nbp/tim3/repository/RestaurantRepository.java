@@ -135,4 +135,132 @@ public class RestaurantRepository {
         }
 
     }
+
+    public void updateRestaurant(Restaurant restaurant, Address address)  {
+        String sqlRes = "UPDATE nbp_restaurant" +
+                " SET name=?,logo=? WHERE id=?";
+        String sqlUpdateAdr = "UPDATE nbp_address SET street=?, municipality=?, map_coordinates=? WHERE id=" +
+                "(SELECT address_id FROM nbp_restaurant WHERE id=?)";
+
+        Connection connection = null;
+
+        boolean exception = false;
+
+        try {
+            connection = dbConnectionService.getConnection();
+            String returnCols[] = { "id" };
+
+          PreparedStatement preparedStatement = connection.prepareStatement(sqlUpdateAdr);
+          preparedStatement.setString(1, address.getStreet());
+          preparedStatement.setString(2, address.getMunicipality());
+          preparedStatement.setString(3, address.getMapCoordinates());
+          preparedStatement.setInt(4, restaurant.getId());
+
+          int rowCount = preparedStatement.executeUpdate();
+
+        if (rowCount > 0) {
+            ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                int id = generatedKeys.getInt(1);
+                System.out.println("ID of the updated row: " + id);
+                address.setId(id);
+            }
+            logger.info(String.format("Updated %d rows in Address!",rowCount));
+        }
+
+        preparedStatement = connection.prepareStatement(sqlRes);
+        preparedStatement.setString(1,restaurant.getName());
+        preparedStatement.setString(2,restaurant.getLogo());
+        preparedStatement.setInt(3,restaurant.getId());
+
+        rowCount = preparedStatement.executeUpdate();
+
+        connection.commit();
+
+
+        logger.info(String.format("Successfully updated %d rows in Restaurant.", rowCount));
+
+
+        }
+
+        catch (SQLException e) {
+            logger.error(e.getMessage());
+
+            exception = true;
+
+            if(e.getSQLState().startsWith("23")) {
+                if(e.getErrorCode() == 1) {
+                    if (e.getMessage().contains("NBP_ADDRESS_UN"))
+                        throw new InvalidRequestException(String.format("Map coordinates %s already in use!", address.getMapCoordinates()));
+                    else
+                        throw new InvalidRequestException(String.format("Restaurant with %s name already exists!",restaurant.getName()));
+                }
+            }
+
+
+        } catch (Exception e) {
+            exception = true;
+            e.printStackTrace();
+            throw e;
+        } finally {
+            if(exception && connection!=null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+    }
+
+    public boolean checkExists(int id)  {
+        String sqlRes = "SELECT CASE WHEN COUNT(1) > 0 THEN 1 ELSE 0 END AS exists_row " +
+                "FROM nbp_restaurant WHERE id = ?";
+
+        Connection connection = null;
+
+        boolean exception = false;
+
+        try {
+            connection = dbConnectionService.getConnection();
+            String returnCols[] = { "id" };
+
+            PreparedStatement preparedStatement = connection.prepareStatement(sqlRes);
+            preparedStatement.setInt(1, id);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if(resultSet.next()) {
+                int exists = resultSet.getInt(1);
+
+                if(exists==1)
+                    return true;
+            }
+
+            connection.commit();
+        }
+
+        catch (SQLException e) {
+            logger.error(e.getMessage());
+
+            exception = true;
+
+
+        } catch (Exception e) {
+            exception = true;
+            e.printStackTrace();
+            throw e;
+        } finally {
+            if(exception && connection!=null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return false;
+    }
+
 }

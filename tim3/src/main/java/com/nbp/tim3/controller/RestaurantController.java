@@ -39,7 +39,7 @@ public class RestaurantController {
 
 
 
-    //@PreAuthorize("hasRole('ADMINISTRATOR')")
+    @PreAuthorize("hasRole('ADMINISTRATOR')")
     @Operation(description = "Create a new restaurant")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successfully created a new restaurant",
@@ -49,7 +49,7 @@ public class RestaurantController {
                     content = @Content)})
     @PostMapping(path="/add")
     @ResponseStatus(HttpStatus.CREATED)
-    public @ResponseBody ResponseEntity<RestaurantResponse> addNewRestaurant (
+    public @ResponseBody ResponseEntity<RestaurantCreateResponse> addNewRestaurant (
             @Parameter(description = "Information required for restaurant creation", required = true)
             @Valid @RequestBody RestaurantCreateRequest request) {
 
@@ -58,7 +58,7 @@ public class RestaurantController {
         return new ResponseEntity<>(restaurant,HttpStatus.CREATED);
     }
 
-    /*
+
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Update restaurant information")
     @ApiResponses(value = {
@@ -72,20 +72,19 @@ public class RestaurantController {
     )
     @PutMapping(path="/update/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody ResponseEntity<Restaurant> updateRestaurant (
+    public @ResponseBody ResponseEntity<RestaurantUpdateResponse> updateRestaurant (
             @Parameter(description = "Restaurant ID", required = true)
-            @PathVariable Long id,
+            @PathVariable int id,
             @Parameter(description = "Restaurant information to be updated", required = true)
-            @RequestBody @Valid RestaurantUpdateRequest request,
-            @RequestHeader("uuid") String userUUID,
-            @RequestHeader("username") String username) {
+            @RequestBody @Valid RestaurantUpdateRequest request) {
 
-        Restaurant restaurant = null;
-        restaurant = restaurantService.updateRestaurant(request,id,userUUID);
+        RestaurantUpdateResponse restaurant = null;
+        restaurant = restaurantService.updateRestaurant(request,id);
 
         return new ResponseEntity<>(restaurant,HttpStatus.OK);
     }
 
+    /*
     @Operation(description = "Get all restaurants")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully found all restaurants in the system",

@@ -7,6 +7,7 @@ import com.nbp.tim3.model.Restaurant;
 import com.nbp.tim3.repository.CategoryRepository;
 import com.nbp.tim3.repository.RestaurantRepository;
 import com.nbp.tim3.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +35,8 @@ public class RestaurantService {
      */
 
 
-    public RestaurantResponse addNewRestaurant(RestaurantCreateRequest request) {
+    public RestaurantCreateResponse addNewRestaurant(RestaurantCreateRequest request) {
+
         Restaurant restaurant = new Restaurant();
         restaurant.setName(request.getName());
         Address address = new Address(0,request.getAddress(),request.getCity(),request.getMapCoordinates());
@@ -42,27 +44,25 @@ public class RestaurantService {
         restaurantRepository.addRestaurant(restaurant,address,request.getManagerId());
 
         restaurant.setAddress(address);
-        RestaurantResponse response =  new RestaurantResponse(restaurant);
-        response.setManagerId(request.getManagerId());
 
-        return response;
+        return new RestaurantCreateResponse(restaurant,request.getManagerId());
 
     }
 
-    public Restaurant updateRestaurant(RestaurantUpdateRequest request, Long id, String uuid) {
-        /*var exception = new EntityNotFoundException("Restaurant with id " + id + " does not exist!");
-        var restaurant = restaurantRepository.findById(id).orElseThrow(()-> exception);
+    public RestaurantUpdateResponse updateRestaurant(RestaurantUpdateRequest request, int id) {
+        if(!restaurantRepository.checkExists(id))
+            throw new EntityNotFoundException(String.format("Restaurant with id %d does not exist!",id));
+
+        var restaurant = new Restaurant();
+        restaurant.setId(id);
         restaurant.setName(request.getName());
-        restaurant.setMapCoordinates(request.getMapCoordinates());
-        restaurant.setAddress(request.getAddress());
         restaurant.setLogo(request.getLogo());
-        restaurant.setModified(LocalDateTime.now());
-        restaurant.setModifiedBy(uuid);
-        restaurantRepository.save(restaurant);
-        return restaurant;*/
+        Address address = new Address(0,request.getAddress(),request.getCity(),request.getMapCoordinates());
+        restaurant.setAddress(address);
 
-        return new Restaurant();
+        restaurantRepository.updateRestaurant(restaurant,address);
 
+        return new RestaurantUpdateResponse(restaurant);
     }
 
 

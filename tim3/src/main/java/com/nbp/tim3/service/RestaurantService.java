@@ -68,10 +68,8 @@ public class RestaurantService {
 
     }
 
-    public List<RestaurantResponse> getFullRestaurants() {
-        // return restaurantRepository.getFullRestaurants();
-
-        return new ArrayList<>();
+    public RestaurantPaginatedResponse getFullRestaurants(PaginatedRequest paginatedRequest) {
+         return restaurantRepository.getFullRestaurants(paginatedRequest);
     }
 
     public RestaurantShortResponse getRestaurantById(int id, String customerUsername) {

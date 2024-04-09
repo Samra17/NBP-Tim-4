@@ -99,17 +99,21 @@ public class RestaurantController {
         return new ResponseEntity<>(restaurants, HttpStatus.OK);
     }
 
-    /*
+
     //@PreAuthorize("hasRole('ADMINISTRATOR')")
     @GetMapping(path="/all/full")
     @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody ResponseEntity<List<RestaurantResponse>> getAllFullRestaurants() {
+    public @ResponseBody ResponseEntity<RestaurantPaginatedResponse> getAllFullRestaurants(
+            @RequestParam(name="page") int page,
+            @RequestParam(name="perPage") int recordsPerPage
+    ) {
+        PaginatedRequest paginatedRequest = new PaginatedRequest(page,recordsPerPage);
 
-        var restaurants = restaurantService.getFullRestaurants();
+        var restaurants = restaurantService.getFullRestaurants(paginatedRequest);
         return new ResponseEntity<>(restaurants, HttpStatus.OK);
     }
 
-    */
+
     @Operation(description = "Search for restaurants based on filter and sorting criteria")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully found all restaurants fulfilling the provided criteria",

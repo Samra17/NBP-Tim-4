@@ -179,9 +179,9 @@ public class RestaurantController {
         return new ResponseEntity<>(restaurant, HttpStatus.OK);
     }
 
-    /*
+
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
-    @Operation(description = "Get restaurant UUID by restaurant manager  UUID")
+    @Operation(description = "Get restaurant id by restaurant manager")
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully found the restaurant with provided restaurant manager UUID",
                     content = { @Content(mediaType = "application/json",
@@ -189,14 +189,15 @@ public class RestaurantController {
                     }),
             @ApiResponse(responseCode = "404", description = "Restaurant with provided restaurant manager UUID not found",
                     content = @Content)})
-    @GetMapping(path="/uuid/manager")
+    @GetMapping(path="/id/manager")
     @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody ResponseEntity<String> getRestaurantUUIDByManagerUUID(
-            @RequestHeader("uuid") String managerUUID) {
+    public @ResponseBody ResponseEntity<Integer> getRestaurantIdByManager(
+            @RequestHeader("username") String managerUsername) {
 
-        var restaurant = restaurantService.getRestaurantUUIDByManagerUUID(managerUUID);
-        return new ResponseEntity<>(restaurant, HttpStatus.OK);
+        var restaurantId = restaurantService.getRestaurantIdByManager(managerUsername);
+        return new ResponseEntity<>(restaurantId, HttpStatus.OK);
     }
+
 
     @Operation(description = "Get a full restaurant response by restaurant ID")
     @ApiResponses ( value = {
@@ -210,12 +211,13 @@ public class RestaurantController {
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody ResponseEntity<RestaurantResponse> getRestaurantFullResponseById(
             @Parameter(description = "Restaurant ID", required = true)
-            @PathVariable  Long id) {
+            @PathVariable  int id) {
 
         var restaurant = restaurantService.getRestaurantFullResponseById(id);
         return new ResponseEntity<>(restaurant, HttpStatus.OK);
     }
 
+    /*
     @Operation(description = "Get restaurants with categories")
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully found restaurants with provided categories",

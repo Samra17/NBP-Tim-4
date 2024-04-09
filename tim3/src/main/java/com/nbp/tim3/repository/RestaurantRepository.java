@@ -275,7 +275,7 @@ public class RestaurantRepository {
 
         boolean exception = false;
 
-        String query = constructQuery(filter, sortBy, ascending);
+        String query = constructQuery(filter, sortBy, ascending,-1);
 
 
         int paramIndex = 1;
@@ -329,23 +329,13 @@ public class RestaurantRepository {
                         resultSet.getString("logo"),
                         resultSet.getInt("is_open") != 0,
                         resultSet.getString("map_coordinates"),
-                        new TreeSet<>(),
+                        resultSet.getString("categories") != null ?
+                        new TreeSet<>(Arrays.asList(resultSet.getString("categories").split(",")))
+                        : new TreeSet<String>(),
                         resultSet.getFloat("rating"),
                         resultSet.getInt("customers_rated"),
                         resultSet.getInt("customers_favorited"),
                         resultSet.getInt("customer_favorite")>0);
-
-                String categorySql = "SELECT name FROM nbp_category nc JOIN nbp_restaurant_category nrc ON " +
-                        "nc.id = nrc.category_id WHERE nrc.restaurant_id=?";
-
-                PreparedStatement preparedStatementCategories = connection.prepareStatement(categorySql);
-                preparedStatementCategories.setInt(1,r.getId());
-
-                ResultSet categoriesResultSet = preparedStatementCategories.executeQuery();
-
-                while (categoriesResultSet.next()) {
-                    r.getCategories().add(categoriesResultSet.getString("name"));
-                }
 
 
                 response.setTotalPages((resultSet.getInt("result_count") + request.getRecordsPerPage()-1)/request.getRecordsPerPage());
@@ -375,8 +365,85 @@ public class RestaurantRepository {
         return null;
     }
 
+    public RestaurantShortResponse getRestaurantShortResponseById(int id, String username) {
+        Connection connection = null;
 
-    private String constructQuery(FilterRestaurantRequest filter,String sortBy,boolean ascending) {
+        boolean exception = false;
+
+        String query = constructQuery(null, null, false,id);
+
+
+
+        int paramIndex = 1;
+
+        User user = userRepository.getByUsername(username);
+
+        int userId = user != null ? user.getId() : -1;
+
+        try {
+            connection = dbConnectionService.getConnection();
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            preparedStatement.setInt(paramIndex,userId);
+            paramIndex +=1;
+
+            preparedStatement.setInt(paramIndex,id);
+            paramIndex +=1;
+
+            preparedStatement.setInt(paramIndex,1);
+            paramIndex +=1;
+            preparedStatement.setInt(paramIndex,1);
+
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            RestaurantShortResponse response = null;
+
+            if (resultSet.next()) {
+                 response = new RestaurantShortResponse(id, resultSet.getString("name"),
+                        resultSet.getString("street"),
+                        resultSet.getString("logo"),
+                        resultSet.getInt("is_open") != 0,
+                        resultSet.getString("map_coordinates"),
+                         resultSet.getString("categories") != null ?
+                                 new TreeSet<>(Arrays.asList(resultSet.getString("categories").split(",")))
+                                 : new TreeSet<String>(),
+                        resultSet.getFloat("rating"),
+                        resultSet.getInt("customers_rated"),
+                        resultSet.getInt("customers_favorited"),
+                        resultSet.getInt("customer_favorite")>0);
+
+
+
+            }
+
+            connection.commit();
+
+            return response;
+        } catch (SQLException e) {
+            exception = true;
+            logger.error(e.getMessage());
+        }
+        catch (Exception e) {
+            exception = true;
+            e.printStackTrace();
+            throw e;
+        } finally {
+            if(exception && connection!=null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return null;
+    }
+
+
+
+    private String constructQuery(FilterRestaurantRequest filter,String sortBy,boolean ascending, int id) {
         String baseQuery = "SELECT * FROM (" +
                 "    SELECT COUNT(*) OVER () RESULT_COUNT,\n" +
                 "        nr.ID, \n" +
@@ -384,6 +451,7 @@ public class RestaurantRepository {
                 "        nr.LOGO, \n" +
                 "        na.MAP_COORDINATES, \n" +
                 "        na.STREET, \n" +
+                "LISTAGG(DISTINCT nc.name, ',') WITHIN GROUP (ORDER BY nc.NAME) AS categories," +
                 "        COALESCE(AVG(nr2.rating), 0) AS rating, \n" +
                 "        COUNT(DISTINCT nr2.ID) AS customers_rated, \n" +
                 "        COUNT(DISTINCT nfr.ID) AS customers_favorited, \n" +
@@ -417,9 +485,10 @@ public class RestaurantRepository {
                 "                                        END \n" +
                 "                                    FROM \n" +
                 "                                        dual\n" +
-                "                                )";
+                "                                )" +
+                " LEFT JOIN NBP_RESTAURANT_CATEGORY nrc ON nr.id = nrc.restaurant_id " +
+                " LEFT JOIN NBP_CATEGORY nc ON nc.id=nrc.category_id ";
 
-        String optionalJoin = " JOIN NBP_RESTAURANT_CATEGORY nrc ON nr.id = nrc.restaurant_id";
 
         String whereClause = "";
 
@@ -442,6 +511,10 @@ public class RestaurantRepository {
                 "    ROWNUM >= ?\n" +
                 "    AND ROWNUM <= ?";
 
+        if(id > -1){
+            whereClause = "WHERE nr.id=?";
+        }
+
         if(filter != null) {
             if(filter.getCategoryIds() != null && !filter.getCategoryIds().isEmpty()) {
 
@@ -452,7 +525,6 @@ public class RestaurantRepository {
 
                 String categories = "(" + joiner + ")";
                 whereClause = "WHERE nrc.category_id IN " + categories;
-                baseQuery += optionalJoin;
             }
 
             if(filter.getName() != null) {
@@ -495,5 +567,6 @@ public class RestaurantRepository {
         return String.format("%s %s %s %s %s",baseQuery,whereClause,groupBy,orderBy,endQuery);
 
     }
+
 
 }

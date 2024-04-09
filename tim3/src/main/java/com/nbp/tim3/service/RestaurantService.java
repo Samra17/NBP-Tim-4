@@ -74,19 +74,19 @@ public class RestaurantService {
         return new ArrayList<>();
     }
 
-    public RestaurantShortResponse getRestaurantById(Long id, String customerUUID) {
-        /*var exception = new EntityNotFoundException("Restaurant with id " + id + " does not exist!");
+    public RestaurantShortResponse getRestaurantById(int id, String customerUsername) {
+        var exception = new EntityNotFoundException("Restaurant with id " + id + " does not exist!");
         try {
-            var restaurant = restaurantRepository.getRestaurantShortResponseById(id);
-            System.out.println(restaurant);
-            restaurant.setCustomerFavorite(restaurantRepository.checkIfRestaurantIsCustomersFavorite(id,customerUUID));
+            var restaurant = restaurantRepository.getRestaurantShortResponseById(id,customerUsername);
+
+            if(restaurant==null)
+                throw exception;
+
             return restaurant;
         } catch(Exception e) {
             e.printStackTrace();
             throw exception;
-        }*/
-
-        return new RestaurantShortResponse();
+        }
     }
 
     public RestaurantResponse getRestaurantByManagerUUID(String managerUUID) {

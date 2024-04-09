@@ -29,12 +29,12 @@ public class RestaurantResponse {
     private OpeningHoursResponse openingHours;
 
     private List<CategoryResponse> categories;
-    private Double rating;
+    private double rating;
 
-    private Integer customersRated;
-    private Integer customersFavorited;
+    private int customersRated;
+    private int customersFavorited;
 
-    public RestaurantResponse(Restaurant restaurant, Number rating, Number customersRated, Number customersFavorited) {
+    public RestaurantResponse(Restaurant restaurant, double rating, int customersRated, int customersFavorited) {
         this.id= restaurant.getId();
         this.name=restaurant.getName();
         this.managerId = restaurant.getManager().getId();
@@ -47,9 +47,9 @@ public class RestaurantResponse {
             this.openingHours = new OpeningHoursResponse(restaurant.getOpeningHours());
 
         this.logo=restaurant.getLogo();
-        this.rating=rating.doubleValue();
-        this.customersFavorited = customersFavorited.intValue();
-        this.customersRated = customersRated.intValue();
+        this.rating=rating;
+        this.customersFavorited = customersFavorited;
+        this.customersRated = customersRated;
 
         if(restaurant.getCategories() != null)
             this.categories= restaurant.getCategories().stream().map(CategoryResponse::new).collect(Collectors.toList());

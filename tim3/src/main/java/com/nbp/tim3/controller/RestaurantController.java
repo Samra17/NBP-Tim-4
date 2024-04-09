@@ -136,7 +136,7 @@ public class RestaurantController {
         return new ResponseEntity<>(restaurants, HttpStatus.OK);
     }
 
-    /*
+
     @Operation(description = "Get a restaurant by restaurant ID")
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully found the restaurant with provided ID",
@@ -149,13 +149,14 @@ public class RestaurantController {
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody ResponseEntity<RestaurantShortResponse> getRestaurantById(
             @Parameter(description = "Restaurant ID", required = true)
-            @PathVariable  Long id,
-            @RequestHeader("uuid") String userUUID) {
+            @PathVariable  int id,
+            @RequestHeader("username") String username) {
 
-        var restaurant = restaurantService.getRestaurantById(id,userUUID);
+        var restaurant = restaurantService.getRestaurantById(id,username);
         return new ResponseEntity<>(restaurant, HttpStatus.OK);
     }
 
+    /*
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Get a restaurant by restaurant manager  UUID")
     @ApiResponses ( value = {

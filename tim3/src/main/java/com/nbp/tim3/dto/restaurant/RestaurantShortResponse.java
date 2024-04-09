@@ -1,5 +1,6 @@
 package com.nbp.tim3.dto.restaurant;
 
+import com.nbp.tim3.dto.pagination.PaginatedResponse;
 import com.nbp.tim3.model.Restaurant;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,26 +17,25 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class RestaurantShortResponse {
 
-    private Long id;
+    private int id;
 
     private String name;
 
     private String address;
 
-
     private String logo;
 
     private boolean open;
 
-    String mapCoordinates;
+    private String mapCoordinates;
 
-    Set<String> categories;
-    Double rating;
+    private Set<String> categories;
+    private double rating;
 
-    Integer customersRated;
-    Integer customersFavorited;
+    private int customersRated;
+    private int customersFavorited;
 
-    Boolean customerFavorite;
+    private boolean customerFavorite;
 
     public RestaurantShortResponse(Restaurant restaurant, Double rating, Number customersRated, Number customersFavorited) {
         /*this.id= restaurant.getId();

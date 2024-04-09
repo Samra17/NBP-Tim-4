@@ -1,8 +1,12 @@
 package com.nbp.tim3.repository;
 
+import com.nbp.tim3.dto.pagination.PaginatedRequest;
+import com.nbp.tim3.dto.restaurant.FilterRestaurantRequest;
+import com.nbp.tim3.dto.restaurant.RestaurantPaginatedShortResponse;
+import com.nbp.tim3.dto.restaurant.RestaurantShortResponse;
 import com.nbp.tim3.model.Address;
-import com.nbp.tim3.model.Category;
 import com.nbp.tim3.model.Restaurant;
+import com.nbp.tim3.model.User;
 import com.nbp.tim3.service.DBConnectionService;
 import com.nbp.tim3.util.exception.InvalidRequestException;
 import org.slf4j.Logger;
@@ -10,10 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.*;
 
 @Repository
 public class RestaurantRepository {
@@ -21,6 +23,9 @@ public class RestaurantRepository {
 
     @Autowired
     DBConnectionService dbConnectionService;
+
+    @Autowired
+    UserRepository userRepository;
 
     public void addRestaurant(Restaurant restaurant, Address address, int managerId)  {
         String sqlRes = "INSERT INTO nbp_restaurant(name,address_id,manager_id) VALUES(?,?,?)";
@@ -261,6 +266,234 @@ public class RestaurantRepository {
             }
         }
         return false;
+    }
+
+    public RestaurantPaginatedShortResponse getRestaurants(PaginatedRequest request, String username, FilterRestaurantRequest filter, String sortBy, boolean ascending)  {
+
+
+        Connection connection = null;
+
+        boolean exception = false;
+
+        String query = constructQuery(filter, sortBy, ascending);
+
+
+        int paramIndex = 1;
+
+        int offset = (request.getPage()-1)*request.getRecordsPerPage();
+
+        User user = userRepository.getByUsername(username);
+
+        int userId = user != null ? user.getId() : -1;
+
+        try {
+            connection = dbConnectionService.getConnection();
+            String returnCols[] = { "id" };
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            preparedStatement.setInt(paramIndex,userId);
+            paramIndex +=1;
+
+            if(filter != null) {
+                if(filter.getCategoryIds() != null && !filter.getCategoryIds().isEmpty()) {
+                    List<Integer> categoryIds = filter.getCategoryIds();
+
+                    for(int i=0; i<categoryIds.size(); i++) {
+                        preparedStatement.setInt(paramIndex, categoryIds.get(i));
+                        paramIndex +=1;
+                    }
+                }
+
+                if(filter.getName()!=null) {
+                    preparedStatement.setString(paramIndex, "'%" + filter.getName() + "%'");
+                    paramIndex +=1;
+                }
+            }
+
+
+            preparedStatement.setInt(paramIndex,offset +1);
+            paramIndex += 1;
+            preparedStatement.setInt(paramIndex,offset + request.getRecordsPerPage());
+
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            RestaurantPaginatedShortResponse response = new RestaurantPaginatedShortResponse();
+            response.setRestaurants(new ArrayList<>());
+            response.setCurrentPage(request.getPage());
+
+            while (resultSet.next()) {
+                RestaurantShortResponse r = new RestaurantShortResponse(resultSet.getInt("id"), resultSet.getString("name"),
+                        resultSet.getString("street"),
+                        resultSet.getString("logo"),
+                        resultSet.getInt("is_open") != 0,
+                        resultSet.getString("map_coordinates"),
+                        new TreeSet<>(),
+                        resultSet.getFloat("rating"),
+                        resultSet.getInt("customers_rated"),
+                        resultSet.getInt("customers_favorited"),
+                        resultSet.getInt("customer_favorite")>0);
+
+                String categorySql = "SELECT name FROM nbp_category nc JOIN nbp_restaurant_category nrc ON " +
+                        "nc.id = nrc.category_id WHERE nrc.restaurant_id=?";
+
+                PreparedStatement preparedStatementCategories = connection.prepareStatement(categorySql);
+                preparedStatementCategories.setInt(1,r.getId());
+
+                ResultSet categoriesResultSet = preparedStatementCategories.executeQuery();
+
+                while (categoriesResultSet.next()) {
+                    r.getCategories().add(categoriesResultSet.getString("name"));
+                }
+
+
+                response.setTotalPages((resultSet.getInt("result_count") + request.getRecordsPerPage()-1)/request.getRecordsPerPage());
+                response.getRestaurants().add(r);
+            }
+
+            connection.commit();
+
+            return response;
+        } catch (SQLException e) {
+            exception = true;
+            logger.error(e.getMessage());
+        }
+        catch (Exception e) {
+            exception = true;
+            e.printStackTrace();
+            throw e;
+        } finally {
+            if(exception && connection!=null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return null;
+    }
+
+
+    private String constructQuery(FilterRestaurantRequest filter,String sortBy,boolean ascending) {
+        String baseQuery = "SELECT * FROM (" +
+                "    SELECT COUNT(*) OVER () RESULT_COUNT,\n" +
+                "        nr.ID, \n" +
+                "        nr.NAME, \n" +
+                "        nr.LOGO, \n" +
+                "        na.MAP_COORDINATES, \n" +
+                "        na.STREET, \n" +
+                "        COALESCE(AVG(nr2.rating), 0) AS rating, \n" +
+                "        COUNT(DISTINCT nr2.ID) AS customers_rated, \n" +
+                "        COUNT(DISTINCT nfr.ID) AS customers_favorited, \n" +
+                "        CASE \n" +
+                "            WHEN TO_CHAR(SYSDATE, 'HH24:MI') >= noh.opening_time \n" +
+                "                 AND TO_CHAR(SYSDATE, 'HH24:MI') <= noh.closing_time THEN 1 \n" +
+                "            ELSE 0 \n" +
+                "        END AS is_open,\n" +
+                "(SELECT COUNT(nfr2.id) FROM NBP_FAVORITE_RESTAURANT nfr2 WHERE nfr2.RESTAURANT_ID =nr.id AND nfr2.CUSTOMER_ID=? ) \n" +
+                "        AS customer_favorite" +
+                "    FROM \n" +
+                "        NBP_RESTAURANT nr\n" +
+                "    LEFT JOIN \n" +
+                "        NBP_ADDRESS na ON nr.ADDRESS_ID = na.ID \n" +
+                "    LEFT JOIN \n" +
+                "        NBP_REVIEW nr2 ON nr.ID = nr2.RESTAURANT_ID \n" +
+                "    LEFT JOIN \n" +
+                "        NBP_FAVORITE_RESTAURANT nfr ON nr.ID = nfr.RESTAURANT_ID \n" +
+                "    LEFT JOIN \n" +
+                "        NBP_OPENING_HOURS noh ON nr.ID = noh.RESTAURANT_ID \n" +
+                "                                AND noh.DAY_OF_WEEK = (\n" +
+                "                                    SELECT \n" +
+                "                                        CASE TO_CHAR(SYSDATE, 'DY')\n" +
+                "                                            WHEN 'MON' THEN 'Monday'\n" +
+                "                                            WHEN 'TUE' THEN 'Tuesday'\n" +
+                "                                            WHEN 'WED' THEN 'Wednesday'\n" +
+                "                                            WHEN 'THU' THEN 'Thursday'\n" +
+                "                                            WHEN 'FRI' THEN 'Friday'\n" +
+                "                                            WHEN 'SAT' THEN 'Saturday'\n" +
+                "                                            ELSE 'Sunday'\n" +
+                "                                        END \n" +
+                "                                    FROM \n" +
+                "                                        dual\n" +
+                "                                )";
+
+        String optionalJoin = " JOIN NBP_RESTAURANT_CATEGORY nrc ON nr.id = nrc.restaurant_id";
+
+        String whereClause = "";
+
+        String groupBy = "GROUP BY \n" +
+                "        nr.ID, \n" +
+                "        nr.NAME, \n" +
+                "        nr.LOGO, \n" +
+                "        na.MAP_COORDINATES, \n" +
+                "        na.STREET, \n" +
+                "        CASE \n" +
+                "            WHEN TO_CHAR(SYSDATE, 'HH24:MI') >= noh.opening_time \n" +
+                "                 AND TO_CHAR(SYSDATE, 'HH24:MI') <= noh.closing_time THEN 1 \n" +
+                "            ELSE 0 \n" +
+                "        END" ;
+
+        String orderBy = "";
+
+        String endQuery = ") \n" +
+                "WHERE \n" +
+                "    ROWNUM >= ?\n" +
+                "    AND ROWNUM <= ?";
+
+        if(filter != null) {
+            if(filter.getCategoryIds() != null && !filter.getCategoryIds().isEmpty()) {
+
+                StringJoiner joiner = new StringJoiner(",", "", "");
+                for (int i = 0; i < filter.getCategoryIds().size(); i++) {
+                    joiner.add("?");
+                }
+
+                String categories = "(" + joiner + ")";
+                whereClause = "WHERE nrc.category_id IN " + categories;
+                baseQuery += optionalJoin;
+            }
+
+            if(filter.getName() != null) {
+                String whereName = "UPPER(nr.name) LIKE UPPER(?)";
+                if(whereClause.isEmpty()) {
+                    whereClause = "WHERE " + whereName;
+                } else {
+                    whereClause += " AND " + whereName;
+                }
+            }
+
+            if(filter.isOfferingDiscount()) {
+                String discountWhere = "EXISTS(SELECT nc.id FROM NBP_COUPON nc WHERE nc.QUANTITY>0 AND nc.RESTAURANT_ID=nr.id)";
+
+                if(whereClause.isEmpty()) {
+                    whereClause = "WHERE " + discountWhere;
+                } else {
+                    whereClause += " AND " + discountWhere;
+                }
+            }
+        }
+
+        if(sortBy!= null && !sortBy.isEmpty()) {
+            String dir = "";
+            if(ascending)
+                dir = "ASC";
+            else
+                dir = "DESC";
+
+            switch (sortBy) {
+                case "POPULARITY":
+                    orderBy = "ORDER BY customers_favorited " + dir;
+                    break;
+                case "RATING":
+                    orderBy = "ORDER BY rating " + dir;
+                    break;
+            }
+        }
+
+        return String.format("%s %s %s %s %s",baseQuery,whereClause,groupBy,orderBy,endQuery);
+
     }
 
 }

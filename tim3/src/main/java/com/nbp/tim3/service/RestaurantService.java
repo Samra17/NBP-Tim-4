@@ -1,21 +1,18 @@
 package com.nbp.tim3.service;
 
 import com.nbp.tim3.dto.openinghours.OpeningHoursCreateRequest;
+import com.nbp.tim3.dto.pagination.PaginatedRequest;
 import com.nbp.tim3.dto.restaurant.*;
 import com.nbp.tim3.model.Address;
 import com.nbp.tim3.model.Restaurant;
 import com.nbp.tim3.repository.CategoryRepository;
 import com.nbp.tim3.repository.RestaurantRepository;
-import com.nbp.tim3.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class RestaurantService {
@@ -66,10 +63,9 @@ public class RestaurantService {
     }
 
 
-    public List<RestaurantShortResponse> searchForRestaurants(FilterRestaurantRequest filterRestaurantRequest, String sortBy, Boolean ascending) {
-        //return restaurantRepository.getRestaurants(filterRestaurantRequest,sortBy,ascending);
+    public RestaurantPaginatedShortResponse searchForRestaurants(PaginatedRequest paginatedRequest, String username, FilterRestaurantRequest filterRestaurantRequest, String sortBy, Boolean ascending) {
+        return restaurantRepository.getRestaurants(paginatedRequest,username, filterRestaurantRequest,sortBy,ascending);
 
-        return new ArrayList<>();
     }
 
     public List<RestaurantResponse> getFullRestaurants() {

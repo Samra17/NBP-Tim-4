@@ -1,9 +1,8 @@
 package com.nbp.tim3.controller;
 
-import com.nbp.tim3.dto.openinghours.OpeningHoursCreateRequest;
+import com.nbp.tim3.dto.pagination.PaginatedRequest;
+import com.nbp.tim3.dto.pagination.PaginatedResponse;
 import com.nbp.tim3.dto.restaurant.*;
-import com.nbp.tim3.dto.restaurantimage.RestaurantImageResponse;
-import com.nbp.tim3.dto.restaurantimage.RestaurantImageUploadRequest;
 import com.nbp.tim3.model.Restaurant;
 import com.nbp.tim3.service.FavoriteRestaurantService;
 import com.nbp.tim3.service.RestaurantImageService;
@@ -21,8 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -84,7 +81,7 @@ public class RestaurantController {
         return new ResponseEntity<>(restaurant,HttpStatus.OK);
     }
 
-    /*
+
     @Operation(description = "Get all restaurants")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully found all restaurants in the system",
@@ -93,13 +90,17 @@ public class RestaurantController {
     )
     @GetMapping(path="/all")
     @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody ResponseEntity<List<RestaurantShortResponse>> getAllRestaurants() {
+    public @ResponseBody ResponseEntity<RestaurantPaginatedShortResponse> getAllRestaurants(@RequestParam(name="page") int page,
+                                                                                            @RequestParam(name="perPage")int recordsPerPage,
+                                                                                            @RequestHeader("username") String username) {
 
-        var restaurants = restaurantService.searchForRestaurants(null,null,false);
+       PaginatedRequest request = new PaginatedRequest(page,recordsPerPage);
+        var restaurants = restaurantService.searchForRestaurants(request,username,null,null,false);
         return new ResponseEntity<>(restaurants, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('ADMINISTRATOR')")
+    /*
+    //@PreAuthorize("hasRole('ADMINISTRATOR')")
     @GetMapping(path="/all/full")
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody ResponseEntity<List<RestaurantResponse>> getAllFullRestaurants() {
@@ -108,6 +109,7 @@ public class RestaurantController {
         return new ResponseEntity<>(restaurants, HttpStatus.OK);
     }
 
+    */
     @Operation(description = "Search for restaurants based on filter and sorting criteria")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully found all restaurants fulfilling the provided criteria",
@@ -116,20 +118,25 @@ public class RestaurantController {
     )
     @GetMapping(path="/search")
     @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody ResponseEntity<List<RestaurantShortResponse>> searchForRestaurants(@RequestParam(required = false)  String name,
-                                                                                            @RequestParam(required = false)  List<Long> categoryIds,
-                                                                                            @RequestParam(required = false)  Boolean isOfferingDiscount,
+    public @ResponseBody ResponseEntity<RestaurantPaginatedShortResponse> searchForRestaurants(@RequestParam(name="page") int page,
+                                                                                            @RequestParam(name="perPage")int recordsPerPage,
+                                                                                            @RequestHeader("username") String username,
+                                                                                            @RequestParam(required = false)  String name,
+                                                                                            @RequestParam(required = false)  List<Integer> categoryIds,
+                                                                                            @RequestParam(required = false)  boolean isOfferingDiscount,
                                                                                             @RequestParam(required = false) String sortBy,
-                                                                                            @RequestParam(required = false) Boolean ascending) {
+                                                                                            @RequestParam(required = false) boolean ascending) {
 
+        PaginatedRequest paginatedRequest = new PaginatedRequest(page,recordsPerPage);
         FilterRestaurantRequest filterRequest = null;
-        if(name!=null || isOfferingDiscount!=null || categoryIds!=null)
+        if(name!=null || isOfferingDiscount || categoryIds!=null)
             filterRequest = new FilterRestaurantRequest(name,categoryIds,isOfferingDiscount);
 
-        var restaurants = restaurantService.searchForRestaurants(filterRequest,sortBy,ascending);
+        var restaurants = restaurantService.searchForRestaurants(paginatedRequest,username,filterRequest,sortBy,ascending);
         return new ResponseEntity<>(restaurants, HttpStatus.OK);
     }
 
+    /*
     @Operation(description = "Get a restaurant by restaurant ID")
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully found the restaurant with provided ID",

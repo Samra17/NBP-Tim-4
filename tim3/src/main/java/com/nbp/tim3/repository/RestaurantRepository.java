@@ -158,7 +158,6 @@ public class RestaurantRepository {
 
         try {
             connection = dbConnectionService.getConnection();
-            String returnCols[] = { "id" };
 
           PreparedStatement preparedStatement = connection.prepareStatement(sqlUpdateAdr);
           preparedStatement.setString(1, address.getStreet());
@@ -293,7 +292,6 @@ public class RestaurantRepository {
 
         try {
             connection = dbConnectionService.getConnection();
-            String returnCols[] = { "id" };
 
             PreparedStatement preparedStatement = connection.prepareStatement(query);
 
@@ -304,14 +302,14 @@ public class RestaurantRepository {
                 if(filter.getCategoryIds() != null && !filter.getCategoryIds().isEmpty()) {
                     List<Integer> categoryIds = filter.getCategoryIds();
 
-                    for(int i=0; i<categoryIds.size(); i++) {
-                        preparedStatement.setInt(paramIndex, categoryIds.get(i));
-                        paramIndex +=1;
+                    for (Integer categoryId : categoryIds) {
+                        preparedStatement.setInt(paramIndex, categoryId);
+                        paramIndex += 1;
                     }
                 }
 
                 if(filter.getName()!=null) {
-                    preparedStatement.setString(paramIndex, "'%" + filter.getName() + "%'");
+                    preparedStatement.setString(paramIndex, "%" + filter.getName() + "%");
                     paramIndex +=1;
                 }
             }
@@ -628,6 +626,173 @@ public class RestaurantRepository {
         return null;
     }
 
+    public RestaurantResponse getRestaurantByManagerUsername(String managerUsername) {
+        Connection connection = null;
+
+        boolean exception = false;
+
+        String query = "SELECT \n" +
+                "        nr.ID, \n" +
+                "        nr.NAME, \n" +
+                "        nr.LOGO, \n" +
+                "        nr.ADDRESS_ID,\n" +
+                "        na.MAP_COORDINATES, \n" +
+                "        na.STREET, \n" +
+                "        na.MUNICIPALITY ,\n" +
+                "        nr.MANAGER_ID,\n" +
+                "        LISTAGG(DISTINCT  nc.id ||' ' || nc.name, ',') WITHIN GROUP (ORDER BY nc.NAME) AS categories,\n" +
+                "        LISTAGG(DISTINCT  noh.DAY_OF_WEEK  ||' ' || noh.OPENING_TIME || '-' || noh.CLOSING_TIME , ',') WITHIN GROUP (ORDER BY noh.DAY_OF_WEEK) AS opening_times,\n" +
+                "        COALESCE(AVG(nr2.rating), 0) AS rating, \n" +
+                "        COUNT(DISTINCT nr2.ID) AS customers_rated, \n" +
+                "        COUNT(DISTINCT nfr.ID) AS customers_favorited\n" +
+                "        \n" +
+                "     FROM \n" +
+                "        NBP_RESTAURANT nr\n" +
+                "    LEFT JOIN \n" +
+                "        NBP_ADDRESS na ON nr.ADDRESS_ID = na.ID \n" +
+                "    LEFT JOIN \n" +
+                "        NBP_REVIEW nr2 ON nr.ID = nr2.RESTAURANT_ID \n" +
+                "    LEFT JOIN \n" +
+                "        NBP_FAVORITE_RESTAURANT nfr ON nr.ID = nfr.RESTAURANT_ID \n" +
+                "    LEFT JOIN \n" +
+                "        NBP_OPENING_HOURS noh ON nr.ID = noh.RESTAURANT_ID \n" +
+                "    LEFT JOIN \n" +
+                "    \tNBP_RESTAURANT_CATEGORY nrc ON nrc.RESTAURANT_ID = nr.ID \n" +
+                "    LEFT JOIN \n" +
+                "    \t NBP_CATEGORY nc ON nc.ID = nrc.CATEGORY_ID \n" +
+                " LEFT JOIN nbp.nbp_user nu ON nu.id=nr.manager_id " +
+                "\n WHERE nu.username = ?" +
+                "GROUP BY \n" +
+                "        nr.ID, \n" +
+                "        nr.NAME, \n" +
+                "        nr.LOGO, \n" +
+                "        nr.ADDRESS_ID,\n" +
+                "        na.MAP_COORDINATES, \n" +
+                "        na.STREET,\n" +
+                "        na.MUNICIPALITY,\n" +
+                "        nr.MANAGER_ID";
+
+
+
+
+        try {
+            connection = dbConnectionService.getConnection();
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+
+            preparedStatement.setString(1,managerUsername);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            RestaurantResponse response = null;
+
+
+            if (resultSet.next()) {
+                response = new RestaurantResponse(resultSet.getInt("id"), resultSet.getString("name"),
+                        new AddressResponse(resultSet.getInt("address_id"),resultSet.getString("street"),
+                                resultSet.getString("municipality"), resultSet.getString("map_coordinates")),
+                        resultSet.getString("logo"),
+                        resultSet.getInt("manager_id") ,
+                        null,
+                        null,
+                        resultSet.getFloat("rating"),
+                        resultSet.getInt("customers_rated"),
+                        resultSet.getInt("customers_favorited"));
+
+                List<String> categories = resultSet.getString("categories") != null ?
+                        Arrays.asList(resultSet.getString("categories").split(",")) : new ArrayList<>();
+
+                if(!categories.isEmpty()) {
+                    List<CategoryResponse> categoryResponses = new ArrayList<>();
+
+                    categories.forEach(c -> {
+                        Pattern pattern = Pattern.compile("(\\d+)\\s(\\w+)");
+                        Matcher matcher = pattern.matcher(c);
+                        if (matcher.find()) {
+                            int id = Integer.parseInt(matcher.group(1));
+                            String name = matcher.group(2);
+                            CategoryResponse categoryResponse= new CategoryResponse(id,name);
+                            categoryResponses.add(categoryResponse);
+                        }
+                    });
+                    response.setCategories(categoryResponses);
+                }
+
+                List<String> openingTimes = resultSet.getString("opening_times") != null ?
+                        Arrays.asList(resultSet.getString("opening_times").split(",")) : new ArrayList<>();
+
+                if(!openingTimes.isEmpty()) {
+                    OpeningHoursResponse openingHoursResponse = new OpeningHoursResponse();
+                    openingTimes.forEach(ot -> {
+                        Pattern pattern = Pattern.compile("([a-zA-Z]+)\\s(\\d{2}:\\d{2})-(\\d{2}:\\d{2})");
+                        Matcher matcher = pattern.matcher(ot);
+                        if (matcher.find()) {
+                            String day = matcher.group(1);
+                            String open = matcher.group(2);
+                            String close = matcher.group(3);
+
+                            switch (day){
+                                case "Monday":
+                                    openingHoursResponse.setMondayOpen(LocalTime.parse(open));
+                                    openingHoursResponse.setMondayClose(LocalTime.parse(close));
+                                    break;
+                                case "Tuesday":
+                                    openingHoursResponse.setTuesdayOpen(LocalTime.parse(open));
+                                    openingHoursResponse.setTuesdayClose(LocalTime.parse(close));
+                                    break;
+                                case "Wednesday":
+                                    openingHoursResponse.setWednesdayOpen(LocalTime.parse(open));
+                                    openingHoursResponse.setWednesdayClose(LocalTime.parse(close));
+                                    break;
+                                case "Thursday":
+                                    openingHoursResponse.setThursdayOpen(LocalTime.parse(open));
+                                    openingHoursResponse.setThursdayClose(LocalTime.parse(close));
+                                    break;
+                                case "Friday":
+                                    openingHoursResponse.setFridayOpen(LocalTime.parse(open));
+                                    openingHoursResponse.setFridayClose(LocalTime.parse(close));
+                                    break;
+                                case "Saturday":
+                                    openingHoursResponse.setSaturdayOpen(LocalTime.parse(open));
+                                    openingHoursResponse.setSaturdayClose(LocalTime.parse(close));
+                                    break;
+                                case "Sunday":
+                                    openingHoursResponse.setSundayOpen(LocalTime.parse(open));
+                                    openingHoursResponse.setSundayClose(LocalTime.parse(close));
+                                    break;
+                            }
+                        }
+                    });
+
+                    response.setOpeningHours(openingHoursResponse);
+                }
+
+            }
+
+            connection.commit();
+
+            return response;
+        } catch (SQLException e) {
+            exception = true;
+            logger.error(e.getMessage());
+        }
+        catch (Exception e) {
+            exception = true;
+            e.printStackTrace();
+            throw e;
+        } finally {
+            if(exception && connection!=null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return null;
+    }
+
     private String constructQuery(FilterRestaurantRequest filter,String sortBy,boolean ascending, int id) {
         String baseQuery = "SELECT * FROM (" +
                 "    SELECT ROW_NUMBER() OVER (ORDER BY nr.id) rnum, " +
@@ -753,7 +918,6 @@ public class RestaurantRepository {
         return String.format("%s %s %s %s %s",baseQuery,whereClause,groupBy,orderBy,endQuery);
 
     }
-
 
 
 }

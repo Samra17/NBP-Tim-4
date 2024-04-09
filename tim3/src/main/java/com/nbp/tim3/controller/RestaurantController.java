@@ -100,7 +100,7 @@ public class RestaurantController {
     }
 
 
-    //@PreAuthorize("hasRole('ADMINISTRATOR')")
+    @PreAuthorize("hasRole('ADMINISTRATOR')")
     @GetMapping(path="/all/full")
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody ResponseEntity<RestaurantPaginatedResponse> getAllFullRestaurants(
@@ -160,9 +160,9 @@ public class RestaurantController {
         return new ResponseEntity<>(restaurant, HttpStatus.OK);
     }
 
-    /*
+
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
-    @Operation(description = "Get a restaurant by restaurant manager  UUID")
+    @Operation(description = "Get a restaurant by restaurant manager id")
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully found the restaurant with provided restaurant manager UUID",
                     content = { @Content(mediaType = "application/json",
@@ -172,13 +172,14 @@ public class RestaurantController {
                     content = @Content)})
     @GetMapping(path="/manager")
     @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody ResponseEntity<RestaurantResponse> getRestaurantByManagerUUID(
-            @RequestHeader("uuid") String managerUUID) {
+    public @ResponseBody ResponseEntity<RestaurantResponse> getRestaurantByManager(
+            @RequestHeader("username") String managerUsername) {
 
-        var restaurant = restaurantService.getRestaurantByManagerUUID(managerUUID);
+        var restaurant = restaurantService.getRestaurantByManager(managerUsername);
         return new ResponseEntity<>(restaurant, HttpStatus.OK);
     }
 
+    /*
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Get restaurant UUID by restaurant manager  UUID")
     @ApiResponses ( value = {

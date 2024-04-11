@@ -94,7 +94,8 @@ public class CouponController {
         couponService.updateCoupon(couponDto, id);
         return  new ResponseEntity<>(couponService.getCouponById(id), HttpStatus.CREATED);
     }
-//
+
+    /*
 //    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Delete a coupon")
     @ApiResponses ( value = {
@@ -107,6 +108,8 @@ public class CouponController {
             @PathVariable Integer id) {
         return new ResponseEntity<>(couponService.deleteCoupon(id), HttpStatus.OK);
     }
+
+     */
 //
 //    @Operation(description = "Filter restaurants with coupons")
     @ApiResponses(value = {

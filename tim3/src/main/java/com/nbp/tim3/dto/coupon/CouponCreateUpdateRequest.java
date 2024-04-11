@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 public class CouponCreateUpdateRequest {
 
-    @Size(min = 12, max = 12, message = "Coupon code must be 12 characters long!")
+    @Size(min = 3, max = 100, message = "Coupon code must be between 3 and 100 characters long!")
     @NotNull(message = "Coupon code should not be null")
     private String code;
 

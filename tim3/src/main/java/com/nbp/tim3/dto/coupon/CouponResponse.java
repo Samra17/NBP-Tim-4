@@ -1,10 +1,10 @@
 package com.nbp.tim3.dto.coupon;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
+@Data
 public class CouponResponse {
     private Integer id;
     private String code;

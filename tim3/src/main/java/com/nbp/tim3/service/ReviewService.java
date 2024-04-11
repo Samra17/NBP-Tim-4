@@ -1,6 +1,7 @@
 package com.nbp.tim3.service;
 
 import com.nbp.tim3.dto.review.ReviewCreateRequest;
+import com.nbp.tim3.dto.review.ReviewPaginatedResponse;
 import com.nbp.tim3.dto.review.ReviewResponse;
 import com.nbp.tim3.model.Review;
 import com.nbp.tim3.repository.ReviewRepository;
@@ -28,11 +29,11 @@ public class ReviewService {
         return reviewRepository.getReviewById(id);
     }
 
-    public List<ReviewResponse> getReviewsByRestaurantId(Integer restaurantId, Integer page, Integer size) {
+    public ReviewPaginatedResponse getReviewsByRestaurantId(Integer restaurantId, Integer page, Integer size) {
         return reviewRepository.getByRestaurantIdPage(restaurantId, page, size);
     }
 
-    public List<ReviewResponse> getReviewsByUserId(Integer userId, Integer page, Integer size) {
+    public ReviewPaginatedResponse getReviewsByUserId(Integer userId, Integer page, Integer size) {
         return reviewRepository.getByUserIdPage(userId, page, size);
     }
 

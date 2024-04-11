@@ -1,6 +1,7 @@
 package com.nbp.tim3.controller;
 
 import com.nbp.tim3.dto.coupon.CouponCreateUpdateRequest;
+import com.nbp.tim3.dto.coupon.CouponPaginatedResponse;
 import com.nbp.tim3.dto.coupon.CouponResponse;
 import com.nbp.tim3.service.CouponService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,11 +32,11 @@ public class CouponController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully found all coupons",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = CouponResponse.class)) })}
+                            schema = @Schema(implementation = CouponPaginatedResponse.class)) })}
     )
     @GetMapping(path="/all")
-    public @ResponseBody ResponseEntity<List<CouponResponse>> getAllCoupons(
-            @RequestHeader(value = "page", defaultValue = "0") Integer page,
+    public @ResponseBody ResponseEntity<CouponPaginatedResponse> getAllCoupons(
+            @RequestHeader(value = "page", defaultValue = "1") Integer page,
             @RequestHeader(value = "size", defaultValue = "10") Integer size) {
         var coupons = couponService.getAllCoupons(page, size);
         return new ResponseEntity<>(coupons, HttpStatus.OK);
@@ -147,15 +148,15 @@ public class CouponController {
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully found the coupons with provided restaurant UUID",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = CouponResponse.class)),
+                            schema = @Schema(implementation = CouponPaginatedResponse.class)),
                     }),
             @ApiResponse(responseCode = "404", description = "Coupons with provided restaurant Id not found",
                     content = @Content)})
     @GetMapping(path = "/res/{restaurantId}")
-    public  @ResponseBody ResponseEntity<List<CouponResponse>> getCouponForRestaurant(
+    public  @ResponseBody ResponseEntity<CouponPaginatedResponse> getCouponForRestaurant(
             @Parameter(description = "Restaurant ID", required = true)
             @PathVariable Integer restaurantId,
-            @RequestHeader(value = "page", defaultValue = "0") Integer page,
+            @RequestHeader(value = "page", defaultValue = "1") Integer page,
             @RequestHeader(value = "size", defaultValue = "10") Integer size) {
         var coupons = couponService.getAllCouponsForRestaurant(restaurantId, page, size);
         return new ResponseEntity<>(coupons, HttpStatus.OK);

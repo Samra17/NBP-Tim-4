@@ -1,9 +1,6 @@
 package com.nbp.tim3.service;
 
-import com.nbp.tim3.dto.order.OrderCreateRequest;
-import com.nbp.tim3.dto.order.OrderMenuItemResponse;
-import com.nbp.tim3.dto.order.OrderResponse;
-import com.nbp.tim3.dto.order.OrderUpdateDto;
+import com.nbp.tim3.dto.order.*;
 import com.nbp.tim3.enums.Status;
 import com.nbp.tim3.repository.OrderMenuItemRepository;
 import com.nbp.tim3.repository.OrderRepository;
@@ -27,15 +24,15 @@ public class OrderService {
         return orderRepository.createOrder(request);
     }
 
-    public List<OrderResponse> getOrdersByCustomerId(Integer customerId, Integer page, Integer size) {
+    public OrderPaginatedResponse getOrdersByCustomerId(Integer customerId, Integer page, Integer size) {
         return orderRepository.getByCustomerIdPage(customerId, page, size);
     }
 
-    public List<OrderResponse> getOrdersByCourierId(Integer customerId, Integer page, Integer size) {
+    public OrderPaginatedResponse getOrdersByCourierId(Integer customerId, Integer page, Integer size) {
         return orderRepository.getByCourierIdPage(customerId, page, size);
     }
 
-    public List<OrderResponse> getByRestaurantIdAndStatusPage(Integer restaurantId, Status status, Integer page, Integer size) {
+    public OrderPaginatedResponse getByRestaurantIdAndStatusPage(Integer restaurantId, Status status, Integer page, Integer size) {
         return orderRepository.getByRestaurantIdAndStatusPage(restaurantId, status, page, size);
     }
 

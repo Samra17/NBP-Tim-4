@@ -1,10 +1,10 @@
 package com.nbp.tim3.dto.review;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
+@Data
 public class ReviewResponse {
     private Integer id;
     private Integer userId;

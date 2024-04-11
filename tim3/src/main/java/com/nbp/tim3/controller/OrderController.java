@@ -1,6 +1,7 @@
 package com.nbp.tim3.controller;
 
 import com.nbp.tim3.dto.order.OrderCreateRequest;
+import com.nbp.tim3.dto.order.OrderPaginatedResponse;
 import com.nbp.tim3.dto.order.OrderResponse;
 import com.nbp.tim3.enums.Status;
 import com.nbp.tim3.model.Order;
@@ -53,9 +54,9 @@ public class OrderController {
     @Operation(description = "Get all customer's orders")
     @GetMapping(path = "/get/customer/{customerId}")
     @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody ResponseEntity<List<OrderResponse>> GetAllCustomerOrders(
+    public @ResponseBody ResponseEntity<OrderPaginatedResponse> GetAllCustomerOrders(
             @PathVariable("customerId") Integer customerId,
-            @RequestHeader(value = "page", defaultValue = "0") Integer page,
+            @RequestHeader(value = "page", defaultValue = "1") Integer page,
             @RequestHeader(value = "size", defaultValue = "10") Integer size) {
         return ResponseEntity.ok(orderService.getOrdersByCustomerId(customerId, page, size));
     }
@@ -63,9 +64,9 @@ public class OrderController {
     @Operation(description = "Get all orders by delivery person")
     @GetMapping("/get/delivery-person/{courierId}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<List<OrderResponse>> getOrdersByDeliveryPersonId(
+    public ResponseEntity<OrderPaginatedResponse> getOrdersByDeliveryPersonId(
             @PathVariable("courierId") Integer courierId,
-            @RequestHeader(value = "page", defaultValue = "0") Integer page,
+            @RequestHeader(value = "page", defaultValue = "1") Integer page,
             @RequestHeader(value = "size", defaultValue = "10") Integer size) {
         return ResponseEntity.ok(orderService.getOrdersByCourierId(courierId, page, size));
     }
@@ -122,9 +123,9 @@ public class OrderController {
 //    @PreAuthorize("hasRole('COURIER')")
 //    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @GetMapping("/get/restaurant/{restaurantId}")
-    public ResponseEntity<List<OrderResponse>> getOrdersByStatusForRestaurant(
+    public ResponseEntity<OrderPaginatedResponse> getOrdersByStatusForRestaurant(
             @PathVariable("restaurantId") Integer restaurantId,
-            @RequestHeader(value = "page", defaultValue = "0") Integer page,
+            @RequestHeader(value = "page", defaultValue = "1") Integer page,
             @RequestHeader(value = "size", defaultValue = "10") Integer size,
             @RequestHeader(value = "status", required = false) Status status
             ) {

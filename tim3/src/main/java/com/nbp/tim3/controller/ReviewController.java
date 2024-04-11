@@ -1,6 +1,7 @@
 package com.nbp.tim3.controller;
 
 import com.nbp.tim3.dto.review.ReviewCreateRequest;
+import com.nbp.tim3.dto.review.ReviewPaginatedResponse;
 import com.nbp.tim3.dto.review.ReviewResponse;
 import com.nbp.tim3.model.Review;
 import com.nbp.tim3.service.ReviewService;
@@ -31,15 +32,15 @@ public class ReviewController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully found all reviews for the restaurant",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ReviewResponse.class)) }),
+                            schema = @Schema(implementation = ReviewPaginatedResponse.class)) }),
             @ApiResponse(responseCode = "400", description = "Restaurant with provided id does not exist",
                     content = @Content)})
     @GetMapping(path="/restaurant/{restaurantId}")
     @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody ResponseEntity<List<ReviewResponse>> getReviewsForRestaurant (
+    public @ResponseBody ResponseEntity<ReviewPaginatedResponse> getReviewsForRestaurant (
             @Parameter(description = "Restaurant ID", required = true)
             @PathVariable Integer restaurantId,
-            @RequestHeader(value = "page", defaultValue = "0") Integer page,
+            @RequestHeader(value = "page", defaultValue = "1") Integer page,
             @RequestHeader(value = "size", defaultValue = "10") Integer size) {
         var reviews = reviewService.getReviewsByRestaurantId(restaurantId, page, size);
         return new ResponseEntity<>(reviews,HttpStatus.OK);
@@ -49,15 +50,15 @@ public class ReviewController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully found all reviews for the user",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ReviewResponse.class)) }),
+                            schema = @Schema(implementation = ReviewPaginatedResponse.class)) }),
             @ApiResponse(responseCode = "400", description = "User with provided id does not exist",
                     content = @Content)})
     @GetMapping(path="/user/{userId}")
     @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody ResponseEntity<List<ReviewResponse>> getReviewsForUser (
+    public @ResponseBody ResponseEntity<ReviewPaginatedResponse> getReviewsForUser (
             @Parameter(description = "User ID", required = true)
             @PathVariable Integer userId,
-            @RequestHeader(value = "page", defaultValue = "0") Integer page,
+            @RequestHeader(value = "page", defaultValue = "1") Integer page,
             @RequestHeader(value = "size", defaultValue = "10") Integer size) {
         var reviews = reviewService.getReviewsByUserId(userId, page, size);
         return new ResponseEntity<>(reviews,HttpStatus.OK);

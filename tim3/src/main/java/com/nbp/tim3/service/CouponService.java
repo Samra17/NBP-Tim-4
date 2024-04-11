@@ -1,14 +1,13 @@
 package com.nbp.tim3.service;
 
 import com.nbp.tim3.dto.coupon.CouponCreateUpdateRequest;
+import com.nbp.tim3.dto.coupon.CouponPaginatedResponse;
 import com.nbp.tim3.dto.coupon.CouponResponse;
-import com.nbp.tim3.model.Coupon;
 import com.nbp.tim3.repository.CouponRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -17,7 +16,7 @@ public class CouponService {
     @Autowired
     private CouponRepository couponRepository;
 
-    public List<CouponResponse> getAllCoupons(Integer page, Integer size) {
+    public CouponPaginatedResponse getAllCoupons(Integer page, Integer size) {
         return couponRepository.getAll(page, size);
     }
 
@@ -33,7 +32,7 @@ public class CouponService {
     }
 
     public String deleteCoupon(Integer id) {
-        if (!couponRepository.deleteReview(id))
+        if (!couponRepository.deleteCoupon(id))
             throw new EntityNotFoundException(String.format("Coupon item with id %d does not exist!", id));
         return "Coupon with id " + id + " is successfully deleted!";
     }
@@ -58,7 +57,7 @@ public class CouponService {
         return 3;
     }
 
-    public List<CouponResponse> getAllCouponsForRestaurant(Integer restaurantId, Integer page, Integer size) {
+    public CouponPaginatedResponse getAllCouponsForRestaurant(Integer restaurantId, Integer page, Integer size) {
         return couponRepository.getByRestaurantIdPage(restaurantId, page, size);
     }
 }

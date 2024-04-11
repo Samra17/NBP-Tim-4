@@ -1,6 +1,7 @@
 package com.nbp.tim3.repository;
 
 import com.nbp.tim3.dto.order.OrderCreateRequest;
+import com.nbp.tim3.dto.order.OrderPaginatedResponse;
 import com.nbp.tim3.dto.order.OrderResponse;
 import com.nbp.tim3.dto.order.OrderUpdateDto;
 import com.nbp.tim3.enums.Status;
@@ -36,7 +37,8 @@ public class OrderRepository {
             " address_cust.STREET AS CUST_ADD_STREET, " +
             " address_cust.MUNICIPALITY AS CUST_ADD_MUNICIPALITY," +
             " address_res.STREET AS RES_ADD_STREET, " +
-            " address_res.MUNICIPALITY AS RES_ADD_MUNICIPALITY " +
+            " address_res.MUNICIPALITY AS RES_ADD_MUNICIPALITY, " +
+            " COUNT(*) OVER() AS RESULT_COUNT " +
             "FROM nbp_order ord " +
             "JOIN nbp_restaurant res ON ord.restaurant_id = res.id " +
             "JOIN nbp_address address_res ON res.address_id = address_res.id " +
@@ -45,17 +47,18 @@ public class OrderRepository {
             "LEFT JOIN nbp.nbp_user courier ON ord.courier_id = courier.id " +
             "JOIN nbp_coupon coupon ON ord.coupon_id = coupon.id ";
 
-    public List<OrderResponse> getByRestaurantIdAndStatusPage(Integer restaurantId, Status status, Integer page, Integer size) {
+    public OrderPaginatedResponse getByRestaurantIdAndStatusPage(Integer restaurantId, Status status, Integer page, Integer size) {
         String sql = orderSelectSql +
                 "WHERE (UPPER(ord.status)=NVL(?, ord.status)) AND ord.restaurant_id=? OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
+        OrderPaginatedResponse orderPaginatedResponse = new OrderPaginatedResponse();
         List<OrderResponse> orders = new ArrayList<>();
         try {
             Connection connection = dbConnectionService.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, status != null ? status.name() : null);
             preparedStatement.setInt(2, restaurantId);
-            preparedStatement.setInt(3, page * size);
+            preparedStatement.setInt(3, (page - 1) * size);
             preparedStatement.setInt(4, size);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -64,37 +67,42 @@ public class OrderRepository {
                 OrderResponse orderResponse = new OrderResponse();
                 mapOrder(orderResponse, resultSet);
                 orders.add(orderResponse);
+                orderPaginatedResponse.setTotalPages((resultSet.getInt("result_count") + size-1)/size);
+
             }
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
-        return orders;
+        orderPaginatedResponse.setCurrentPage(page);
+        orderPaginatedResponse.setOrders(orders);
+        return orderPaginatedResponse;
 
     }
 
 
-    public List<OrderResponse> getByCustomerIdPage(Integer customerId, Integer page, Integer size) {
+    public OrderPaginatedResponse getByCustomerIdPage(Integer customerId, Integer page, Integer size) {
         String sql = orderSelectSql +
                 "WHERE ord.customer_id=? OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         return getByUserIdPage(customerId, page, size, sql);
     }
 
-    public List<OrderResponse> getByCourierIdPage(Integer courierId, Integer page, Integer size) {
+    public OrderPaginatedResponse getByCourierIdPage(Integer courierId, Integer page, Integer size) {
         String sql = orderSelectSql +
                 "WHERE ord.courier_id=? OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         return getByUserIdPage(courierId, page, size, sql);
     }
 
-    private List<OrderResponse> getByUserIdPage(Integer userId, Integer page, Integer size, String sql) {
+    private OrderPaginatedResponse getByUserIdPage(Integer userId, Integer page, Integer size, String sql) {
 
+        OrderPaginatedResponse orderPaginatedResponse = new OrderPaginatedResponse();
         List<OrderResponse> orders = new ArrayList<>();
         try {
             Connection connection = dbConnectionService.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setLong(1, userId);
-            preparedStatement.setInt(2, page * size);
+            preparedStatement.setInt(2, (page - 1) * size);
             preparedStatement.setInt(3, size);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -103,13 +111,17 @@ public class OrderRepository {
                 OrderResponse orderResponse = new OrderResponse();
                 mapOrder(orderResponse, resultSet);
                 orders.add(orderResponse);
+                orderPaginatedResponse.setTotalPages((resultSet.getInt("result_count") + size-1)/size);
+
             }
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
-        return orders;
+        orderPaginatedResponse.setCurrentPage(page);
+        orderPaginatedResponse.setOrders(orders);
+        return orderPaginatedResponse;
     }
 
     public OrderResponse getById(Integer id) {

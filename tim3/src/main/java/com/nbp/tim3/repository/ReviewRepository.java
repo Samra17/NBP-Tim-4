@@ -2,6 +2,7 @@ package com.nbp.tim3.repository;
 
 import com.nbp.tim3.dto.order.OrderResponse;
 import com.nbp.tim3.dto.review.ReviewCreateRequest;
+import com.nbp.tim3.dto.review.ReviewPaginatedResponse;
 import com.nbp.tim3.dto.review.ReviewResponse;
 import com.nbp.tim3.service.DBConnectionService;
 import com.nbp.tim3.util.exception.InvalidRequestException;
@@ -111,24 +112,25 @@ public class ReviewRepository {
         }
     }
 
-    public List<ReviewResponse> getByRestaurantIdPage(Integer restaurantId, Integer page, Integer size) {
-        String sql = "SELECT * FROM nbp_review WHERE restaurant_id=? OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+    public ReviewPaginatedResponse getByRestaurantIdPage(Integer restaurantId, Integer page, Integer size) {
+        String sql = "SELECT nbp_review.*, COUNT(*) OVER() result_count FROM nbp_review WHERE restaurant_id=? OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         return getByForeignKeyIdPage(restaurantId, page, size, sql);
     }
 
-    public List<ReviewResponse> getByUserIdPage(Integer userId, Integer page, Integer size) {
-        String sql = "SELECT * FROM nbp_review WHERE customer_id=? OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+    public ReviewPaginatedResponse getByUserIdPage(Integer userId, Integer page, Integer size) {
+        String sql = "SELECT nbp_review.*, COUNT(*) OVER() result_count FROM nbp_review WHERE customer_id=? OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         return getByForeignKeyIdPage(userId, page, size, sql);
     }
 
-    private List<ReviewResponse> getByForeignKeyIdPage(Integer foreignKeyId, Integer page, Integer size, String sql) {
+    private ReviewPaginatedResponse getByForeignKeyIdPage(Integer foreignKeyId, Integer page, Integer size, String sql) {
 
+        ReviewPaginatedResponse reviewPaginatedResponse = new ReviewPaginatedResponse();
         List<ReviewResponse> reviews = new ArrayList<>();
         try {
             Connection connection = dbConnectionService.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, foreignKeyId);
-            preparedStatement.setInt(2, page * size);
+            preparedStatement.setInt(2, (page - 1) * size);
             preparedStatement.setInt(3, size);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -137,13 +139,17 @@ public class ReviewRepository {
                 ReviewResponse reviewResponse = new ReviewResponse();
                 mapReview(reviewResponse, resultSet);
                 reviews.add(reviewResponse);
+                reviewPaginatedResponse.setTotalPages((resultSet.getInt("result_count") + size-1)/size);
+
             }
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
-        return reviews;
+        reviewPaginatedResponse.setCurrentPage(page);
+        reviewPaginatedResponse.setReviews(reviews);
+        return reviewPaginatedResponse;
     }
 
     public boolean deleteReview(Integer id) {

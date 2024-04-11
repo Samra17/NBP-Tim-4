@@ -1,8 +1,8 @@
 package com.nbp.tim3.repository;
 
 import com.nbp.tim3.dto.coupon.CouponCreateUpdateRequest;
+import com.nbp.tim3.dto.coupon.CouponPaginatedResponse;
 import com.nbp.tim3.dto.coupon.CouponResponse;
-import com.nbp.tim3.dto.review.ReviewResponse;
 import com.nbp.tim3.service.DBConnectionService;
 import com.nbp.tim3.util.exception.InvalidRequestException;
 import org.slf4j.Logger;
@@ -51,10 +51,11 @@ public class CouponRepository {
         couponResponse.setQuantity(resultSet.getInt("quantity"));
     }
 
-    public List<CouponResponse> getAll(Integer page, Integer size) {
+    public CouponPaginatedResponse getAll(Integer page, Integer size) {
 
-        String sql = "SELECT * FROM nbp_coupon OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        String sql = "SELECT nbp_coupon.*, COUNT(*) OVER() result_count FROM nbp_coupon OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
+        CouponPaginatedResponse couponPaginatedResponse = new CouponPaginatedResponse();
         List<CouponResponse> couponResponses = new ArrayList<>();
         try {
             Connection connection = dbConnectionService.getConnection();
@@ -67,12 +68,16 @@ public class CouponRepository {
                 CouponResponse couponResponse = new CouponResponse();
                 mapCoupon(couponResponse, resultSet);
                 couponResponses.add(couponResponse);
+                couponPaginatedResponse.setTotalPages((resultSet.getInt("result_count") + size-1)/size);
             }
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return couponResponses;
+
+        couponPaginatedResponse.setCurrentPage(page);
+        couponPaginatedResponse.setCouponResponse(couponResponses);
+        return couponPaginatedResponse;
     }
 
     public int createCoupon(CouponCreateUpdateRequest data) {
@@ -181,9 +186,10 @@ public class CouponRepository {
         }
     }
 
-    public boolean deleteReview(Integer id) {
+    public boolean deleteCoupon(Integer id) {
 
-        String sql = "DELETE FROM nbp_coupon WHERE id=?";
+        String sql = "UPDATE nbp_coupon SET quantity = 0 " +
+                "WHERE id = ?";
 
         try {
             Connection connection = dbConnectionService.getConnection();
@@ -197,23 +203,25 @@ public class CouponRepository {
             return rowCount > 0;
 
         } catch (SQLException e) {
+            logger.error(String.format("Deleting coupon failed: %s", e.getMessage()));
             throw new RuntimeException(e);
         }
     }
 
-    public List<CouponResponse> getByRestaurantIdPage(Integer restaurantId, Integer page, Integer size) {
-        String sql = "SELECT * FROM nbp_coupon WHERE restaurant_id=? OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+    public CouponPaginatedResponse getByRestaurantIdPage(Integer restaurantId, Integer page, Integer size) {
+        String sql = "SELECT nbp_coupon.*, COUNT(*) OVER() result_count FROM nbp_coupon WHERE restaurant_id=? OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         return getByForeignKeyIdPage(restaurantId, page, size, sql);
     }
 
-    private List<CouponResponse> getByForeignKeyIdPage(Integer foreignKeyId, Integer page, Integer size, String sql) {
+    private CouponPaginatedResponse getByForeignKeyIdPage(Integer foreignKeyId, Integer page, Integer size, String sql) {
 
+        CouponPaginatedResponse couponPaginatedResponse = new CouponPaginatedResponse();
         List<CouponResponse> coupons = new ArrayList<>();
         try {
             Connection connection = dbConnectionService.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, foreignKeyId);
-            preparedStatement.setInt(2, page * size);
+            preparedStatement.setInt(2, (page - 1) * size);
             preparedStatement.setInt(3, size);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -222,13 +230,16 @@ public class CouponRepository {
                 CouponResponse couponResponse = new CouponResponse();
                 mapCoupon(couponResponse, resultSet);
                 coupons.add(couponResponse);
+                couponPaginatedResponse.setTotalPages((resultSet.getInt("result_count") + size-1)/size);
             }
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
-        return coupons;
+        couponPaginatedResponse.setCurrentPage(page);
+        couponPaginatedResponse.setCouponResponse(coupons);
+        return couponPaginatedResponse;
     }
 
     public boolean applyCoupon(Integer id) {

@@ -185,7 +185,7 @@ public class RestaurantController {
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully found the restaurant with provided restaurant manager UUID",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Restaurant.class)),
+                            schema = @Schema(implementation = RestaurantResponse.class)),
                     }),
             @ApiResponse(responseCode = "404", description = "Restaurant with provided restaurant manager UUID not found",
                     content = @Content)})
@@ -203,7 +203,7 @@ public class RestaurantController {
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully found the restaurant with provided ID",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Restaurant.class)),
+                            schema = @Schema(implementation = RestaurantResponse.class)),
                     }),
             @ApiResponse(responseCode = "404", description = "Restaurant with provided ID not found",
                     content = @Content)})
@@ -217,22 +217,27 @@ public class RestaurantController {
         return new ResponseEntity<>(restaurant, HttpStatus.OK);
     }
 
-    /*
+
     @Operation(description = "Get restaurants with categories")
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully found restaurants with provided categories",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Restaurant.class)),
+                            schema = @Schema(implementation = RestaurantPaginatedResponse.class)),
                     })})
     @GetMapping(path="/category")
     @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody ResponseEntity<List<Restaurant>> getRestaurantsWithCategories(
+    public @ResponseBody ResponseEntity<RestaurantPaginatedResponse> getRestaurantsWithCategories(
+            @RequestParam(name="page") int page,
+            @RequestParam(name="perPage") int recordsPerPage,
             @Parameter(description = "List of category IDs", required = true)
-            @RequestParam List<Long> categoryIds) {
+            @RequestParam List<Integer> categoryIds) {
 
-        return new ResponseEntity<>(restaurantService.getRestaurantsWithCategories(categoryIds),HttpStatus.OK);
+        PaginatedRequest paginatedRequest = new PaginatedRequest(page, recordsPerPage);
+
+        return new ResponseEntity<>(restaurantService.getRestaurantsWithCategories(paginatedRequest,categoryIds),HttpStatus.OK);
     }
 
+    /*
     @Operation(description = "Get restaurant average rating")
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully calculated average restaurant rating",

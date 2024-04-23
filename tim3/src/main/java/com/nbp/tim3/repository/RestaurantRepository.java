@@ -537,7 +537,7 @@ public class RestaurantRepository {
                     List<CategoryResponse> categoryResponses = new ArrayList<>();
 
                     categories.forEach(c -> {
-                        Pattern pattern = Pattern.compile("(\\d+)\\s(\\w+)");
+                        Pattern pattern = Pattern.compile("(\\d+)\\s(.+)");
                         Matcher matcher = pattern.matcher(c);
                                 if (matcher.find()) {
                                     int id = Integer.parseInt(matcher.group(1));
@@ -756,7 +756,7 @@ public class RestaurantRepository {
                     List<CategoryResponse> categoryResponses = new ArrayList<>();
 
                     categories.forEach(c -> {
-                        Pattern pattern = Pattern.compile("(\\d+)\\s(\\w+)");
+                        Pattern pattern = Pattern.compile("(\\d+)\\s(.+)");
                         Matcher matcher = pattern.matcher(c);
                         if (matcher.find()) {
                             int id = Integer.parseInt(matcher.group(1));
@@ -922,7 +922,7 @@ public class RestaurantRepository {
                     List<CategoryResponse> categoryResponses = new ArrayList<>();
 
                     categories.forEach(c -> {
-                        Pattern pattern = Pattern.compile("(\\d+)\\s(\\w+)");
+                        Pattern pattern = Pattern.compile("(\\d+)\\s(.+)");
                         Matcher matcher = pattern.matcher(c);
                         if (matcher.find()) {
                             int catId = Integer.parseInt(matcher.group(1));
@@ -981,6 +981,195 @@ public class RestaurantRepository {
                     });
 
                     response.setOpeningHours(openingHoursResponse);
+                }
+
+            }
+
+            connection.commit();
+
+            return response;
+        } catch (SQLException e) {
+            exception = true;
+            logger.error(e.getMessage());
+        }
+        catch (Exception e) {
+            exception = true;
+            e.printStackTrace();
+            throw e;
+        } finally {
+            if(exception && connection!=null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return null;
+    }
+
+    public RestaurantPaginatedResponse getRestaurantsWithCategories(PaginatedRequest paginatedRequest, List<Integer> categoryIds) {
+        Connection connection = null;
+
+        boolean exception = false;
+
+        String query = "SELECT * FROM (    SELECT ROW_NUMBER() OVER (ORDER BY nr.id) rnum," +
+                " COUNT(DISTINCT nr.id) OVER () RESULT_COUNT,\n" +
+                "        nr.ID, \n" +
+                "        nr.NAME, \n" +
+                "        nr.LOGO, \n" +
+                "        nr.ADDRESS_ID,\n" +
+                "        na.MAP_COORDINATES, \n" +
+                "        na.STREET, \n" +
+                "        na.MUNICIPALITY ,\n" +
+                "        nr.MANAGER_ID,\n" +
+                "        LISTAGG(DISTINCT  nc.id ||' ' || nc.name, ',') WITHIN GROUP (ORDER BY nc.NAME) AS categories,\n" +
+                "        LISTAGG(DISTINCT  noh.DAY_OF_WEEK  ||' ' || noh.OPENING_TIME || '-' || noh.CLOSING_TIME , ',') WITHIN GROUP (ORDER BY noh.DAY_OF_WEEK) AS opening_times,\n" +
+                "        COALESCE(AVG(nr2.rating), 0) AS rating, \n" +
+                "        COUNT(DISTINCT nr2.ID) AS customers_rated, \n" +
+                "        COUNT(DISTINCT nfr.ID) AS customers_favorited\n" +
+                "        \n" +
+                "     FROM \n" +
+                "        NBP_RESTAURANT nr\n" +
+                "    LEFT JOIN \n" +
+                "        NBP_ADDRESS na ON nr.ADDRESS_ID = na.ID \n" +
+                "    LEFT JOIN \n" +
+                "        NBP_REVIEW nr2 ON nr.ID = nr2.RESTAURANT_ID \n" +
+                "    LEFT JOIN \n" +
+                "        NBP_FAVORITE_RESTAURANT nfr ON nr.ID = nfr.RESTAURANT_ID \n" +
+                "    LEFT JOIN \n" +
+                "        NBP_OPENING_HOURS noh ON nr.ID = noh.RESTAURANT_ID \n" +
+                "    LEFT JOIN \n" +
+                "    \tNBP_RESTAURANT_CATEGORY nrc ON nrc.RESTAURANT_ID = nr.ID \n" +
+                "    LEFT JOIN \n" +
+                "    \t NBP_CATEGORY nc ON nc.ID = nrc.CATEGORY_ID \n" +
+                "   WHERE EXISTS (SELECT nrc2.id FROM NBP_RESTAURANT_CATEGORY nrc2 WHERE nrc2.category_id IN" +
+                " ("+ "?,".repeat(categoryIds.size() - 1) + "?) AND nrc2.restaurant_id=nr.id)" +
+                "GROUP BY \n" +
+                "        nr.ID, \n" +
+                "        nr.NAME, \n" +
+                "        nr.LOGO, \n" +
+                "        nr.ADDRESS_ID,\n" +
+                "        na.MAP_COORDINATES, \n" +
+                "        na.STREET,\n" +
+                "        na.MUNICIPALITY,\n" +
+                "        nr.MANAGER_ID\n" +
+                "        \n" +
+                "ORDER BY nr.id\n" +
+                "        )\n" +
+                "\n" +
+                "WHERE \n" +
+                "    rnum >= ?\n" +
+                "    AND rnum <= ?";
+
+
+
+        int offset = (paginatedRequest.getPage()-1)*paginatedRequest.getRecordsPerPage();
+
+        try {
+            connection = dbConnectionService.getConnection();
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            int paramIndex = 1;
+
+            for (Integer categoryId : categoryIds) {
+                preparedStatement.setInt(paramIndex, categoryId);
+                paramIndex++;
+            }
+
+            preparedStatement.setInt(paramIndex,offset +1);
+            paramIndex++;
+            preparedStatement.setInt(paramIndex,offset + paginatedRequest.getRecordsPerPage());
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            RestaurantPaginatedResponse response = new RestaurantPaginatedResponse();
+            response.setRestaurants(new ArrayList<>());
+            response.setCurrentPage(paginatedRequest.getPage());
+
+
+            while (resultSet.next()) {
+                var restaurant = new RestaurantResponse(resultSet.getInt("id"), resultSet.getString("name"),
+                        new AddressResponse(resultSet.getInt("address_id"),resultSet.getString("street"),
+                                resultSet.getString("municipality"), resultSet.getString("map_coordinates")),
+                        resultSet.getString("logo"),
+                        resultSet.getInt("manager_id") ,
+                        null,
+                        null,
+                        resultSet.getFloat("rating"),
+                        resultSet.getInt("customers_rated"),
+                        resultSet.getInt("customers_favorited"));
+
+                List<String> categories = resultSet.getString("categories") != null ?
+                        Arrays.asList(resultSet.getString("categories").split(",")) : new ArrayList<>();
+
+                if(!categories.isEmpty()) {
+                    List<CategoryResponse> categoryResponses = new ArrayList<>();
+
+                    categories.forEach(c -> {
+                        Pattern pattern = Pattern.compile("(\\d+)\\s(.+)");
+                        Matcher matcher = pattern.matcher(c);
+                        if (matcher.find()) {
+                            int id = Integer.parseInt(matcher.group(1));
+                            String name = matcher.group(2);
+                            CategoryResponse categoryResponse= new CategoryResponse(id,name);
+                            categoryResponses.add(categoryResponse);
+                        }
+                    });
+                    restaurant.setCategories(categoryResponses);
+                }
+
+                List<String> openingTimes = resultSet.getString("opening_times") != null ?
+                        Arrays.asList(resultSet.getString("opening_times").split(",")) : new ArrayList<>();
+
+                if(!openingTimes.isEmpty()) {
+                    OpeningHoursResponse openingHoursResponse = new OpeningHoursResponse();
+                    openingTimes.forEach(ot -> {
+                        Pattern pattern = Pattern.compile("([a-zA-Z]+)\\s(\\d{2}:\\d{2})-(\\d{2}:\\d{2})");
+                        Matcher matcher = pattern.matcher(ot);
+                        if (matcher.find()) {
+                            String day = matcher.group(1);
+                            String open = matcher.group(2);
+                            String close = matcher.group(3);
+
+                            switch (day){
+                                case "Monday":
+                                    openingHoursResponse.setMondayOpen(LocalTime.parse(open));
+                                    openingHoursResponse.setMondayClose(LocalTime.parse(close));
+                                    break;
+                                case "Tuesday":
+                                    openingHoursResponse.setTuesdayOpen(LocalTime.parse(open));
+                                    openingHoursResponse.setTuesdayClose(LocalTime.parse(close));
+                                    break;
+                                case "Wednesday":
+                                    openingHoursResponse.setWednesdayOpen(LocalTime.parse(open));
+                                    openingHoursResponse.setWednesdayClose(LocalTime.parse(close));
+                                    break;
+                                case "Thursday":
+                                    openingHoursResponse.setThursdayOpen(LocalTime.parse(open));
+                                    openingHoursResponse.setThursdayClose(LocalTime.parse(close));
+                                    break;
+                                case "Friday":
+                                    openingHoursResponse.setFridayOpen(LocalTime.parse(open));
+                                    openingHoursResponse.setFridayClose(LocalTime.parse(close));
+                                    break;
+                                case "Saturday":
+                                    openingHoursResponse.setSaturdayOpen(LocalTime.parse(open));
+                                    openingHoursResponse.setSaturdayClose(LocalTime.parse(close));
+                                    break;
+                                case "Sunday":
+                                    openingHoursResponse.setSundayOpen(LocalTime.parse(open));
+                                    openingHoursResponse.setSundayClose(LocalTime.parse(close));
+                                    break;
+                            }
+                        }
+                    });
+
+                    restaurant.setOpeningHours(openingHoursResponse);
+
+                    response.setTotalPages((resultSet.getInt("result_count") + paginatedRequest.getRecordsPerPage()-1)/paginatedRequest.getRecordsPerPage());
+                    response.getRestaurants().add(restaurant);
                 }
 
             }

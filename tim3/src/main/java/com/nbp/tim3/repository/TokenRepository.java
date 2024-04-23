@@ -43,6 +43,7 @@ public class TokenRepository {
                 boolean revoked = resultSet.getBoolean("revoked");
 
                 Token token = new Token(tokenValue,expired,revoked);
+                token.setId(resultSet.getInt("id"));
                 return token;
             }
 

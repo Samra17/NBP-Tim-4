@@ -2,6 +2,7 @@ package com.nbp.tim3.service;
 
 import com.nbp.tim3.dto.openinghours.OpeningHoursCreateRequest;
 import com.nbp.tim3.dto.pagination.PaginatedRequest;
+import com.nbp.tim3.dto.pagination.PaginatedResponse;
 import com.nbp.tim3.dto.restaurant.*;
 import com.nbp.tim3.model.Address;
 import com.nbp.tim3.model.Restaurant;
@@ -133,9 +134,8 @@ public class RestaurantService {
 
     }
 
-    public List<Restaurant> getRestaurantsWithCategories(List<Long> categoryIds) {
-        // return categoryRepository.getRestaurantsWithCategories(categoryIds);
-        return new ArrayList<>();
+    public RestaurantPaginatedResponse getRestaurantsWithCategories(PaginatedRequest paginatedRequest, List<Integer> categoryIds) {
+        return restaurantRepository.getRestaurantsWithCategories(paginatedRequest,categoryIds);
     }
 
     public String deleteRestaurant(Long id) {

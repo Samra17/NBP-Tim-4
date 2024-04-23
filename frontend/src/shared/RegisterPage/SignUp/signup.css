@@ -1,0 +1,40 @@
+.container {
+    margin-top: 10px;
+    margin-bottom: 10%;
+    background-color:#FAF9F6;
+    border-radius: 5px;
+    padding: 20px;
+    width:40%;
+}
+
+.container  h1 {
+    text-align: center;
+}
+
+.btn {
+    background-color: #272D2F;
+    border-color: #272D2F;
+    width:100%
+}
+
+.btn:hover {
+    background-color: #525454;
+    border-color: #525454;
+    
+}
+
+.lnk {
+    text-decoration: none;
+}
+
+.lnk:hover {
+    cursor: pointer;
+}
+
+body {
+    background-color: #272D2F;
+}
+
+.clickable:hover {
+    cursor: pointer;
+}

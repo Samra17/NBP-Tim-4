@@ -1,0 +1,22 @@
+.container-side-expanded {
+    position:"absolute";
+    width: 60rem;
+    margin-left: 20rem;
+
+}
+
+.container-side-collapsed {
+    position:"absolute";
+    width: 72rem;
+    margin-left: 8rem;
+
+}
+
+.main-container {
+    background-color: #D7D7D7;
+    border-radius: 0px 0px 0px 5px;
+    min-height: 31rem;
+    padding-top: 20px;
+    height:"fit-content";
+    padding-bottom: 20px;
+}

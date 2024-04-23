@@ -1,0 +1,19 @@
+.active{
+    background-color:#f2f2f2;
+    border-radius:5px;
+    font-weight: 500;
+    font-family: 'Rubik';
+    box-shadow: 2px 2px 2px  #888888;
+    margin:0 !important;
+}
+
+.option {
+    border-radius:5px;
+    font-weight: 400;
+    font-family: 'Rubik';
+    margin:0 !important;
+}
+
+.option:hover {
+    background-color: #f2f2f2;
+}

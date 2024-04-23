@@ -21,6 +21,7 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Repository
 public class RestaurantRepository {
@@ -1309,6 +1310,143 @@ public class RestaurantRepository {
                 response.setTotalPages((resultSet.getInt("result_count") + paginatedRequest.getRecordsPerPage()-1)/paginatedRequest.getRecordsPerPage());
                 response.getRestaurants().add(r);
             }
+
+            connection.commit();
+
+            return response;
+        } catch (SQLException e) {
+            exception = true;
+            logger.error(e.getMessage());
+        }
+        catch (Exception e) {
+            exception = true;
+            e.printStackTrace();
+            throw e;
+        } finally {
+            if(exception && connection!=null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return null;
+    }
+
+
+    public RestaurantResponse setRestaurantCategories(int id, List<Integer> categoryIds) {
+        Connection connection = null;
+
+        boolean exception = false;
+        try {
+            connection = dbConnectionService.getConnection();
+
+            String procedureCall = "{call update_restaurant_categories(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
+            CallableStatement callableStatement = connection.prepareCall(procedureCall);
+
+            callableStatement.setInt(1, id);
+            callableStatement.setString(2,categoryIds.stream()
+                                                        .map(Object::toString)
+                                                        .collect(Collectors.joining(",")));
+
+            callableStatement.registerOutParameter(3, Types.INTEGER);
+            callableStatement.registerOutParameter(4, Types.VARCHAR);
+            callableStatement.registerOutParameter(5, Types.VARCHAR);
+            callableStatement.registerOutParameter(6, Types.INTEGER);
+            callableStatement.registerOutParameter(7, Types.VARCHAR);
+            callableStatement.registerOutParameter(8, Types.VARCHAR);
+            callableStatement.registerOutParameter(9, Types.VARCHAR);
+            callableStatement.registerOutParameter(10, Types.INTEGER);
+            callableStatement.registerOutParameter(11, Types.VARCHAR);
+            callableStatement.registerOutParameter(12, Types.VARCHAR);
+            callableStatement.registerOutParameter(13, Types.FLOAT);
+            callableStatement.registerOutParameter(14, Types.INTEGER);
+            callableStatement.registerOutParameter(15, Types.INTEGER);
+
+            callableStatement.execute();
+
+
+            var response = new RestaurantResponse(id, callableStatement.getString(4),
+                        new AddressResponse(callableStatement.getInt(6),callableStatement.getString(8),
+                                callableStatement.getString(9), callableStatement.getString(7)),
+                        callableStatement.getString(5),
+                        callableStatement.getInt(10) ,
+                        null,
+                        null,
+                        callableStatement.getFloat(13),
+                        callableStatement.getInt(14),
+                        callableStatement.getInt(15));
+
+                List<String> categories = callableStatement.getString(11) != null ?
+                        Arrays.asList(callableStatement.getString(11).split(",")) : new ArrayList<>();
+
+                if(!categories.isEmpty()) {
+                    List<CategoryResponse> categoryResponses = new ArrayList<>();
+
+                    categories.forEach(c -> {
+                        Pattern pattern = Pattern.compile("(\\d+)\\s(.+)");
+                        Matcher matcher = pattern.matcher(c);
+                        if (matcher.find()) {
+                            int category_id = Integer.parseInt(matcher.group(1));
+                            String category_name = matcher.group(2);
+                            CategoryResponse categoryResponse= new CategoryResponse(category_id,category_name);
+                            categoryResponses.add(categoryResponse);
+                        }
+                    });
+                    response.setCategories(categoryResponses);
+                }
+
+                List<String> openingTimes = callableStatement.getString(12) != null ?
+                        Arrays.asList(callableStatement.getString(12).split(",")) : new ArrayList<>();
+
+                if(!openingTimes.isEmpty()) {
+                    OpeningHoursResponse openingHoursResponse = new OpeningHoursResponse();
+                    openingTimes.forEach(ot -> {
+                        Pattern pattern = Pattern.compile("([a-zA-Z]+)\\s(\\d{2}:\\d{2})-(\\d{2}:\\d{2})");
+                        Matcher matcher = pattern.matcher(ot);
+                        if (matcher.find()) {
+                            String day = matcher.group(1);
+                            String open = matcher.group(2);
+                            String close = matcher.group(3);
+
+                            switch (day){
+                                case "Monday":
+                                    openingHoursResponse.setMondayOpen(LocalTime.parse(open));
+                                    openingHoursResponse.setMondayClose(LocalTime.parse(close));
+                                    break;
+                                case "Tuesday":
+                                    openingHoursResponse.setTuesdayOpen(LocalTime.parse(open));
+                                    openingHoursResponse.setTuesdayClose(LocalTime.parse(close));
+                                    break;
+                                case "Wednesday":
+                                    openingHoursResponse.setWednesdayOpen(LocalTime.parse(open));
+                                    openingHoursResponse.setWednesdayClose(LocalTime.parse(close));
+                                    break;
+                                case "Thursday":
+                                    openingHoursResponse.setThursdayOpen(LocalTime.parse(open));
+                                    openingHoursResponse.setThursdayClose(LocalTime.parse(close));
+                                    break;
+                                case "Friday":
+                                    openingHoursResponse.setFridayOpen(LocalTime.parse(open));
+                                    openingHoursResponse.setFridayClose(LocalTime.parse(close));
+                                    break;
+                                case "Saturday":
+                                    openingHoursResponse.setSaturdayOpen(LocalTime.parse(open));
+                                    openingHoursResponse.setSaturdayClose(LocalTime.parse(close));
+                                    break;
+                                case "Sunday":
+                                    openingHoursResponse.setSundayOpen(LocalTime.parse(open));
+                                    openingHoursResponse.setSundayClose(LocalTime.parse(close));
+                                    break;
+                            }
+                        }
+                    });
+
+                    response.setOpeningHours(openingHoursResponse);
+                }
+
+
 
             connection.commit();
 

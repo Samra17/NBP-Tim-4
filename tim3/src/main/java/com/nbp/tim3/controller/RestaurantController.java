@@ -289,9 +289,9 @@ public class RestaurantController {
             @RequestHeader("username") String username) {
 
         return new ResponseEntity<>(restaurantService.deleteRestaurant(id),HttpStatus.OK);
-    }
+    }*/
 
-    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
+    //@PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Set restaurant categories")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully updated restaurant categories",
@@ -304,18 +304,17 @@ public class RestaurantController {
     )
     @PutMapping(path="/{id}/add-categories")
     @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody ResponseEntity<Restaurant> addCategoriesToRestaurant(
+    public @ResponseBody ResponseEntity<RestaurantResponse> addCategoriesToRestaurant(
             @Parameter(description = "Restaurant ID", required = true)
-            @PathVariable Long id,
+            @PathVariable int id,
             @Parameter(description = "List of category IDs", required = true)
-            @RequestBody List<Long> categoryIds,
-            @RequestHeader("uuid") String userUUID,
-            @RequestHeader("username") String username) {
-        var restaurant = restaurantService.addCategoriesToRestaurant(id,categoryIds,userUUID);
+            @RequestBody List<Integer> categoryIds) {
+        var restaurant = restaurantService.addCategoriesToRestaurant(id,categoryIds);
 
         return  new ResponseEntity<>(restaurant,HttpStatus.OK);
     }
 
+    /*
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Set restaurant opening hours")
     @ApiResponses(value = {

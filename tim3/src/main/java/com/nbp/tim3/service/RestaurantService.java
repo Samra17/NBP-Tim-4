@@ -148,21 +148,14 @@ public class RestaurantService {
         return "Something";
     }
 
-    public Restaurant addCategoriesToRestaurant(Long id, List<Long> categoryIds,String userUUID) {
-        /*var exception = new EntityNotFoundException("Restaurant with id " + id + " does not exist!");
-        var restaurant = restaurantRepository.findById(id).orElseThrow(()->exception);
-        if(restaurant.getCategories().stream().map(c -> c.getId()).collect(Collectors.toList()).equals(categoryIds)) {
-            System.out.println("all match");
-            return restaurant;
-        }
-        var categories = new HashSet<>(categoryRepository.findAllById(categoryIds));
-        restaurant.setCategories(categories);
-        restaurant.setModified(LocalDateTime.now());
-        restaurant.setModifiedBy(userUUID);
-        restaurantRepository.save(restaurant);
-        return restaurant;*/
+    public RestaurantResponse addCategoriesToRestaurant(int id, List<Integer> categoryIds) {
+        var exception = new EntityNotFoundException("Restaurant with id " + id + " does not exist!");
 
-        return new Restaurant();
+       RestaurantResponse response = restaurantRepository.setRestaurantCategories(id, categoryIds);
+        if(response == null)
+            throw exception;
+
+        return response;
     }
 
     public Restaurant setRestaurantOpeningHours(Long id, OpeningHoursCreateRequest request, String userUUID) {

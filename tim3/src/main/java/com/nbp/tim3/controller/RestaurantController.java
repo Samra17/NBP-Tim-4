@@ -1,5 +1,6 @@
 package com.nbp.tim3.controller;
 
+import com.nbp.tim3.dto.openinghours.OpeningHoursCreateRequest;
 import com.nbp.tim3.dto.pagination.PaginatedRequest;
 import com.nbp.tim3.dto.pagination.PaginatedResponse;
 import com.nbp.tim3.dto.restaurant.*;
@@ -314,8 +315,8 @@ public class RestaurantController {
         return  new ResponseEntity<>(restaurant,HttpStatus.OK);
     }
 
-    /*
-    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
+
+    //@PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Set restaurant opening hours")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully updated restaurant opening hours",
@@ -328,17 +329,16 @@ public class RestaurantController {
     )
     @PutMapping(path="/{id}/set-opening-hours")
     @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody ResponseEntity<Restaurant> setRestaurantOpeningHours(
+    public @ResponseBody ResponseEntity<RestaurantResponse> setRestaurantOpeningHours(
             @Parameter(description = "Restaurant ID", required = true)
-            @PathVariable Long id,
+            @PathVariable int id,
             @Parameter(description = "Values of daily opening and closing hours", required = true)
-            @Valid @RequestBody OpeningHoursCreateRequest request,
-            @RequestHeader("uuid") String userUUID,
-            @RequestHeader("username") String username) {
-        var restaurant = restaurantService.setRestaurantOpeningHours(id,request,userUUID);
+            @Valid @RequestBody OpeningHoursCreateRequest request) {
+        var restaurant = restaurantService.setRestaurantOpeningHours(id,request);
 
         return  new ResponseEntity<>(restaurant,HttpStatus.OK);
     }
+
 
     /*@PreAuthorize("hasRole('CUSTOMER')")
     @Operation(description = "Add restaurant to user's favorite restaurants")
@@ -385,21 +385,7 @@ public class RestaurantController {
         return new ResponseEntity<>("Successfully removed restaurant with id " + id + " from favorites!",HttpStatus.OK);
     }
 
-    @Operation(description = "Get restaurant UUID by restaurant ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully found restaurant UUID",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = String.class)) }),
-            @ApiResponse(responseCode = "404", description = "Restaurant with provided ID not found",
-                    content = @Content)}
-    )
-    @GetMapping(path="/uuid/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody ResponseEntity<String> getRestaurantUUIDByRestaurantId(
-            @Parameter(description = "Restaurant ID",required = true)
-            @PathVariable Long id) {
-        return new ResponseEntity<>(restaurantService.getRestaurantUUID(id),HttpStatus.OK);
-    }
+
 
     @Operation(description = "Get images by Restaurant id")
     @ApiResponses(value = {

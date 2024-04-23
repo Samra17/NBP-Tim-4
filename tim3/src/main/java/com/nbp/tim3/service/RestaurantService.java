@@ -158,35 +158,15 @@ public class RestaurantService {
         return response;
     }
 
-    public Restaurant setRestaurantOpeningHours(Long id, OpeningHoursCreateRequest request, String userUUID) {
-        /*var exception = new EntityNotFoundException("Restaurant with id " + id + " does not exist!");
-        var restaurant = restaurantRepository.findById(id).orElseThrow(()->exception);
+    public RestaurantResponse setRestaurantOpeningHours(int id, OpeningHoursCreateRequest request) {
+        var exception = new EntityNotFoundException("Restaurant with id " + id + " does not exist!");
 
-        var created = userUUID;
-        var openingHours = new OpeningHours(request.getMondayOpen(),
-                request.getMondayClose(),
-                request.getTuesdayOpen(),
-                request.getTuesdayClose(),
-                request.getWednesdayOpen(),
-                request.getWednesdayClose(),
-                request.getThursdayOpen(),
-                request.getThursdayClose(),
-                request.getFridayOpen(),
-                request.getFridayClose(),
-                request.getSaturdayOpen(),
-                request.getSaturdayClose(),
-                request.getSundayOpen(),
-                request.getSundayClose(),
-                LocalDateTime.now(),
-                created);
+        RestaurantResponse response = restaurantRepository.setRestaurantOpeningHours(id,request);
 
-        restaurant.setOpeningHours(openingHours);
-        restaurant.setModified(LocalDateTime.now());
-        restaurant.setModifiedBy(created);
-        restaurantRepository.save(restaurant);
-        return restaurant;*/
+        if(response == null)
+            throw exception;
 
-        return new Restaurant();
+        return response;
     }
 
     public Double calculateAverageRatingForRestaurant(int restaurantId) {

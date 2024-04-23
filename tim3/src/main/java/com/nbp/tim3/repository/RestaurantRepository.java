@@ -2,6 +2,7 @@ package com.nbp.tim3.repository;
 
 import com.nbp.tim3.dto.address.AddressResponse;
 import com.nbp.tim3.dto.category.CategoryResponse;
+import com.nbp.tim3.dto.openinghours.OpeningHoursCreateRequest;
 import com.nbp.tim3.dto.openinghours.OpeningHoursResponse;
 import com.nbp.tim3.dto.pagination.PaginatedRequest;
 import com.nbp.tim3.dto.restaurant.*;
@@ -1445,6 +1446,153 @@ public class RestaurantRepository {
 
                     response.setOpeningHours(openingHoursResponse);
                 }
+
+
+
+            connection.commit();
+
+            return response;
+        } catch (SQLException e) {
+            exception = true;
+            logger.error(e.getMessage());
+        }
+        catch (Exception e) {
+            exception = true;
+            e.printStackTrace();
+            throw e;
+        } finally {
+            if(exception && connection!=null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return null;
+    }
+
+    public RestaurantResponse setRestaurantOpeningHours(int id, OpeningHoursCreateRequest request) {
+        Connection connection = null;
+
+        boolean exception = false;
+        try {
+            connection = dbConnectionService.getConnection();
+
+            String procedureCall = "{call update_restaurant_opening_hours(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
+            CallableStatement callableStatement = connection.prepareCall(procedureCall);
+
+            callableStatement.setInt(1, id);
+            callableStatement.setString(2,request.getMondayOpen() != null ? request.getMondayOpen().toString() : null);
+            callableStatement.setString(3,request.getMondayClose() != null ? request.getMondayClose().toString() : null);
+            callableStatement.setString(4,request.getTuesdayOpen() != null ? request.getTuesdayOpen().toString() : null);
+            callableStatement.setString(5,request.getTuesdayClose() != null ? request.getTuesdayClose().toString() : null);
+            callableStatement.setString(6,request.getWednesdayOpen() != null ? request.getWednesdayOpen().toString() : null);
+            callableStatement.setString(7,request.getWednesdayClose() != null ? request.getWednesdayClose().toString() : null);
+            callableStatement.setString(8,request.getThursdayOpen() != null ? request.getThursdayOpen().toString() : null);
+            callableStatement.setString(9,request.getThursdayClose() != null ? request.getThursdayClose().toString() : null);
+            callableStatement.setString(10,request.getFridayOpen() != null ? request.getFridayOpen().toString() : null);
+            callableStatement.setString(11,request.getFridayClose() != null ? request.getFridayClose().toString() : null);
+            callableStatement.setString(12,request.getSaturdayOpen() != null ? request.getSaturdayOpen().toString() : null);
+            callableStatement.setString(13,request.getSaturdayClose() != null ? request.getSaturdayClose().toString() : null);
+            callableStatement.setString(14,request.getSundayOpen() != null ? request.getSundayOpen().toString() : null);
+            callableStatement.setString(15,request.getSundayClose() != null ? request.getSundayClose().toString() : null);
+
+            callableStatement.registerOutParameter(16, Types.INTEGER);
+            callableStatement.registerOutParameter(17, Types.VARCHAR);
+            callableStatement.registerOutParameter(18, Types.VARCHAR);
+            callableStatement.registerOutParameter(19, Types.INTEGER);
+            callableStatement.registerOutParameter(20, Types.VARCHAR);
+            callableStatement.registerOutParameter(21, Types.VARCHAR);
+            callableStatement.registerOutParameter(22, Types.VARCHAR);
+            callableStatement.registerOutParameter(23, Types.INTEGER);
+            callableStatement.registerOutParameter(24, Types.VARCHAR);
+            callableStatement.registerOutParameter(25, Types.VARCHAR);
+            callableStatement.registerOutParameter(26, Types.FLOAT);
+            callableStatement.registerOutParameter(27, Types.INTEGER);
+            callableStatement.registerOutParameter(28, Types.INTEGER);
+
+            callableStatement.execute();
+
+
+            var response = new RestaurantResponse(id, callableStatement.getString(17),
+                    new AddressResponse(callableStatement.getInt(19),callableStatement.getString(21),
+                            callableStatement.getString(22), callableStatement.getString(20)),
+                    callableStatement.getString(18),
+                    callableStatement.getInt(23) ,
+                    null,
+                    null,
+                    callableStatement.getFloat(26),
+                    callableStatement.getInt(27),
+                    callableStatement.getInt(28));
+
+            List<String> categories = callableStatement.getString(24) != null ?
+                    Arrays.asList(callableStatement.getString(24).split(",")) : new ArrayList<>();
+
+            if(!categories.isEmpty()) {
+                List<CategoryResponse> categoryResponses = new ArrayList<>();
+
+                categories.forEach(c -> {
+                    Pattern pattern = Pattern.compile("(\\d+)\\s(.+)");
+                    Matcher matcher = pattern.matcher(c);
+                    if (matcher.find()) {
+                        int category_id = Integer.parseInt(matcher.group(1));
+                        String category_name = matcher.group(2);
+                        CategoryResponse categoryResponse= new CategoryResponse(category_id,category_name);
+                        categoryResponses.add(categoryResponse);
+                    }
+                });
+                response.setCategories(categoryResponses);
+            }
+
+            List<String> openingTimes = callableStatement.getString(25) != null ?
+                    Arrays.asList(callableStatement.getString(25).split(",")) : new ArrayList<>();
+
+            if(!openingTimes.isEmpty()) {
+                OpeningHoursResponse openingHoursResponse = new OpeningHoursResponse();
+                openingTimes.forEach(ot -> {
+                    Pattern pattern = Pattern.compile("([a-zA-Z]+)\\s(\\d{2}:\\d{2})-(\\d{2}:\\d{2})");
+                    Matcher matcher = pattern.matcher(ot);
+                    if (matcher.find()) {
+                        String day = matcher.group(1);
+                        String open = matcher.group(2);
+                        String close = matcher.group(3);
+
+                        switch (day){
+                            case "Monday":
+                                openingHoursResponse.setMondayOpen(LocalTime.parse(open));
+                                openingHoursResponse.setMondayClose(LocalTime.parse(close));
+                                break;
+                            case "Tuesday":
+                                openingHoursResponse.setTuesdayOpen(LocalTime.parse(open));
+                                openingHoursResponse.setTuesdayClose(LocalTime.parse(close));
+                                break;
+                            case "Wednesday":
+                                openingHoursResponse.setWednesdayOpen(LocalTime.parse(open));
+                                openingHoursResponse.setWednesdayClose(LocalTime.parse(close));
+                                break;
+                            case "Thursday":
+                                openingHoursResponse.setThursdayOpen(LocalTime.parse(open));
+                                openingHoursResponse.setThursdayClose(LocalTime.parse(close));
+                                break;
+                            case "Friday":
+                                openingHoursResponse.setFridayOpen(LocalTime.parse(open));
+                                openingHoursResponse.setFridayClose(LocalTime.parse(close));
+                                break;
+                            case "Saturday":
+                                openingHoursResponse.setSaturdayOpen(LocalTime.parse(open));
+                                openingHoursResponse.setSaturdayClose(LocalTime.parse(close));
+                                break;
+                            case "Sunday":
+                                openingHoursResponse.setSundayOpen(LocalTime.parse(open));
+                                openingHoursResponse.setSundayClose(LocalTime.parse(close));
+                                break;
+                        }
+                    }
+                });
+
+                response.setOpeningHours(openingHoursResponse);
+            }
 
 
 

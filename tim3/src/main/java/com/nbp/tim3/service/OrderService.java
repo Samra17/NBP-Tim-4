@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class OrderService {
@@ -34,6 +35,10 @@ public class OrderService {
 
     public OrderPaginatedResponse getByRestaurantIdAndStatusPage(Integer restaurantId, Status status, Integer page, Integer size) {
         return orderRepository.getByRestaurantIdAndStatusPage(restaurantId, status, page, size);
+    }
+
+    public Map<String, Long> getRestaurantOrdersSorted(List<String> restaurantIds, String sortType){
+        return orderRepository.getRestaurantOrdersSorted(restaurantIds,sortType);
     }
 
     public OrderResponse getById(Integer id) {

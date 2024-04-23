@@ -1,6 +1,10 @@
 package com.nbp.tim3.service;
 
+import com.nbp.tim3.dto.pagination.PaginatedRequest;
+import com.nbp.tim3.dto.restaurant.RestaurantPaginatedResponse;
+import com.nbp.tim3.dto.restaurant.RestaurantPaginatedShortResponse;
 import com.nbp.tim3.dto.restaurant.RestaurantShortResponse;
+import com.nbp.tim3.repository.RestaurantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,15 +14,12 @@ import java.util.List;
 
 @Service
 public class FavoriteRestaurantService {
-    //@Autowired
-    //private RestaurantRepository restaurantRepository;
-    //@Autowired
-    //private FavoriteRestaurantRepository favoriteRestaurantRepository;
+    @Autowired
+    private RestaurantRepository restaurantRepository;
 
-    public List<RestaurantShortResponse> getFavoriteRestaurants(String userUUID) {
-        //return favoriteRestaurantRepository.getFavoriteRestaurants(userUUID);
+    public RestaurantPaginatedShortResponse getFavoriteRestaurants(PaginatedRequest paginatedRequest,String username) {
+        return restaurantRepository.getFavoriteRestaurants(paginatedRequest,username);
 
-        return new ArrayList<>();
     }
 
     /*public FavoriteRestaurant addRestaurantToFavorites(Long restaurantId,String userUUID) {

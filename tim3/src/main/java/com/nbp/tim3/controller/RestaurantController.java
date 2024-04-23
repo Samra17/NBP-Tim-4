@@ -256,7 +256,7 @@ public class RestaurantController {
         return new ResponseEntity<>(restaurantService.calculateAverageRatingForRestaurant(id),HttpStatus.OK);
     }
 
-    /*
+
     @Operation(description = "Get user's favorite restaurants")
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully found user's favorite restaurants",
@@ -266,11 +266,15 @@ public class RestaurantController {
     })
     @GetMapping(path="/favorites")
     @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody ResponseEntity<List<RestaurantShortResponse>> getFavoriteRestaurants(
-            @RequestHeader("uuid") String userUUID) {
-        return new ResponseEntity<>(favoriteRestaurantService.getFavoriteRestaurants(userUUID),HttpStatus.OK);
+    public @ResponseBody ResponseEntity<RestaurantPaginatedShortResponse> getFavoriteRestaurants(
+            @RequestParam(name="page") int page,
+            @RequestParam(name="perPage") int recordsPerPage,
+            @RequestHeader("username") String username) {
+        PaginatedRequest paginatedRequest = new PaginatedRequest(page, recordsPerPage);
+        return new ResponseEntity<>(favoriteRestaurantService.getFavoriteRestaurants(paginatedRequest,username),HttpStatus.OK);
     }
 
+    /*
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     @Operation(description = "Delete a restaurant")
     @ApiResponses ( value = {

@@ -1197,6 +1197,142 @@ public class RestaurantRepository {
         return null;
     }
 
+    public RestaurantPaginatedShortResponse getFavoriteRestaurants(PaginatedRequest paginatedRequest, String username) {
+        Connection connection = null;
+
+        boolean exception = false;
+
+        String query = "SELECT * FROM (" +
+                "    SELECT ROW_NUMBER() OVER (ORDER BY nr.id) rnum, " +
+                "COUNT(*) OVER () RESULT_COUNT,\n" +
+                "        nr.ID, \n" +
+                "        nr.NAME, \n" +
+                "        nr.LOGO, \n" +
+                "        na.MAP_COORDINATES, \n" +
+                "        na.STREET, \n" +
+                "LISTAGG(DISTINCT nc.name, ',') WITHIN GROUP (ORDER BY nc.NAME) AS categories," +
+                "        COALESCE(AVG(nr2.rating), 0) AS rating, \n" +
+                "        COUNT(DISTINCT nr2.ID) AS customers_rated, \n" +
+                "        COUNT(DISTINCT nfr.ID) AS customers_favorited, \n" +
+                "        CASE \n" +
+                "            WHEN TO_CHAR(SYSDATE, 'HH24:MI') >= noh.opening_time \n" +
+                "                 AND TO_CHAR(SYSDATE, 'HH24:MI') <= noh.closing_time THEN 1 \n" +
+                "            ELSE 0 \n" +
+                "        END AS is_open,\n" +
+                "1 AS customer_favorite" +
+                "    FROM \n" +
+                "        NBP_RESTAURANT nr\n" +
+                "    LEFT JOIN \n" +
+                "        NBP_ADDRESS na ON nr.ADDRESS_ID = na.ID \n" +
+                "    LEFT JOIN \n" +
+                "        NBP_REVIEW nr2 ON nr.ID = nr2.RESTAURANT_ID \n" +
+                "    LEFT JOIN \n" +
+                "        NBP_FAVORITE_RESTAURANT nfr ON nr.ID = nfr.RESTAURANT_ID \n" +
+                "    LEFT JOIN \n" +
+                "        NBP_OPENING_HOURS noh ON nr.ID = noh.RESTAURANT_ID \n" +
+                "                                AND noh.DAY_OF_WEEK = (\n" +
+                "                                    SELECT \n" +
+                "                                        CASE TO_CHAR(SYSDATE, 'DY')\n" +
+                "                                            WHEN 'MON' THEN 'Monday'\n" +
+                "                                            WHEN 'TUE' THEN 'Tuesday'\n" +
+                "                                            WHEN 'WED' THEN 'Wednesday'\n" +
+                "                                            WHEN 'THU' THEN 'Thursday'\n" +
+                "                                            WHEN 'FRI' THEN 'Friday'\n" +
+                "                                            WHEN 'SAT' THEN 'Saturday'\n" +
+                "                                            ELSE 'Sunday'\n" +
+                "                                        END \n" +
+                "                                    FROM \n" +
+                "                                        dual\n" +
+                "                                )" +
+                " LEFT JOIN NBP_RESTAURANT_CATEGORY nrc ON nr.id = nrc.restaurant_id " +
+                " LEFT JOIN NBP_CATEGORY nc ON nc.id=nrc.category_id " +
+                " WHERE nr.id IN (SELECT restaurant_id FROM NBP_FAVORITE_RESTAURANT WHERE customer_id=?)" +
+                "GROUP BY \n" +
+                "        nr.ID, \n" +
+                "        nr.NAME, \n" +
+                "        nr.LOGO, \n" +
+                "        na.MAP_COORDINATES, \n" +
+                "        na.STREET, \n" +
+                "        CASE \n" +
+                "            WHEN TO_CHAR(SYSDATE, 'HH24:MI') >= noh.opening_time \n" +
+                "                 AND TO_CHAR(SYSDATE, 'HH24:MI') <= noh.closing_time THEN 1 \n" +
+                "            ELSE 0 \n" +
+                "        END) "  +
+                " WHERE \n" +
+                "    rnum >= ?\n" +
+                "    AND rnum <= ?";
+
+
+        int paramIndex = 1;
+
+        int offset = (paginatedRequest.getPage()-1)*paginatedRequest.getRecordsPerPage();
+
+        User user = userRepository.getByUsername(username);
+
+        int userId = user != null ? user.getId() : -1;
+
+        try {
+            connection = dbConnectionService.getConnection();
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            preparedStatement.setInt(paramIndex,userId);
+            paramIndex +=1;
+
+
+            preparedStatement.setInt(paramIndex,offset +1);
+            paramIndex += 1;
+            preparedStatement.setInt(paramIndex,offset + paginatedRequest.getRecordsPerPage());
+
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            RestaurantPaginatedShortResponse response = new RestaurantPaginatedShortResponse();
+            response.setRestaurants(new ArrayList<>());
+            response.setCurrentPage(paginatedRequest.getPage());
+
+            while (resultSet.next()) {
+                RestaurantShortResponse r = new RestaurantShortResponse(resultSet.getInt("id"), resultSet.getString("name"),
+                        resultSet.getString("street"),
+                        resultSet.getString("logo"),
+                        resultSet.getInt("is_open") != 0,
+                        resultSet.getString("map_coordinates"),
+                        resultSet.getString("categories") != null ?
+                                new TreeSet<>(Arrays.asList(resultSet.getString("categories").split(",")))
+                                : new TreeSet<String>(),
+                        resultSet.getFloat("rating"),
+                        resultSet.getInt("customers_rated"),
+                        resultSet.getInt("customers_favorited"),
+                        resultSet.getInt("customer_favorite")>0);
+
+
+                response.setTotalPages((resultSet.getInt("result_count") + paginatedRequest.getRecordsPerPage()-1)/paginatedRequest.getRecordsPerPage());
+                response.getRestaurants().add(r);
+            }
+
+            connection.commit();
+
+            return response;
+        } catch (SQLException e) {
+            exception = true;
+            logger.error(e.getMessage());
+        }
+        catch (Exception e) {
+            exception = true;
+            e.printStackTrace();
+            throw e;
+        } finally {
+            if(exception && connection!=null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return null;
+    }
+
     private String constructQuery(FilterRestaurantRequest filter,String sortBy,boolean ascending, int id) {
         String baseQuery = "SELECT * FROM (" +
                 "    SELECT ROW_NUMBER() OVER (ORDER BY nr.id) rnum, " +

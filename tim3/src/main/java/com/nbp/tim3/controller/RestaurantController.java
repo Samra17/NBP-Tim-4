@@ -237,7 +237,7 @@ public class RestaurantController {
         return new ResponseEntity<>(restaurantService.getRestaurantsWithCategories(paginatedRequest,categoryIds),HttpStatus.OK);
     }
 
-    /*
+
     @Operation(description = "Get restaurant average rating")
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully calculated average restaurant rating",
@@ -251,11 +251,12 @@ public class RestaurantController {
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody ResponseEntity<Double> getAverageRatingForRestaurant(
             @Parameter(description = "Restaurant ID", required = true)
-            @PathVariable Long id) {
+            @PathVariable int id) {
 
         return new ResponseEntity<>(restaurantService.calculateAverageRatingForRestaurant(id),HttpStatus.OK);
     }
 
+    /*
     @Operation(description = "Get user's favorite restaurants")
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully found user's favorite restaurants",

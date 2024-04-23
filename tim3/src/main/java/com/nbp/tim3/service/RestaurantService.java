@@ -8,6 +8,7 @@ import com.nbp.tim3.model.Address;
 import com.nbp.tim3.model.Restaurant;
 import com.nbp.tim3.repository.CategoryRepository;
 import com.nbp.tim3.repository.RestaurantRepository;
+import com.nbp.tim3.repository.ReviewRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,10 +24,11 @@ public class RestaurantService {
     private CategoryRepository categoryRepository;
 
 
-    /*
+
     @Autowired
     private ReviewRepository reviewRepository;
 
+    /*
     @Autowired
     private FavoriteRestaurantRepository favoriteRestaurantRepository;
 
@@ -194,12 +196,12 @@ public class RestaurantService {
         return new Restaurant();
     }
 
-    public Double calculateAverageRatingForRestaurant(Long restaurantId) {
-        /*var exception = new EntityNotFoundException("Restaurant with id " + restaurantId + " does not exist!");
-        restaurantRepository.findById(restaurantId).orElseThrow(()->exception);
-        return reviewRepository.calculateAverageRatingForRestaurant(restaurantId);*/
+    public Double calculateAverageRatingForRestaurant(int restaurantId) {
+        var exception = new EntityNotFoundException("Restaurant with id " + restaurantId + " does not exist!");
+        if(!restaurantRepository.checkExists(restaurantId))
+            throw exception;
+        return reviewRepository.calculateAverageRatingForRestaurant(restaurantId);
 
-        return 3.0;
     }
 
     public String getRestaurantUUID(Long id) {

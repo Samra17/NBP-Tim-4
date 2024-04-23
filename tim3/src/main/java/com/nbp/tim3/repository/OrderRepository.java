@@ -17,9 +17,7 @@ import org.springframework.stereotype.Repository;
 import java.lang.reflect.Field;
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Repository
 public class OrderRepository {
@@ -92,6 +90,42 @@ public class OrderRepository {
         String sql = orderSelectSql +
                 "WHERE ord.courier_id=? OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         return getByUserIdPage(courierId, page, size, sql);
+    }
+
+    public Map<String, Long> getRestaurantOrdersSorted(List<String> restaurantIds, String sortType){
+        StringBuilder sql = new StringBuilder("SELECT r.name AS restaurant_name, COUNT(o.id) AS order_count " +
+                "FROM nbp_restaurant r " +
+                "JOIN nbp_order o ON r.id = o.restaurant_id " +
+                "WHERE r.id IN (");
+        // Append the restaurant IDs to the query string
+        for (int i = 0; i < restaurantIds.size(); i++) {
+            sql.append("?");
+            if (i < restaurantIds.size() - 1) {
+                sql.append(",");
+            }
+        }
+        sql.append(") ");
+        sql.append("GROUP BY r.name " + "ORDER BY order_count ").append(sortType.toUpperCase());
+
+        Map<String, Long> orderMap= new HashMap<>();
+        try {
+            Connection connection = dbConnectionService.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql.toString());
+            // Set the restaurant IDs as parameters
+            for (int i = 0; i < restaurantIds.size(); i++) {
+                preparedStatement.setString(i + 1, restaurantIds.get(i));
+            }
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                orderMap.put(resultSet.getString("restaurant_name"), (long) resultSet.getInt("order_count"));
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return orderMap;
     }
 
     private OrderPaginatedResponse getByUserIdPage(Integer userId, Integer page, Integer size, String sql) {

@@ -6,6 +6,7 @@ import com.nbp.tim3.dto.openinghours.OpeningHoursCreateRequest;
 import com.nbp.tim3.dto.openinghours.OpeningHoursResponse;
 import com.nbp.tim3.dto.pagination.PaginatedRequest;
 import com.nbp.tim3.dto.restaurant.*;
+import com.nbp.tim3.dto.review.ReviewResponse;
 import com.nbp.tim3.model.Address;
 import com.nbp.tim3.model.Category;
 import com.nbp.tim3.model.Restaurant;
@@ -1738,6 +1739,27 @@ public class RestaurantRepository {
                 }
             }
         }
+        return 0;
+    }
+
+    public int countNumberOfFavorites(int restaurantId) {
+        String sql = "SELECT COUNT(id) as cnt FROM nbp_favorite_restaurant WHERE restaurant_id=?";
+
+        try {
+            Connection connection = dbConnectionService.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, restaurantId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                return  resultSet.getInt("cnt");
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
         return 0;
     }
 

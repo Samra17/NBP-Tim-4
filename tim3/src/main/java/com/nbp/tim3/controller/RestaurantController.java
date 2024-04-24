@@ -440,17 +440,19 @@ public class RestaurantController {
         return new ResponseEntity<>(restaurantImageService.deleteRestaurantImage(id),HttpStatus.OK);
     }
 
+        */
+
     @Operation(description = "Get number of customers who marked the restaurant as favorite")
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully fetched number of customers who marked the restaurant with provided UUID as a favorite"),
-            @ApiResponse(responseCode = "404", description = "Restaurant with provided UUID not found",
+            @ApiResponse(responseCode = "404", description = "Restaurant with provided id not found",
                     content = @Content)})
-    @GetMapping(path="/favorites/{uuid}")
+    @GetMapping(path="/favorites/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Long> getCustomersFavorited(@Parameter(description = "Restaurant UUID",required = true)
-                                                      @PathVariable("uuid") String restaurantUUID) {
+    public ResponseEntity<Integer> getCustomersFavorited(@Parameter(description = "Restaurant Id",required = true)
+                                                      @PathVariable("id") int restaurantId) {
 
-        return ResponseEntity.ok(restaurantService.getCustomersFavorited(restaurantUUID));
+        return ResponseEntity.ok(restaurantService.getCustomersFavorited(restaurantId));
     }
-    */
+
 }

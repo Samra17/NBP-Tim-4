@@ -179,10 +179,10 @@ public class RestaurantService {
 
 
 
-    public Long getCustomersFavorited(String restaurantUUID) {
-        /*restaurantRepository.findByUUID(restaurantUUID).orElseThrow();
-        return favoriteRestaurantRepository.countNumberOfFavorites(restaurantUUID);*/
-
-        return 3L;
+    public int getCustomersFavorited(int restaurantId) {
+        var exception = new EntityNotFoundException("Restaurant with id " + restaurantId + " does not exist!");
+        if(!restaurantRepository.checkExists(restaurantId))
+            throw exception;
+        return restaurantRepository.countNumberOfFavorites(restaurantId);
     }
 }

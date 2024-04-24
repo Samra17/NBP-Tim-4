@@ -176,7 +176,6 @@ public class ReviewRepository {
     public Double calculateAverageRatingForRestaurant(int restaurantId) {
         String sql = "SELECT COALESCE(AVG(rating),0.) as average FROM nbp_review WHERE restaurant_id=?";
 
-        ReviewResponse reviewResponse = new ReviewResponse();
         try {
             Connection connection = dbConnectionService.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(sql);

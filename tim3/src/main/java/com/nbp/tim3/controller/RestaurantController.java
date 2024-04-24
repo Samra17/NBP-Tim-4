@@ -42,8 +42,6 @@ public class RestaurantController {
     @Autowired
     private FirebaseService firebaseService;
 
-
-
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     @Operation(description = "Create a new restaurant")
     @ApiResponses(value = {
@@ -347,50 +345,48 @@ public class RestaurantController {
     }
 
 
-    /*@PreAuthorize("hasRole('CUSTOMER')")
+    //@PreAuthorize("hasRole('CUSTOMER')")
     @Operation(description = "Add restaurant to user's favorite restaurants")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully added restaurant to favorites",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = FavoriteRestaurant.class)) }),
+                            schema = @Schema(implementation = FavoriteRestaurantResponse.class)) }),
             @ApiResponse(responseCode = "404", description = "Restaurant with provided ID not found",
                     content = @Content)}
     )
     @PostMapping(path="/{id}/add-to-favorites")
     @ResponseStatus(HttpStatus.CREATED)
-    public @ResponseBody ResponseEntity<FavoriteRestaurant> addRestaurantToFavorites(
+    public @ResponseBody ResponseEntity<FavoriteRestaurantResponse> addRestaurantToFavorites(
             @Parameter(description = "Restaurant ID", required = true)
-            @PathVariable Long id,
-            @RequestHeader("uuid") String user,
+            @PathVariable int id,
             @RequestHeader("username") String username
     ) {
 
-        var favoriteRestaurant = favoriteRestaurantService.addRestaurantToFavorites(id,user);
+        var favoriteRestaurant = favoriteRestaurantService.addRestaurantToFavorites(id,username);
 
         return new ResponseEntity<>(favoriteRestaurant,HttpStatus.CREATED);
-    }*/
+    }
 
-    /*@PreAuthorize("hasRole('CUSTOMER')")
+    //@PreAuthorize("hasRole('CUSTOMER')")
     @Operation(description = "Remove restaurant from user's favorite restaurants")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully removed restaurant from favorites",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = FavoriteRestaurant.class)) }),
-            @ApiResponse(responseCode = "404", description = "Restaurant with provided ID not found",
-                    content = @Content)}
+            @ApiResponse(responseCode = "204", description = "Successfully removed restaurant from favorites"),
+            @ApiResponse(responseCode = "404", description = "Favorite Restaurant with provided data not found")}
     )
-    @PutMapping(path="/{id}/remove-from-favorites")
+    @DeleteMapping (path="/{id}/remove-from-favorites")
     @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody ResponseEntity<String> removeRestaurantFromFavorites(
+    public @ResponseBody ResponseEntity<Void> removeRestaurantFromFavorites(
             @Parameter(description = "Restaurant ID",required = true)
-            @PathVariable Long id,
-            @RequestHeader("uuid") String user,
+            @PathVariable int id,
             @RequestHeader("username") String username) {
 
-        favoriteRestaurantService.removeRestaurantFromFavorites(id,user);
+        int deletedRows = favoriteRestaurantService.removeRestaurantFromFavorites(id,username);
 
-        return new ResponseEntity<>("Successfully removed restaurant with id " + id + " from favorites!",HttpStatus.OK);
-    }*/
+        if(deletedRows > 0)
+            return ResponseEntity.noContent().build();
+        else
+            return ResponseEntity.notFound().build();
+    }
 
     @Operation(description = "Get images by Restaurant id")
     @ApiResponses(value = {
@@ -444,16 +440,15 @@ public class RestaurantController {
         return new ResponseEntity<>("Image successfully deleted",HttpStatus.OK);
     }
 
-    /*@Operation(description = "Get number of customers who marked the restaurant as favorite")
+    @Operation(description = "Get number of customers who marked the restaurant as favorite")
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully fetched number of customers who marked the restaurant with provided UUID as a favorite"),
-            @ApiResponse(responseCode = "404", description = "Restaurant with provided UUID not found",
+            @ApiResponse(responseCode = "404", description = "Restaurant with provided id not found",
                     content = @Content)})
-    @GetMapping(path="/favorites/{uuid}")
+    @GetMapping(path="/favorites/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Long> getCustomersFavorited(@Parameter(description = "Restaurant UUID",required = true)
-                                                      @PathVariable("uuid") String restaurantUUID) {
-
-        return ResponseEntity.ok(restaurantService.getCustomersFavorited(restaurantUUID));
-    }*/
+    public ResponseEntity<Integer> getCustomersFavorited(@Parameter(description = "Restaurant Id",required = true)
+                                                      @PathVariable("id") int restaurantId) {
+        return ResponseEntity.ok(restaurantService.getCustomersFavorited(restaurantId));
+    }
 }

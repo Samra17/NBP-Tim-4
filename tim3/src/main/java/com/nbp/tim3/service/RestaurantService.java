@@ -177,21 +177,12 @@ public class RestaurantService {
 
     }
 
-    public String getRestaurantUUID(Long id) {
-        /*var exception = new EntityNotFoundException("Restaurant with id " + id + " does not exist!");
-        var uuid= restaurantRepository.getRestaurantUUID(id);
-        if(uuid==null)
+
+
+    public int getCustomersFavorited(int restaurantId) {
+        var exception = new EntityNotFoundException("Restaurant with id " + restaurantId + " does not exist!");
+        if(!restaurantRepository.checkExists(restaurantId))
             throw exception;
-        return uuid;*/
-
-        return "Something";
-    }
-
-
-    public Long getCustomersFavorited(String restaurantUUID) {
-        /*restaurantRepository.findByUUID(restaurantUUID).orElseThrow();
-        return favoriteRestaurantRepository.countNumberOfFavorites(restaurantUUID);*/
-
-        return 3L;
+        return restaurantRepository.countNumberOfFavorites(restaurantId);
     }
 }

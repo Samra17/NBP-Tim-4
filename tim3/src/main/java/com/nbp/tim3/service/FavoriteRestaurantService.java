@@ -1,10 +1,12 @@
 package com.nbp.tim3.service;
 
 import com.nbp.tim3.dto.pagination.PaginatedRequest;
+import com.nbp.tim3.dto.restaurant.FavoriteRestaurantResponse;
 import com.nbp.tim3.dto.restaurant.RestaurantPaginatedResponse;
 import com.nbp.tim3.dto.restaurant.RestaurantPaginatedShortResponse;
 import com.nbp.tim3.dto.restaurant.RestaurantShortResponse;
 import com.nbp.tim3.repository.RestaurantRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,21 +24,15 @@ public class FavoriteRestaurantService {
 
     }
 
-    /*public FavoriteRestaurant addRestaurantToFavorites(Long restaurantId,String userUUID) {
-        FavoriteRestaurant favoriteRestaurant = new FavoriteRestaurant();
-        var exception = new EntityNotFoundException("Restaurant with id " + restaurantId + " does not exist!");
-        var restaurant = restaurantRepository.findById(restaurantId).orElseThrow(()-> exception);
-        favoriteRestaurant.setRestaurant(restaurant);
-        favoriteRestaurant.setUserUUID(userUUID);
-        favoriteRestaurant.setCreated(LocalDateTime.now());
-        favoriteRestaurant.setCreatedBy(userUUID);
-        favoriteRestaurantRepository.save(favoriteRestaurant);
+    public FavoriteRestaurantResponse addRestaurantToFavorites(int restaurantId, String username) {
+
+        var favoriteRestaurant = restaurantRepository.addRestaurantToFavorites(restaurantId,username);
+
 
         return favoriteRestaurant;
-    }*/
+    }
 
-    public void removeRestaurantFromFavorites(Long restaurantId, String userUUID)  {
-        /*var restaurant = restaurantRepository.findById(restaurantId).orElseThrow(()->new EntityNotFoundException("Restaurant with id " + restaurantId + " does not exist!"));
-        favoriteRestaurantRepository.removeRestaurantFromFavorites(restaurantId, userUUID);*/
+    public int removeRestaurantFromFavorites(int restaurantId, String username)  {
+        return restaurantRepository.removeRestaurantFromFavorites(restaurantId, username);
     }
 }

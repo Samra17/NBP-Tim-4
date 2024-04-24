@@ -1,7 +1,14 @@
 package com.nbp.tim3.auth.controller;
 
+import com.nbp.tim3.auth.dto.AuthResponse;
 import com.nbp.tim3.auth.dto.UserResponse;
 import com.nbp.tim3.auth.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -19,18 +26,42 @@ public class UserController {
     }
 
 
+    @Operation(description = "Get all users")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully fetched all users",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class)) }),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
+                    content = @Content)})
+    @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     @GetMapping("/all")
     public ResponseEntity<List<UserResponse>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
+    @Operation(description = "Get all restaurant managers")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully fetched all users with restaurant manager role",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class)) }),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
+                    content = @Content)})
+    @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     @GetMapping("/managers")
     public ResponseEntity<List<UserResponse>> getAllManagers() {
         return ResponseEntity.ok(userService.getAllManagers());
     }
 
+    @Operation(description = "Get all couriers")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully fetched all users with courier role",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class)) }),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
+                    content = @Content)})
+    @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     @GetMapping("/couriers")
     public ResponseEntity<List<UserResponse>> getAllCouriers() {

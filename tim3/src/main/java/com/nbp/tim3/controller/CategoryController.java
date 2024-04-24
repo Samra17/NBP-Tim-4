@@ -27,18 +27,20 @@ public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
-    //@PreAuthorize("hasRole('ADMINISTRATOR')")
+    @PreAuthorize("hasRole('ADMINISTRATOR')")
     @Operation(description = "Create a new category")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successfully created a new category",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = Category.class)) }),
             @ApiResponse(responseCode = "400", description = "Invalid information supplied",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)})
     @PostMapping(path="/add")
     @ResponseStatus(HttpStatus.CREATED)
     public @ResponseBody ResponseEntity<Category> addNewCategory (
-            @Parameter(description = "Category name", required = true)
+            @Parameter(description = "Category information", required = true)
             @Valid @RequestBody CategoryCreateRequest request) {
 
         var category = categoryService.addNewCategory(request);
@@ -55,6 +57,8 @@ public class CategoryController {
             @ApiResponse(responseCode = "400", description = "Invalid information supplied",
                     content = @Content),
             @ApiResponse(responseCode = "404", description = "Category with provided ID not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)}
     )
     @PutMapping(path="/update/{id}")
@@ -76,7 +80,9 @@ public class CategoryController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully found all categories in the system",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Category.class)) })}
+                            schema = @Schema(implementation = Category.class)) }),
+                    @ApiResponse(responseCode = "403", description = "Unauthorized access",
+                    content = @Content)}
     )
     @GetMapping(path="/all")
     @ResponseStatus(HttpStatus.OK)
@@ -93,6 +99,8 @@ public class CategoryController {
                             schema = @Schema(implementation = Category.class)),
                     }),
             @ApiResponse(responseCode = "404", description = "Category with provided ID not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)})
     @GetMapping(path="/{id}")
     @ResponseStatus(HttpStatus.OK)
@@ -105,11 +113,13 @@ public class CategoryController {
 
 
 
-    //@PreAuthorize("hasRole('ADMINISTRATOR')")
+    @PreAuthorize("hasRole('ADMINISTRATOR')")
     @Operation(description = "Delete a category")
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "204", description = "Successfully deleted the category with provided ID"),
             @ApiResponse(responseCode = "404", description = "Category with provided ID not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)})
     @DeleteMapping(path="/{id}")
     @ResponseStatus(HttpStatus.OK)

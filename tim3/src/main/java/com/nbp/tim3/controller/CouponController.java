@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,16 +28,21 @@ public class CouponController {
     @Autowired
     private CouponService couponService;
 
-    //@PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasRole('CUSTOMER')")
     @Operation(description = "Get all coupons")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully found all coupons",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = CouponPaginatedResponse.class)) })}
+                            schema = @Schema(implementation = CouponPaginatedResponse.class)) }),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
+                    content = @Content)}
     )
+    @ResponseStatus(HttpStatus.OK)
     @GetMapping(path="/all")
     public @ResponseBody ResponseEntity<CouponPaginatedResponse> getAllCoupons(
+            @Parameter(description = "Page number", required = true)
             @RequestHeader(value = "page", defaultValue = "1") Integer page,
+            @Parameter(description = "Number of records per page", required = true)
             @RequestHeader(value = "size", defaultValue = "10") Integer size) {
         var coupons = couponService.getAllCoupons(page, size);
         return new ResponseEntity<>(coupons, HttpStatus.OK);
@@ -49,7 +55,10 @@ public class CouponController {
                             schema = @Schema(implementation = CouponResponse.class)),
                     }),
             @ApiResponse(responseCode = "404", description = "Coupon with provided ID not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)})
+    @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/{id}")
     public  @ResponseBody ResponseEntity<CouponResponse> getCoupon(
             @Parameter(description = "Coupon ID", required = true)
@@ -58,13 +67,15 @@ public class CouponController {
         return new ResponseEntity<>(coupon, HttpStatus.OK);
     }
 
-    // @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
+    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Create a new coupon")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successfully created a new coupon",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = CouponResponse.class)) }),
             @ApiResponse(responseCode = "400", description = "Invalid information supplied",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)})
     @PostMapping(path = "/add")
     @ResponseStatus(HttpStatus.CREATED)
@@ -74,8 +85,8 @@ public class CouponController {
         var couponId = couponService.addNewCoupon(couponCreateUpdateRequest);
         return new ResponseEntity<>(couponService.getCouponById(couponId), HttpStatus.CREATED);
     }
-//
-//    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
+
+    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Update coupon information")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully updated coupon information",
@@ -84,8 +95,11 @@ public class CouponController {
             @ApiResponse(responseCode = "400", description = "Invalid information supplied",
                     content = @Content),
             @ApiResponse(responseCode = "404", description = "Coupon with provided ID not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)}
     )
+    @ResponseStatus(HttpStatus.OK)
     @PutMapping(path = "/update/{id}")
     public @ResponseBody ResponseEntity<CouponResponse> updateCoupon(
             @Parameter(description = "Coupon ID", required = true)
@@ -93,7 +107,7 @@ public class CouponController {
             @Parameter(description = "Coupon information to be updated", required = true)
             @Valid @RequestBody CouponCreateUpdateRequest couponDto){
         couponService.updateCoupon(couponDto, id);
-        return  new ResponseEntity<>(couponService.getCouponById(id), HttpStatus.CREATED);
+        return  new ResponseEntity<>(couponService.getCouponById(id), HttpStatus.OK);
     }
 
     /*
@@ -111,30 +125,36 @@ public class CouponController {
     }
 
      */
-//
-//    @Operation(description = "Filter restaurants with coupons")
+
+    @Operation(description = "Filter restaurants with coupons")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully found filtered restaurants",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = String.class)) }),
+                            schema = @Schema(implementation = List.class)) }),
             @ApiResponse(responseCode = "400", description = "Invalid information supplied",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)})
+    @ResponseStatus(HttpStatus.OK)
     @PostMapping(path="/filter")
     public @ResponseBody ResponseEntity<List<Integer>> filterRestaurants(
-            @Parameter(description = "Restaurant UUID list", required = true)
+            @Parameter(description = "Restaurant ID list", required = true)
             @RequestBody List<Integer> restaurants) {
         var filteredRestaurants = couponService.filterRestaurants(restaurants);
         return new ResponseEntity<>(filteredRestaurants, HttpStatus.OK);
     }
-//
-//    @PreAuthorize("hasRole('CUSTOMER')")
+
+    @PreAuthorize("hasRole('CUSTOMER')")
     @Operation(description = "Use one coupon")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully used coupon",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = CouponResponse.class)) }),
             @ApiResponse(responseCode = "400", description = "Invalid information supplied",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)})
+    @ResponseStatus(HttpStatus.OK)
     @PostMapping(path="/apply/{id}")
     public @ResponseBody ResponseEntity<CouponResponse> useCoupon(
             @Parameter(description = "Coupon ID", required = true)
@@ -142,21 +162,26 @@ public class CouponController {
         couponService.applyCoupon(id);
         return new ResponseEntity<>(couponService.getCouponById(id), HttpStatus.OK);
     }
-//
-//    //@PreAuthorize("hasRole('CUSTOMER')")
+
+    @PreAuthorize("hasRole('CUSTOMER')")
     @Operation(description = "Get coupons by restaurant ID")
     @ApiResponses ( value = {
-            @ApiResponse(responseCode = "200", description = "Successfully found the coupons with provided restaurant UUID",
+            @ApiResponse(responseCode = "200", description = "Successfully found the coupons with provided restaurant ID",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = CouponPaginatedResponse.class)),
                     }),
-            @ApiResponse(responseCode = "404", description = "Coupons with provided restaurant Id not found",
+            @ApiResponse(responseCode = "404", description = "Coupons with provided restaurant ID not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)})
+    @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/res/{restaurantId}")
     public  @ResponseBody ResponseEntity<CouponPaginatedResponse> getCouponForRestaurant(
             @Parameter(description = "Restaurant ID", required = true)
             @PathVariable Integer restaurantId,
+            @Parameter(description = "Page number", required = true)
             @RequestHeader(value = "page", defaultValue = "1") Integer page,
+            @Parameter(description = "Records per page", required = true)
             @RequestHeader(value = "size", defaultValue = "10") Integer size) {
         var coupons = couponService.getAllCouponsForRestaurant(restaurantId, page, size);
         return new ResponseEntity<>(coupons, HttpStatus.OK);

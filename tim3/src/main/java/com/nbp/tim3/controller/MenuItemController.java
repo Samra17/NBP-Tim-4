@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -28,31 +29,37 @@ public class MenuItemController {
         return ResponseEntity.ok(menuItemService.getItemById(id));
     }
 
-   //@PreAuthorize("hasRole('RESTAURANT_MANAGER')")
+    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Delete a menu item")
     @ApiResponses( value = {
-            @ApiResponse(responseCode = "200", description = "Successfully deleted the menu item with provided ID"),
+            @ApiResponse(responseCode = "204", description = "Successfully deleted the menu item with provided ID"),
             @ApiResponse(responseCode = "404", description = "Menu item with provided ID not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)})
     @DeleteMapping(path = "/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody ResponseEntity<String> deleteMenuItem(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public @ResponseBody ResponseEntity<?> deleteMenuItem(
             @Parameter(description = "Menu Item ID", required = true)
             @PathVariable Integer id) {
-        return new ResponseEntity<>(menuItemService.deleteMenuItem(id), HttpStatus.OK);
+        menuItemService.deleteMenuItem(id);
+        return ResponseEntity.noContent().build();
     }
 
-   // @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
+    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Update menu item informations")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully updated menu item information",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Menu.class)) }),
+                            schema = @Schema(implementation = MenuItem.class)) }),
             @ApiResponse(responseCode = "400", description = "Invalid information supplied",
                     content = @Content),
             @ApiResponse(responseCode = "404", description = "Menu item with provided ID not found",
-                    content = @Content)}
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
+            content = @Content)}
     )
+    @ResponseStatus(HttpStatus.OK)
     @PutMapping(path = "/update/{id}")
     public @ResponseBody ResponseEntity<MenuItem> updateMenuItem(
             @Parameter(description = "MenuItem ID", required = true)
@@ -61,7 +68,7 @@ public class MenuItemController {
             @Valid @RequestBody MenuItemDto menuItemDto){
 
         var menuItem = menuItemService.updateMenuItem(menuItemDto, id);
-        return  new ResponseEntity<>(menuItem, HttpStatus.CREATED);
+        return  new ResponseEntity<>(menuItem, HttpStatus.OK);
     }
 
 

@@ -34,7 +34,7 @@ public class AdminInformationController {
             @ApiResponse(responseCode = "200", description = "Successfully found all orders by restaurant",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = HashMap.class)) }),
-            @ApiResponse(responseCode = "400", description = "Invalid information",
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)})
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     @ResponseStatus(HttpStatus.OK)
@@ -47,8 +47,8 @@ public class AdminInformationController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully found overall revenue",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = HashMap.class)) }),
-            @ApiResponse(responseCode = "400", description = "Invalid information",
+                            schema = @Schema(implementation = Long.class)) }),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)})
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     @ResponseStatus(HttpStatus.OK)
@@ -62,7 +62,7 @@ public class AdminInformationController {
             @ApiResponse(responseCode = "200", description = "Successfully found revenue per restaurant",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = HashMap.class)) }),
-            @ApiResponse(responseCode = "400", description = "Invalid information",
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)})
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     @ResponseStatus(HttpStatus.OK)

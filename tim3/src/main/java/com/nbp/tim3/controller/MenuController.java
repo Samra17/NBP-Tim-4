@@ -1,5 +1,6 @@
 package com.nbp.tim3.controller;
 
+import com.google.api.Http;
 import com.nbp.tim3.dto.menu.MenuCreateRequest;
 import com.nbp.tim3.dto.menu.MenuDto;
 import com.nbp.tim3.dto.menu.MenuItemDto;
@@ -18,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,7 +37,10 @@ public class MenuController {
                             schema = @Schema(implementation = Menu.class)),
                     }),
             @ApiResponse(responseCode = "404", description = "Menu with provided ID not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)})
+    @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/{id}")
     public @ResponseBody ResponseEntity<Menu> getMenu(
             @Parameter(description = "Menu ID", required = true)
@@ -45,13 +50,15 @@ public class MenuController {
         return new ResponseEntity<>(menu, HttpStatus.OK);
     }
 
-//    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
+    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Create a new menu")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successfully created a new menu",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = Menu.class))}),
             @ApiResponse(responseCode = "400", description = "Invalid information supplied",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)})
     @PostMapping(path = "/add")
     @ResponseStatus(HttpStatus.CREATED)
@@ -63,7 +70,7 @@ public class MenuController {
         return new ResponseEntity<>(menu, HttpStatus.CREATED);
     }
 
-  //  @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
+    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Update menu informations")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully updated menu information",
@@ -72,8 +79,11 @@ public class MenuController {
             @ApiResponse(responseCode = "400", description = "Invalid information supplied",
                     content = @Content),
             @ApiResponse(responseCode = "404", description = "Menu with provided ID not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)}
     )
+    @ResponseStatus(HttpStatus.OK)
     @PutMapping(path = "/update/{id}")
     public @ResponseBody ResponseEntity<Menu> updateMenu(
             @Parameter(description = "Menu ID", required = true)
@@ -85,22 +95,25 @@ public class MenuController {
         return new ResponseEntity<>(menu, HttpStatus.CREATED);
     }
 
-   // @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
+    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Delete a menu")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully deleted the menu with provided ID"),
+            @ApiResponse(responseCode = "204", description = "Successfully deleted the menu with provided ID"),
             @ApiResponse(responseCode = "404", description = "Menu with provided ID not found",
-                    content = @Content)})
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
+                    content = @Content)
+    })
     @DeleteMapping(path = "/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody ResponseEntity<String> deleteMenu(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public @ResponseBody ResponseEntity<?> deleteMenu(
             @Parameter(description = "Menu ID", required = true)
             @PathVariable Integer id) {
-
-        return new ResponseEntity<>(menuService.deleteMenu(id), HttpStatus.OK);
+        menuService.deleteMenu(id);
+        return ResponseEntity.noContent().build();
     }
 
-    //@PreAuthorize("hasRole('RESTAURANT_MANAGER')")
+    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Set menu items for menu")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully updated menu items",
@@ -109,6 +122,8 @@ public class MenuController {
             @ApiResponse(responseCode = "400", description = "Invalid information supplied",
                     content = @Content),
             @ApiResponse(responseCode = "404", description = "Menu with provided ID not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)}
     )
     @PutMapping(path = "/{id}/set-menu-items")
@@ -125,15 +140,41 @@ public class MenuController {
     }
 
 
+    @Operation(description = "Get menus of restaurant")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully fetched menus for restaurant",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class))}),
+            @ApiResponse(responseCode = "404", description = "Restaurant with provided ID not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
+                    content = @Content)}
+    )
+    @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/restaurant-menus/id/{restaurantID}")
-    public  List<MenuDto> getRestaurantMenus (@PathVariable int restaurantID) {
+    public  ResponseEntity<List<MenuDto>> getRestaurantMenus (
+            @Parameter(description = "Restaurant ID", required = true)
+            @PathVariable int restaurantID) {
         var menus = menuService.getRestaurantMenus(restaurantID);
-        return menus;
+        return new ResponseEntity<>(menus, HttpStatus.OK);
     }
 
+    @Operation(description = "Get active menus of restaurant")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully fetched active menus for restaurant",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class))}),
+            @ApiResponse(responseCode = "404", description = "Restaurant with provided ID not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
+                    content = @Content)}
+    )
+    @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/restaurant-menus/active/{restaurantID}")
-    public  List<Menu> getActiveRestaurantMenus (@PathVariable int restaurantID) {
+    public  ResponseEntity<List<Menu>> getActiveRestaurantMenus (
+            @Parameter(description = "Restaurant ID", required = true)
+            @PathVariable int restaurantID) {
         var menus = menuService.getActiveRestaurantMenus(restaurantID);
-        return menus;
+        return new ResponseEntity<>(menus,HttpStatus.OK);
     }
 }

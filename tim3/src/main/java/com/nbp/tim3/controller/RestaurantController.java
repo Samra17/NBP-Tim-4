@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -47,8 +48,10 @@ public class RestaurantController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successfully created a new restaurant",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Restaurant.class)) }),
+                            schema = @Schema(implementation = RestaurantCreateResponse.class)) }),
             @ApiResponse(responseCode = "400", description = "Invalid information supplied",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)})
     @PostMapping(path="/add")
     @ResponseStatus(HttpStatus.CREATED)
@@ -67,10 +70,12 @@ public class RestaurantController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully updated restaurant information",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Restaurant.class)) }),
+                            schema = @Schema(implementation = RestaurantUpdateResponse.class)) }),
             @ApiResponse(responseCode = "400", description = "Invalid information supplied",
                     content = @Content),
             @ApiResponse(responseCode = "404", description = "Restaurant with provided ID not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)}
     )
     @PutMapping(path="/update/{id}")
@@ -88,17 +93,23 @@ public class RestaurantController {
     }
 
 
-    @Operation(description = "Get all restaurants")
+    @Operation(description = "Get all restaurants with shortened information")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully found all restaurants in the system",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Restaurant.class)) })}
+                            schema = @Schema(implementation = RestaurantPaginatedShortResponse.class)) }),
+                    @ApiResponse(responseCode = "403", description = "Unauthorized access",
+                            content = @Content)}
     )
     @GetMapping(path="/all")
     @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody ResponseEntity<RestaurantPaginatedShortResponse> getAllRestaurants(@RequestParam(name="page") int page,
-                                                                                            @RequestParam(name="perPage")int recordsPerPage,
-                                                                                            @RequestHeader("username") String username) {
+    public @ResponseBody ResponseEntity<RestaurantPaginatedShortResponse> getAllRestaurants(
+            @Parameter(description = "Page number", required = true)
+            @RequestParam(name="page", defaultValue = "1") int page,
+            @Parameter(description = "Number of records per page", required = true)
+            @RequestParam(name="perPage", defaultValue ="10")int recordsPerPage,
+            @Parameter(description = "User username", required = true)
+            @RequestHeader("username") String username) {
 
        PaginatedRequest request = new PaginatedRequest(page,recordsPerPage);
         var restaurants = restaurantService.searchForRestaurants(request,username,null,null,false);
@@ -106,11 +117,21 @@ public class RestaurantController {
     }
 
 
+    @Operation(description = "Get all restaurants with full information")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully found all restaurants in the system",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = RestaurantPaginatedResponse.class)) }),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
+                    content = @Content)}
+    )
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     @GetMapping(path="/all/full")
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody ResponseEntity<RestaurantPaginatedResponse> getAllFullRestaurants(
+            @Parameter(description = "Page number", required = true)
             @RequestParam(name="page") int page,
+            @Parameter(description = "Number of records per page", required = true)
             @RequestParam(name="perPage") int recordsPerPage
     ) {
         PaginatedRequest paginatedRequest = new PaginatedRequest(page,recordsPerPage);
@@ -124,18 +145,29 @@ public class RestaurantController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully found all restaurants fulfilling the provided criteria",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = RestaurantShortResponse[].class)) })}
+                            schema = @Schema(implementation = RestaurantPaginatedShortResponse.class)) }),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
+                    content = @Content)}
     )
     @GetMapping(path="/search")
     @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody ResponseEntity<RestaurantPaginatedShortResponse> searchForRestaurants(@RequestParam(name="page") int page,
-                                                                                            @RequestParam(name="perPage")int recordsPerPage,
-                                                                                            @RequestHeader("username") String username,
-                                                                                            @RequestParam(required = false)  String name,
-                                                                                            @RequestParam(required = false)  List<Integer> categoryIds,
-                                                                                            @RequestParam(required = false)  boolean isOfferingDiscount,
-                                                                                            @RequestParam(required = false) String sortBy,
-                                                                                            @RequestParam(required = false) boolean ascending) {
+    public @ResponseBody ResponseEntity<RestaurantPaginatedShortResponse> searchForRestaurants(
+            @Parameter(description = "Page number", required = true)
+            @RequestParam(name="page", defaultValue = "1") int page,
+            @Parameter(description = "Records per page", required = true)
+            @RequestParam(name="perPage", defaultValue = "10")int recordsPerPage,
+            @Parameter(description = "User username", required = true)
+            @RequestHeader("username") String username,
+            @Parameter(description = "Restaurant name", required = false)
+            @RequestParam(required = false)  String name,
+            @Parameter(description = "List of category IDs", required = false)
+            @RequestParam(required = false)  List<Integer> categoryIds,
+            @Parameter(description = "Indicator whether restaurant has coupons", required = false)
+            @RequestParam(required = false)  boolean isOfferingDiscount,
+            @Parameter(description = "Sort criteria")
+            @RequestParam(required = false) String sortBy,
+            @Parameter(description = "True for ascending sort")
+            @RequestParam(required = false) boolean ascending) {
 
         PaginatedRequest paginatedRequest = new PaginatedRequest(page,recordsPerPage);
         FilterRestaurantRequest filterRequest = null;
@@ -151,15 +183,18 @@ public class RestaurantController {
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully found the restaurant with provided ID",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Restaurant.class)),
+                            schema = @Schema(implementation = RestaurantShortResponse.class)),
                     }),
             @ApiResponse(responseCode = "404", description = "Restaurant with provided ID not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)})
     @GetMapping(path="/{id}")
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody ResponseEntity<RestaurantShortResponse> getRestaurantById(
             @Parameter(description = "Restaurant ID", required = true)
             @PathVariable  int id,
+            @Parameter(description = "User username", required = true)
             @RequestHeader("username") String username) {
 
         var restaurant = restaurantService.getRestaurantById(id,username);
@@ -168,17 +203,20 @@ public class RestaurantController {
 
 
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
-    @Operation(description = "Get a restaurant by restaurant manager id")
+    @Operation(description = "Get a restaurant by restaurant manager username")
     @ApiResponses ( value = {
-            @ApiResponse(responseCode = "200", description = "Successfully found the restaurant with provided restaurant manager UUID",
+            @ApiResponse(responseCode = "200", description = "Successfully found the restaurant with provided restaurant manager username",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Restaurant.class)),
+                            schema = @Schema(implementation = RestaurantResponse.class)),
                     }),
-            @ApiResponse(responseCode = "404", description = "Restaurant with provided restaurant manager UUID not found",
+            @ApiResponse(responseCode = "404", description = "Restaurant with provided restaurant manager username not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)})
     @GetMapping(path="/manager")
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody ResponseEntity<RestaurantResponse> getRestaurantByManager(
+            @Parameter(description = "User username", required = true)
             @RequestHeader("username") String managerUsername) {
 
         var restaurant = restaurantService.getRestaurantByManager(managerUsername);
@@ -189,15 +227,18 @@ public class RestaurantController {
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Get restaurant id by restaurant manager")
     @ApiResponses ( value = {
-            @ApiResponse(responseCode = "200", description = "Successfully found the restaurant with provided restaurant manager UUID",
+            @ApiResponse(responseCode = "200", description = "Successfully found the restaurant with provided restaurant manager username",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = RestaurantResponse.class)),
+                            schema = @Schema(implementation = Integer.class)),
                     }),
-            @ApiResponse(responseCode = "404", description = "Restaurant with provided restaurant manager UUID not found",
+            @ApiResponse(responseCode = "404", description = "Restaurant with provided restaurant manager username not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)})
     @GetMapping(path="/id/manager")
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody ResponseEntity<Integer> getRestaurantIdByManager(
+            @Parameter(description = "User username", required = true)
             @RequestHeader("username") String managerUsername) {
 
         var restaurantId = restaurantService.getRestaurantIdByManager(managerUsername);
@@ -212,6 +253,8 @@ public class RestaurantController {
                             schema = @Schema(implementation = RestaurantResponse.class)),
                     }),
             @ApiResponse(responseCode = "404", description = "Restaurant with provided ID not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)})
     @GetMapping(path="/full/{id}")
     @ResponseStatus(HttpStatus.OK)
@@ -229,12 +272,16 @@ public class RestaurantController {
             @ApiResponse(responseCode = "200", description = "Successfully found restaurants with provided categories",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = RestaurantPaginatedResponse.class)),
-                    })})
+                    }),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
+                    content = @Content)})
     @GetMapping(path="/category")
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody ResponseEntity<RestaurantPaginatedResponse> getRestaurantsWithCategories(
-            @RequestParam(name="page") int page,
-            @RequestParam(name="perPage") int recordsPerPage,
+            @Parameter(description = "Page number", required = true)
+            @RequestParam(name="page", defaultValue = "1") int page,
+            @Parameter(description = "Records per page", required = true)
+            @RequestParam(name="perPage", defaultValue = "10") int recordsPerPage,
             @Parameter(description = "List of category IDs", required = true)
             @RequestParam List<Integer> categoryIds) {
 
@@ -248,9 +295,11 @@ public class RestaurantController {
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully calculated average restaurant rating",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Restaurant.class)),
+                            schema = @Schema(implementation = Double.class)),
                     }),
             @ApiResponse(responseCode = "404", description = "Restaurant with provided ID not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)
     })
     @GetMapping(path="/{id}/rating")
@@ -267,14 +316,19 @@ public class RestaurantController {
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully found user's favorite restaurants",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Restaurant.class)),
-                    })
+                            schema = @Schema(implementation = RestaurantPaginatedShortResponse.class)),
+                    }),
+                    @ApiResponse(responseCode = "403", description = "Unauthorized access",
+                            content = @Content)
     })
     @GetMapping(path="/favorites")
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody ResponseEntity<RestaurantPaginatedShortResponse> getFavoriteRestaurants(
+            @Parameter(description = "Page number", required = true)
             @RequestParam(name="page") int page,
+            @Parameter(description = "Records per page", required = true)
             @RequestParam(name="perPage") int recordsPerPage,
+            @Parameter(description = "User username", required = true)
             @RequestHeader("username") String username) {
         PaginatedRequest paginatedRequest = new PaginatedRequest(page, recordsPerPage);
         return new ResponseEntity<>(favoriteRestaurantService.getFavoriteRestaurants(paginatedRequest,username),HttpStatus.OK);
@@ -302,10 +356,12 @@ public class RestaurantController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully updated restaurant categories",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Restaurant.class)) }),
+                            schema = @Schema(implementation = RestaurantResponse.class)) }),
             @ApiResponse(responseCode = "400", description = "Invalid information supplied",
                     content = @Content),
             @ApiResponse(responseCode = "404", description = "Restaurant with provided ID not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)}
     )
     @PutMapping(path="/{id}/add-categories")
@@ -326,10 +382,12 @@ public class RestaurantController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully updated restaurant opening hours",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Restaurant.class)) }),
+                            schema = @Schema(implementation = RestaurantResponse.class)) }),
             @ApiResponse(responseCode = "400", description = "Invalid information supplied",
                     content = @Content),
             @ApiResponse(responseCode = "404", description = "Restaurant with provided ID not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)}
     )
     @PutMapping(path="/{id}/set-opening-hours")
@@ -352,6 +410,8 @@ public class RestaurantController {
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = FavoriteRestaurantResponse.class)) }),
             @ApiResponse(responseCode = "404", description = "Restaurant with provided ID not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)}
     )
     @PostMapping(path="/{id}/add-to-favorites")
@@ -359,6 +419,7 @@ public class RestaurantController {
     public @ResponseBody ResponseEntity<FavoriteRestaurantResponse> addRestaurantToFavorites(
             @Parameter(description = "Restaurant ID", required = true)
             @PathVariable int id,
+            @Parameter(description = "User username", required = true)
             @RequestHeader("username") String username
     ) {
 
@@ -371,13 +432,16 @@ public class RestaurantController {
     @Operation(description = "Remove restaurant from user's favorite restaurants")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Successfully removed restaurant from favorites"),
-            @ApiResponse(responseCode = "404", description = "Favorite Restaurant with provided data not found")}
+            @ApiResponse(responseCode = "404", description = "Favorite Restaurant with provided data not found"),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
+                    content = @Content)}
     )
     @DeleteMapping (path="/{id}/remove-from-favorites")
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody ResponseEntity<Void> removeRestaurantFromFavorites(
             @Parameter(description = "Restaurant ID",required = true)
             @PathVariable int id,
+            @Parameter(description = "User username", required = true)
             @RequestHeader("username") String username) {
 
         int deletedRows = favoriteRestaurantService.removeRestaurantFromFavorites(id,username);
@@ -394,6 +458,8 @@ public class RestaurantController {
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = String.class)) }),
             @ApiResponse(responseCode = "404", description = "Restaurant with provided ID not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)}
     )
     @GetMapping(path="/image/{id}")
@@ -410,8 +476,10 @@ public class RestaurantController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Successfully added restaurant image",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Restaurant.class)) }),
+                            schema = @Schema(implementation = RestaurantImageResponse.class)) }),
             @ApiResponse(responseCode = "400", description = "Invalid information supplied",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)})
     @PostMapping(path="/image/add/{id}")
     @ResponseStatus(HttpStatus.CREATED)
@@ -427,23 +495,27 @@ public class RestaurantController {
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Delete an image from restaurant gallery")
     @ApiResponses ( value = {
-            @ApiResponse(responseCode = "200", description = "Successfully deleted the image with provided ID"),
+            @ApiResponse(responseCode = "204", description = "Successfully deleted the image with provided ID"),
             @ApiResponse(responseCode = "404", description = "Image with provided ID not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)})
     @DeleteMapping(path="/image/{id}")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public @ResponseBody ResponseEntity<String> deleteRestaurantImage(
             @Parameter(description = "Image ID", required = true)
             @PathVariable int id)
     {
         restaurantImageService.deleteRestaurantImage(id);
-        return new ResponseEntity<>("Image successfully deleted",HttpStatus.OK);
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(description = "Get number of customers who marked the restaurant as favorite")
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully fetched number of customers who marked the restaurant with provided UUID as a favorite"),
             @ApiResponse(responseCode = "404", description = "Restaurant with provided id not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)})
     @GetMapping(path="/favorites/{id}")
     @ResponseStatus(HttpStatus.OK)

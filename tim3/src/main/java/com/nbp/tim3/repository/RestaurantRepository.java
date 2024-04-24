@@ -12,6 +12,7 @@ import com.nbp.tim3.model.Restaurant;
 import com.nbp.tim3.model.User;
 import com.nbp.tim3.service.DBConnectionService;
 import com.nbp.tim3.util.exception.InvalidRequestException;
+import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1617,6 +1618,78 @@ public class RestaurantRepository {
             }
         }
         return null;
+    }
+
+    public FavoriteRestaurantResponse addRestaurantToFavorites(int restaurantId, String username) {
+        String sql = "DECLARE\n" +
+                "  v_inserted_id NUMBER;\n" +
+                "  v_customer_id NUMBER;\n" +
+                "BEGIN\n" +
+                "  INSERT INTO nbp_favorite_restaurant (restaurant_id, customer_id)\n" +
+                "  SELECT ?, nu.id FROM nbp.nbp_user nu WHERE nu.username = ?;\n" +
+                "  SELECT id, customer_id\n" +
+                "  INTO v_inserted_id, v_customer_id\n" +
+                "  FROM nbp_favorite_restaurant\n" +
+                "  WHERE restaurant_id = ? AND customer_id IN (SELECT id FROM nbp.nbp_user WHERE username = ?);\n" +
+                "  ? := v_inserted_id; " +
+                "  ? := v_customer_id; " +
+                "END;";
+
+
+        Connection connection = null;
+
+        boolean exception = false;
+
+        try {
+            connection = dbConnectionService.getConnection();
+
+            CallableStatement callableStatement = connection.prepareCall(sql);
+            callableStatement.setInt(1,restaurantId);
+            callableStatement.setString(2,username);
+            callableStatement.setInt(3, restaurantId);
+            callableStatement.setString(4, username);
+            callableStatement.registerOutParameter(5,Types.INTEGER);
+            callableStatement.registerOutParameter(6,Types.INTEGER);
+
+            callableStatement.execute();
+
+            FavoriteRestaurantResponse response = new FavoriteRestaurantResponse(callableStatement.getInt(5),
+                    callableStatement.getInt(6),restaurantId);
+
+            connection.commit();
+
+
+            logger.info("Successfully inserted row into Favorite Restaurant.");
+            return response;
+        }
+
+        catch (SQLException e) {
+            logger.error(e.getMessage());
+
+            exception = true;
+
+            if ("02000".equals(e.getSQLState())) {
+                throw new InvalidRequestException(String.format("User with username %s does not exist!",username));
+            } else if (e.getErrorCode() == 1) {
+                throw new InvalidRequestException("Restaurant already in user favorites!");
+            } else {
+                throw new EntityNotFoundException("Restaurant with id " + restaurantId + " does not exist!");
+            }
+
+        } catch (Exception e) {
+            exception = true;
+            e.printStackTrace();
+            throw e;
+        } finally {
+            if(exception && connection!=null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
     }
 
     private String constructQuery(FilterRestaurantRequest filter,String sortBy,boolean ascending, int id) {

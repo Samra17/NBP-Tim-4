@@ -340,28 +340,27 @@ public class RestaurantController {
     }
 
 
-    /*@PreAuthorize("hasRole('CUSTOMER')")
+    //@PreAuthorize("hasRole('CUSTOMER')")
     @Operation(description = "Add restaurant to user's favorite restaurants")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully added restaurant to favorites",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = FavoriteRestaurant.class)) }),
+                            schema = @Schema(implementation = FavoriteRestaurantResponse.class)) }),
             @ApiResponse(responseCode = "404", description = "Restaurant with provided ID not found",
                     content = @Content)}
     )
     @PostMapping(path="/{id}/add-to-favorites")
     @ResponseStatus(HttpStatus.CREATED)
-    public @ResponseBody ResponseEntity<FavoriteRestaurant> addRestaurantToFavorites(
+    public @ResponseBody ResponseEntity<FavoriteRestaurantResponse> addRestaurantToFavorites(
             @Parameter(description = "Restaurant ID", required = true)
-            @PathVariable Long id,
-            @RequestHeader("uuid") String user,
+            @PathVariable int id,
             @RequestHeader("username") String username
     ) {
 
-        var favoriteRestaurant = favoriteRestaurantService.addRestaurantToFavorites(id,user);
+        var favoriteRestaurant = favoriteRestaurantService.addRestaurantToFavorites(id,username);
 
         return new ResponseEntity<>(favoriteRestaurant,HttpStatus.CREATED);
-    }*/
+    }
 
     /*@PreAuthorize("hasRole('CUSTOMER')")
     @Operation(description = "Remove restaurant from user's favorite restaurants")

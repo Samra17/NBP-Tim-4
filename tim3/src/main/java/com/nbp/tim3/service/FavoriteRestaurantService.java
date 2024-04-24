@@ -32,8 +32,7 @@ public class FavoriteRestaurantService {
         return favoriteRestaurant;
     }
 
-    public void removeRestaurantFromFavorites(Long restaurantId, String userUUID)  {
-        /*var restaurant = restaurantRepository.findById(restaurantId).orElseThrow(()->new EntityNotFoundException("Restaurant with id " + restaurantId + " does not exist!"));
-        favoriteRestaurantRepository.removeRestaurantFromFavorites(restaurantId, userUUID);*/
+    public int removeRestaurantFromFavorites(int restaurantId, String username)  {
+        return restaurantRepository.removeRestaurantFromFavorites(restaurantId, username);
     }
 }

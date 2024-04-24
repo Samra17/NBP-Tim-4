@@ -362,30 +362,29 @@ public class RestaurantController {
         return new ResponseEntity<>(favoriteRestaurant,HttpStatus.CREATED);
     }
 
-    /*@PreAuthorize("hasRole('CUSTOMER')")
+    //@PreAuthorize("hasRole('CUSTOMER')")
     @Operation(description = "Remove restaurant from user's favorite restaurants")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully removed restaurant from favorites",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = FavoriteRestaurant.class)) }),
-            @ApiResponse(responseCode = "404", description = "Restaurant with provided ID not found",
-                    content = @Content)}
+            @ApiResponse(responseCode = "204", description = "Successfully removed restaurant from favorites"),
+            @ApiResponse(responseCode = "404", description = "Favorite Restaurant with provided data not found")}
     )
-    @PutMapping(path="/{id}/remove-from-favorites")
+    @DeleteMapping (path="/{id}/remove-from-favorites")
     @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody ResponseEntity<String> removeRestaurantFromFavorites(
+    public @ResponseBody ResponseEntity<Void> removeRestaurantFromFavorites(
             @Parameter(description = "Restaurant ID",required = true)
-            @PathVariable Long id,
-            @RequestHeader("uuid") String user,
+            @PathVariable int id,
             @RequestHeader("username") String username) {
 
-        favoriteRestaurantService.removeRestaurantFromFavorites(id,user);
+        int deletedRows = favoriteRestaurantService.removeRestaurantFromFavorites(id,username);
 
-        return new ResponseEntity<>("Successfully removed restaurant with id " + id + " from favorites!",HttpStatus.OK);
+        if(deletedRows > 0)
+            return ResponseEntity.noContent().build();
+        else
+            return ResponseEntity.notFound().build();
     }
 
 
-
+    /*
     @Operation(description = "Get images by Restaurant id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully found all images",

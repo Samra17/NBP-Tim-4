@@ -1692,6 +1692,55 @@ public class RestaurantRepository {
 
     }
 
+    public int removeRestaurantFromFavorites(int restaurantId, String username) {
+        String sql =
+                "  DELETE FROM nbp_favorite_restaurant nfr WHERE nfr.restaurant_id = ? AND customer_id=" +
+                "  (SELECT nu.id FROM nbp.nbp_user nu WHERE nu.username = ?)";
+
+
+        Connection connection = null;
+
+        boolean exception = false;
+
+        try {
+            connection = dbConnectionService.getConnection();
+
+            PreparedStatement preparedStatement = connection.prepareCall(sql);
+            preparedStatement.setInt(1,restaurantId);
+            preparedStatement.setString(2,username);
+
+
+            int rowCount = preparedStatement.executeUpdate();
+
+            connection.commit();
+
+
+            logger.info(String.format("Successfully deleted %d rows from Favorite Restaurant.",rowCount));
+
+            return rowCount;
+        }
+
+        catch (SQLException e) {
+            logger.error(e.getMessage());
+
+            exception = true;
+
+        } catch (Exception e) {
+            exception = true;
+            e.printStackTrace();
+            throw e;
+        } finally {
+            if(exception && connection!=null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return 0;
+    }
+
     private String constructQuery(FilterRestaurantRequest filter,String sortBy,boolean ascending, int id) {
         String baseQuery = "SELECT * FROM (" +
                 "    SELECT ROW_NUMBER() OVER (ORDER BY nr.id) rnum, " +

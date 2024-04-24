@@ -4,8 +4,11 @@ import com.nbp.tim3.dto.openinghours.OpeningHoursCreateRequest;
 import com.nbp.tim3.dto.pagination.PaginatedRequest;
 import com.nbp.tim3.dto.pagination.PaginatedResponse;
 import com.nbp.tim3.dto.restaurant.*;
+import com.nbp.tim3.dto.restaurantimage.RestaurantImageResponse;
+import com.nbp.tim3.dto.restaurantimage.RestaurantImageUploadRequest;
 import com.nbp.tim3.model.Restaurant;
 import com.nbp.tim3.service.FavoriteRestaurantService;
+import com.nbp.tim3.service.FirebaseService;
 import com.nbp.tim3.service.RestaurantImageService;
 import com.nbp.tim3.service.RestaurantService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -34,6 +38,9 @@ public class RestaurantController {
 
     @Autowired
     private RestaurantImageService restaurantImageService;
+
+    @Autowired
+    private FirebaseService firebaseService;
 
 
 
@@ -383,9 +390,7 @@ public class RestaurantController {
         favoriteRestaurantService.removeRestaurantFromFavorites(id,user);
 
         return new ResponseEntity<>("Successfully removed restaurant with id " + id + " from favorites!",HttpStatus.OK);
-    }
-
-
+    }*/
 
     @Operation(description = "Get images by Restaurant id")
     @ApiResponses(value = {
@@ -397,10 +402,11 @@ public class RestaurantController {
     )
     @GetMapping(path="/image/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody ResponseEntity<List<RestaurantImageResponse>> getRestaurantImages(
+    public @ResponseBody ResponseEntity<List<String>> getRestaurantImages(
             @Parameter(description = "Restaurant ID",required = true)
-            @PathVariable Long id) {
-        return new ResponseEntity<>(restaurantImageService.getRestaurantImages(id),HttpStatus.OK);
+            @PathVariable int id)
+    {
+        return new ResponseEntity<>(restaurantImageService.getRestaurantImages(id), HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
@@ -413,17 +419,13 @@ public class RestaurantController {
                     content = @Content)})
     @PostMapping(path="/image/add/{id}")
     @ResponseStatus(HttpStatus.CREATED)
-    public @ResponseBody ResponseEntity<Long> addRestaurantImage (
-            @Parameter(description = "Image data", required = true)
-            @Valid @RequestBody RestaurantImageUploadRequest request,
+    public @ResponseBody ResponseEntity<RestaurantImageResponse> addRestaurantImage (
+            @Parameter(description = "Image file", required = true)
+            @Valid @RequestParam("file") MultipartFile file,
             @Parameter (description = "Restaurant id", required = true)
-            @PathVariable("id") Long restaurantid,
-            @RequestHeader("uuid") String uuid,
-            @RequestHeader("username") String username) {
-
-        var id = restaurantImageService.uploadRestaurantImage(request, uuid,restaurantid);
-
-        return new ResponseEntity<>(id,HttpStatus.CREATED);
+            @PathVariable("id") int restaurantid)
+    {
+        return new ResponseEntity<>(restaurantImageService.uploadRestaurantImage(firebaseService.upload(file), restaurantid), HttpStatus.CREATED);
     }
 
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
@@ -436,13 +438,13 @@ public class RestaurantController {
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody ResponseEntity<String> deleteRestaurantImage(
             @Parameter(description = "Image ID", required = true)
-            @PathVariable Long id,
-            @RequestHeader("username") String username) {
-
-        return new ResponseEntity<>(restaurantImageService.deleteRestaurantImage(id),HttpStatus.OK);
+            @PathVariable int id)
+    {
+        restaurantImageService.deleteRestaurantImage(id);
+        return new ResponseEntity<>("Image successfully deleted",HttpStatus.OK);
     }
 
-    @Operation(description = "Get number of customers who marked the restaurant as favorite")
+    /*@Operation(description = "Get number of customers who marked the restaurant as favorite")
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully fetched number of customers who marked the restaurant with provided UUID as a favorite"),
             @ApiResponse(responseCode = "404", description = "Restaurant with provided UUID not found",
@@ -453,6 +455,5 @@ public class RestaurantController {
                                                       @PathVariable("uuid") String restaurantUUID) {
 
         return ResponseEntity.ok(restaurantService.getCustomersFavorited(restaurantUUID));
-    }
-    */
+    }*/
 }

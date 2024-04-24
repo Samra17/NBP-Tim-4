@@ -2,13 +2,14 @@ package com.nbp.tim3.dto.restaurantimage;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.web.multipart.MultipartFile;
 
 public class RestaurantImageUploadRequest {
     @NotNull(message = "Image data must not be empty!")
     @NotBlank(message = "Image data must not be empty!")
-    private String imageData;
+    private MultipartFile imageData;
 
-    public RestaurantImageUploadRequest( String imageData) {
+    public RestaurantImageUploadRequest( MultipartFile imageData) {
         this.imageData = imageData;
     }
 
@@ -16,11 +17,11 @@ public class RestaurantImageUploadRequest {
     }
 
 
-    public String getImageData() {
+    public MultipartFile getImageData() {
         return imageData;
     }
 
-    public void setImageData(String imageData) {
+    public void setImageData(MultipartFile imageData) {
         this.imageData = imageData;
     }
 }

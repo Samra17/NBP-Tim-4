@@ -2,19 +2,17 @@ package com.nbp.tim3.dto.restaurantimage;
 
 public class RestaurantImageResponse {
 
-    Long id;
+    int id;
 
     private String imageData;
 
-    public RestaurantImageResponse(String imageData,Long id) {
+    public RestaurantImageResponse(String imageData, int id) {
         this.imageData = imageData;
         this.id=id;
     }
 
     public RestaurantImageResponse() {
     }
-
-
 
     public String getImageData() {
         return imageData;
@@ -24,11 +22,11 @@ public class RestaurantImageResponse {
         this.imageData = imageData;
     }
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 }

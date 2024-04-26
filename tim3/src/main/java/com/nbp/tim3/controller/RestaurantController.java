@@ -108,8 +108,8 @@ public class RestaurantController {
             @RequestParam(name="page", defaultValue = "1") int page,
             @Parameter(description = "Number of records per page", required = true)
             @RequestParam(name="perPage", defaultValue ="10")int recordsPerPage,
-            @Parameter(description = "User username", required = true)
-            @RequestHeader("username") String username) {
+            @Parameter(description = "User username", required = false)
+            @RequestHeader(value = "username", required = false) String username) {
 
        PaginatedRequest request = new PaginatedRequest(page,recordsPerPage);
         var restaurants = restaurantService.searchForRestaurants(request,username,null,null,false);

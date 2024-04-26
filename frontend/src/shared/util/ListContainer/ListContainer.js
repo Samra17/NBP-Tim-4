@@ -69,11 +69,10 @@ function ListContainer({
 
   console.log(items);
 
-  /*
   useEffect(() => {
     goToPage(1);
   }, [items]);
-*/
+
   const handleChange = (e) => {
     if (e.target.name == "offeringDiscount") {
       setFilterData({ ...filterData, [e.target.name]: e.target.checked });
@@ -315,7 +314,6 @@ function ListContainer({
           ) : (
             <></>
           )}
-
           <hr style={{ clear: left }}></hr>
           {showFilters && categories ? filters() : <></>}
           <Row xs={1} md={grid ? 2 : 1} className="gy-2 gx-2 mw-100">
@@ -345,14 +343,17 @@ function ListContainer({
                       setCoupons={setItems}
                       style={{ width: "100%" }}
                     />
-                  ) : type == "menu" ? (
-                    <MenuItem
-                      grid={grid}
-                      style={{ width: "100%" }}
-                      menuItem={i}
-                      setOrderList={setOrderList}
-                      orderList={orderList}
-                    />
+                  ) : type === "menu" ? (
+                    <>
+                      samra
+                      <MenuItem
+                        grid={grid}
+                        style={{ width: "100%" }}
+                        menuItem={i}
+                        setOrderList={setOrderList}
+                        orderList={orderList}
+                      />
+                    </>
                   ) : type == "menus" ? (
                     <MenuCard
                       grid={grid}
@@ -406,7 +407,6 @@ function ListContainer({
               </span>
             )}
           </Row>
-
           {items.length > perPage ? (
             <div>
               <hr></hr>

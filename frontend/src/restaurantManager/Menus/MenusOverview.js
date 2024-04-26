@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Spinner } from "react-bootstrap";
 import menuService from "../../service/menu.service";
-import Loader from "../../shared/util/Loader/Loader";
 import CustomAlert from "../../shared/util/Alert";
 import ListContainer from "../../shared/util/ListContainer/ListContainer";
-import { Spinner } from "react-bootstrap";
+import Loader from "../../shared/util/Loader/Loader";
 
 function MenusOverview() {
   var mounted = false;

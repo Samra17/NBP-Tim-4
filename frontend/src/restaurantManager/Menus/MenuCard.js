@@ -1,17 +1,9 @@
+import { Delete, Edit } from "@mui/icons-material";
 import React, { useState } from "react";
-import {
-  Col,
-  Row,
-  Button,
-  Container,
-  ButtonGroup,
-  Modal,
-} from "react-bootstrap";
+import { Button, ButtonGroup, Col, Modal, Row } from "react-bootstrap";
 import Card from "react-bootstrap/Card";
-import { Add, Edit, Delete } from "@mui/icons-material";
-import "./MenuCard.css";
-import CustomAlert from "../../shared/util/Alert";
 import { useNavigate } from "react-router-dom";
+import "./MenuCard.css";
 
 import { left } from "@popperjs/core";
 import menuService from "../../service/menu.service";

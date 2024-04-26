@@ -14,13 +14,10 @@ class MenuService {
     }
   }
   getAllRestaurantMenus() {
-    const restaurantUUID = restaurantService.getCurrentRestaurantUUID();
     try {
-      return api
-        .get("/menu/restaurant-menus/uuid/" + restaurantUUID)
-        .then((response) => {
-          return response;
-        });
+      return api.get("/api/menu/restaurant-menus/id/" + 1).then((response) => {
+        return response;
+      });
     } catch (e) {
       console.log(e);
     }

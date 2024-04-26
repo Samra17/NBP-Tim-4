@@ -1,0 +1,6 @@
+.optionContainer li:hover,
+.optionContainer .highlight {
+  background: #272D2F;
+  color: #fff;
+}
+

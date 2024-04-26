@@ -7,6 +7,7 @@ import PrivateRoute from "./shared/PrivateRoute/PrivateRoute";
 import RegisterPage from "./shared/RegisterPage/RegisterPage";
 import NotFound from "./shared/util/NotFound";
 import CustomerDetails from "./customer/CustomerDetails/CustomerDetails";
+import RestaurantDetails from "./restaurantManager/RestaurantDetails/RestaurantDetails";
 
 function App() {
   return (
@@ -19,6 +20,10 @@ function App() {
           <Route
             path="/customer/details"
             element={<CustomerDetails></CustomerDetails>}
+          ></Route>
+          <Route
+            path="/restaurant/menus"
+            element={<RestaurantDetails></RestaurantDetails>}
           ></Route>
         </Route>
       </Routes>

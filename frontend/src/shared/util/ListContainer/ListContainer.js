@@ -60,7 +60,7 @@ function ListContainer({
 
   const goToPage = (p) => {
     if (pagination) {
-      handlePagination(page, perPage);
+      //handlePagination(page, perPage);
     } else
       setCurrentPage(
         items.slice((p - 1) * perPage, (p - 1) * perPage + perPage)

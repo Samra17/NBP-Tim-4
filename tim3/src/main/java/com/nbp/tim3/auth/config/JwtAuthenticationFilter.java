@@ -5,6 +5,7 @@ import com.nbp.tim3.model.Token;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
@@ -18,6 +19,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.nbp.tim3.repository.TokenRepository;
 
 import java.io.IOException;
+import java.util.Enumeration;
+
+import static java.util.Collections.enumeration;
+import static java.util.Collections.singleton;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -53,10 +58,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+
             }
 
         }
-        filterChain.doFilter(request, response);
+
+        HttpServletRequestWrapper wrapper = new HttpServletRequestWrapper((HttpServletRequest) request) {
+            @Override
+            public Enumeration<String> getHeaders(String name) {
+                if ("username".equals(name))
+                    return enumeration(singleton(username));
+                return super.getHeaders(name);
+            }
+        };
+
+
+        filterChain.doFilter(wrapper, response);
 
 
 

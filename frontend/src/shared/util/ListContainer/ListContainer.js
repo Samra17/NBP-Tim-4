@@ -38,6 +38,8 @@ function ListContainer({
   setOrderList,
   orderList,
   moveOrder,
+  pagination = false,
+  handlePagination,
 }) {
   const [page, setPage] = useState();
   const [currentPage, setCurrentPage] = useState([]);
@@ -57,13 +59,21 @@ function ListContainer({
   }, [page]);
 
   const goToPage = (p) => {
-    setCurrentPage(items.slice((p - 1) * perPage, (p - 1) * perPage + perPage));
+    if (pagination) {
+      handlePagination(page, perPage);
+    } else
+      setCurrentPage(
+        items.slice((p - 1) * perPage, (p - 1) * perPage + perPage)
+      );
   };
 
+  console.log(items);
+
+  /*
   useEffect(() => {
     goToPage(1);
   }, [items]);
-
+*/
   const handleChange = (e) => {
     if (e.target.name == "offeringDiscount") {
       setFilterData({ ...filterData, [e.target.name]: e.target.checked });
@@ -77,7 +87,8 @@ function ListContainer({
     restaurantService.searchRestaurants(filterData).then((res) => {
       setLoading(false);
       if (res.status == 200) {
-        setItems(res.data);
+        setItems(res.data.restaurants);
+        setPage(1);
         console.log(res.data);
       }
     });
@@ -140,7 +151,6 @@ function ListContainer({
         >
           <option value="RATING">Rating</option>
           <option value="POPULARITY">Popularity</option>
-          <option value="DATE">Date</option>
         </Form.Select>
         {filterData.ascending ? (
           <KeyboardDoubleArrowDownRounded

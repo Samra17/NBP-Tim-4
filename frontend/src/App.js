@@ -6,6 +6,7 @@ import Home from "./shared/Home/Home";
 import PrivateRoute from "./shared/PrivateRoute/PrivateRoute";
 import RegisterPage from "./shared/RegisterPage/RegisterPage";
 import NotFound from "./shared/util/NotFound";
+import CustomerDetails from "./customer/CustomerDetails/CustomerDetails";
 
 function App() {
   return (
@@ -15,6 +16,10 @@ function App() {
         <Route path="*" element={<NotFound></NotFound>} />
         <Route path="/" element={<PrivateRoute />}>
           <Route path="/" element={<Home></Home>}></Route>
+          <Route
+            path="/customer/details"
+            element={<CustomerDetails></CustomerDetails>}
+          ></Route>
         </Route>
       </Routes>
     </>

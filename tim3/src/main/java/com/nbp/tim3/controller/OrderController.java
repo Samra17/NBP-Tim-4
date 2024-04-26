@@ -4,8 +4,6 @@ import com.nbp.tim3.dto.order.OrderCreateRequest;
 import com.nbp.tim3.dto.order.OrderPaginatedResponse;
 import com.nbp.tim3.dto.order.OrderResponse;
 import com.nbp.tim3.enums.Status;
-import com.nbp.tim3.model.MenuItem;
-import com.nbp.tim3.model.Order;
 import com.nbp.tim3.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,14 +14,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.method.P;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
 
 @RestController
@@ -90,10 +83,10 @@ public class OrderController {
             @Parameter(description = "Customer ID", required = true)
             @PathVariable("customerId") Integer customerId,
             @Parameter(description = "Page number", required = true)
-            @RequestHeader(value = "page", defaultValue = "1") Integer page,
+            @RequestParam(value = "page", defaultValue = "1") Integer page,
             @Parameter(description = "Number of records per page", required = true)
-            @RequestHeader(value = "size", defaultValue = "10") Integer size) {
-        return ResponseEntity.ok(orderService.getOrdersByCustomerId(customerId, page, size));
+            @RequestParam(value = "perPage", defaultValue = "10") Integer perPage) {
+        return ResponseEntity.ok(orderService.getOrdersByCustomerId(customerId, page, perPage));
     }
 
     @Operation(description = "Get all orders by courier")
@@ -112,10 +105,10 @@ public class OrderController {
             @Parameter(description = "Courier ID", required = true)
             @PathVariable("courierId") Integer courierId,
             @Parameter(description = "Page number", required = true)
-            @RequestHeader(value = "page", defaultValue = "1") Integer page,
+            @RequestParam(value = "page", defaultValue = "1") Integer page,
             @Parameter(description = "Records per page", required = true)
-            @RequestHeader(value = "size", defaultValue = "10") Integer size) {
-        return ResponseEntity.ok(orderService.getOrdersByCourierId(courierId, page, size));
+            @RequestParam(value = "perPage", defaultValue = "10") Integer perPage) {
+        return ResponseEntity.ok(orderService.getOrdersByCourierId(courierId, page, perPage));
     }
 
     @Operation(description = "Get order by id")
@@ -175,7 +168,7 @@ public class OrderController {
             @Parameter(description = "Order ID", required = true)
             @PathVariable("orderId") Integer orderId,
             @Parameter(description = "New order status", required = true)
-            @RequestHeader("status") Status status) {
+            @RequestParam("status") Status status) {
         orderService.changeOrderStatus(orderId, status);
         return ResponseEntity.ok(orderService.getById(orderId));
     }
@@ -222,13 +215,13 @@ public class OrderController {
             @Parameter(description = "Restaurant ID", required = true)
             @PathVariable("restaurantId") Integer restaurantId,
             @Parameter(description = "Page number", required = true)
-            @RequestHeader(value = "page", defaultValue = "1") Integer page,
+            @RequestParam(value = "page", defaultValue = "1") Integer page,
             @Parameter(description = "Records per page", required = true)
-            @RequestHeader(value = "size", defaultValue = "10") Integer size,
+            @RequestParam(value = "perPage", defaultValue = "10") Integer perPage,
             @Parameter(description = "Order status", required = false)
-            @RequestHeader(value = "status", required = false) Status status
+            @RequestParam(value = "status", required = false) Status status
             ) {
-        return ResponseEntity.ok(orderService.getByRestaurantIdAndStatusPage(restaurantId, status, page, size));
+        return ResponseEntity.ok(orderService.getByRestaurantIdAndStatusPage(restaurantId, status, page, perPage));
     }
 
 }

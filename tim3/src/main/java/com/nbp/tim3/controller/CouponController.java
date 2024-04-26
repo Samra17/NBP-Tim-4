@@ -41,10 +41,10 @@ public class CouponController {
     @GetMapping(path="/all")
     public @ResponseBody ResponseEntity<CouponPaginatedResponse> getAllCoupons(
             @Parameter(description = "Page number", required = true)
-            @RequestHeader(value = "page", defaultValue = "1") Integer page,
+            @RequestParam(value = "page", defaultValue = "1") Integer page,
             @Parameter(description = "Number of records per page", required = true)
-            @RequestHeader(value = "size", defaultValue = "10") Integer size) {
-        var coupons = couponService.getAllCoupons(page, size);
+            @RequestParam(value = "perPage", defaultValue = "10") Integer perPage) {
+        var coupons = couponService.getAllCoupons(page, perPage);
         return new ResponseEntity<>(coupons, HttpStatus.OK);
     }
 

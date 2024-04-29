@@ -1,4 +1,5 @@
 import React from "react";
+import Restaurants from "../../customer/Home/Restaurants";
 import authService from "../../service/auth.service";
 
 function Home() {
@@ -7,7 +8,7 @@ function Home() {
   return (
     <>
       {user.role == "CUSTOMER" ? (
-        <>Customer</>
+        <Restaurants></Restaurants>
       ) : user.role == "ADMINISTRATOR" ? (
         <>ADMINISTRATOR</>
       ) : user.role == "COURIER" ? (

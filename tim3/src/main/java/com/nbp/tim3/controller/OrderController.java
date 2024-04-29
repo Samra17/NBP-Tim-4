@@ -31,7 +31,7 @@ public class OrderController {
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '!', '#', '$', '%', '&', '/', '(', ')', '=', '?', '*');
 
     @PreAuthorize("hasRole('CUSTOMER')")
-    @Operation(description = "Create order")
+    @Operation(description = "Create an order with possibility of using a coupon")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully created order",
                     content = { @Content(mediaType = "application/json",

@@ -48,7 +48,7 @@ public class CouponController {
         return new ResponseEntity<>(coupons, HttpStatus.OK);
     }
 
-    @Operation(description = "Get a coupon by coupon ID")
+    @Operation(description = "Get a coupon by coupon id")
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully found the coupon with provided ID",
                     content = { @Content(mediaType = "application/json",
@@ -126,7 +126,7 @@ public class CouponController {
 
      */
 
-    @Operation(description = "Filter restaurants with coupons")
+    @Operation(description = "Filter restaurants based on whether they do or do not contain coupons")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully found filtered restaurants",
                     content = { @Content(mediaType = "application/json",
@@ -164,7 +164,7 @@ public class CouponController {
     }
 
     @PreAuthorize("hasRole('CUSTOMER')")
-    @Operation(description = "Get coupons by restaurant ID")
+    @Operation(description = "Get all restaurant's coupons")
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully found the coupons with provided restaurant ID",
                     content = { @Content(mediaType = "application/json",

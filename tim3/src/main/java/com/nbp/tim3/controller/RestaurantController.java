@@ -225,7 +225,7 @@ public class RestaurantController {
 
 
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
-    @Operation(description = "Get restaurant id by restaurant manager")
+    @Operation(description = "Get restaurant id by restaurant manager username")
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully found the restaurant with provided restaurant manager username",
                     content = { @Content(mediaType = "application/json",
@@ -246,7 +246,7 @@ public class RestaurantController {
     }
 
 
-    @Operation(description = "Get a full restaurant response by restaurant ID")
+    @Operation(description = "Get a full restaurant response by restaurant id")
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully found the restaurant with provided ID",
                     content = { @Content(mediaType = "application/json",
@@ -267,7 +267,7 @@ public class RestaurantController {
     }
 
 
-    @Operation(description = "Get restaurants with categories")
+    @Operation(description = "Get restaurants that contain requested categories")
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully found restaurants with provided categories",
                     content = { @Content(mediaType = "application/json",
@@ -291,7 +291,7 @@ public class RestaurantController {
     }
 
 
-    @Operation(description = "Get restaurant average rating")
+    @Operation(description = "Get restaurant's average rating")
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully calculated average restaurant rating",
                     content = { @Content(mediaType = "application/json",
@@ -352,7 +352,7 @@ public class RestaurantController {
     }*/
 
     //@PreAuthorize("hasRole('RESTAURANT_MANAGER')")
-    @Operation(description = "Set restaurant categories")
+    @Operation(description = "Set which categories will restaurant with given id contain")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully updated restaurant categories",
                     content = { @Content(mediaType = "application/json",
@@ -452,7 +452,7 @@ public class RestaurantController {
             return ResponseEntity.notFound().build();
     }
 
-    @Operation(description = "Get images by Restaurant id")
+    @Operation(description = "Get restaurant's images by restaurant id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully found all images",
                     content = { @Content(mediaType = "application/json",

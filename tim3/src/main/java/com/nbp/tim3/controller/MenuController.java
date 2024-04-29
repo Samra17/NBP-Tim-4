@@ -28,9 +28,11 @@ import java.util.List;
 @Validated
 @RequestMapping(path = "/api/menu")
 public class MenuController {
+
     @Autowired
     private MenuService menuService;
-    @Operation(description = "Get a menu by menu ID")
+
+    @Operation(description = "Get a menu by menu id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully found the menu with provided ID",
                     content = {@Content(mediaType = "application/json",
@@ -114,7 +116,7 @@ public class MenuController {
     }
 
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
-    @Operation(description = "Set menu items for menu")
+    @Operation(description = "Set which menu items will menu with given id contain")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully updated menu items",
                     content = {@Content(mediaType = "application/json",
@@ -140,7 +142,7 @@ public class MenuController {
     }
 
 
-    @Operation(description = "Get menus of restaurant")
+    @Operation(description = "Get restaurant's menus")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully fetched menus for restaurant",
                     content = {@Content(mediaType = "application/json",
@@ -159,7 +161,7 @@ public class MenuController {
         return new ResponseEntity<>(menus, HttpStatus.OK);
     }
 
-    @Operation(description = "Get active menus of restaurant")
+    @Operation(description = "Get restaurant's active menus")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully fetched active menus for restaurant",
                     content = {@Content(mediaType = "application/json",

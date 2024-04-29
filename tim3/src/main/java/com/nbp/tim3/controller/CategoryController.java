@@ -92,7 +92,7 @@ public class CategoryController {
     }
 
 
-    @Operation(description = "Get a category by ID")
+    @Operation(description = "Get a category by id")
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully found the category with provided ID",
                     content = { @Content(mediaType = "application/json",

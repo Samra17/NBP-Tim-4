@@ -28,7 +28,7 @@ public class ReviewController {
     @Autowired
     private ReviewService reviewService;
 
-    @Operation(description = "Get all reviews of a restaurant")
+    @Operation(description = "Get all restaurant's reviews")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully found all reviews for the restaurant",
                     content = { @Content(mediaType = "application/json",

@@ -98,7 +98,7 @@ class RestaurantService {
 
   getRestaurant(id) {
     try {
-      return api.get("/restaurant/" + id).then((response) => {
+      return api.get("/api/restaurant/" + id).then((response) => {
         return response;
       });
     } catch (e) {
@@ -108,7 +108,7 @@ class RestaurantService {
 
   getRestaurantImages(id) {
     try {
-      return api.get("/restaurant/image/" + id).then((response) => {
+      return api.get("/api/restaurant/image/" + id).then((response) => {
         return response;
       });
     } catch (e) {
@@ -119,7 +119,7 @@ class RestaurantService {
   addRestaurantToFavorites(id) {
     try {
       return api
-        .post("/restaurant/" + id + "/add-to-favorites")
+        .post("/api/restaurant/" + id + "/add-to-favorites")
         .then((response) => {
           return response;
         });
@@ -131,7 +131,7 @@ class RestaurantService {
   removeRestaurantFromFavorites(id) {
     try {
       return api
-        .put("/restaurant/" + id + "/remove-from-favorites")
+        .delete("/api/restaurant/" + id + "/remove-from-favorites")
         .then((response) => {
           return response;
         });
@@ -142,7 +142,7 @@ class RestaurantService {
 
   getManagersRestaurant() {
     try {
-      return api.get("/restaurant/manager").then((response) => {
+      return api.get("/api/restaurant/manager").then((response) => {
         return response;
       });
     } catch (e) {
@@ -162,7 +162,7 @@ class RestaurantService {
 
   updateRestaurant(req, id) {
     try {
-      return api.put("/restaurant/update/" + id, req).then((response) => {
+      return api.put("/api/restaurant/update/" + id, req).then((response) => {
         return response;
       });
     } catch (e) {
@@ -173,7 +173,7 @@ class RestaurantService {
   updateRestaurantCategories(req, id) {
     try {
       return api
-        .put("/restaurant/" + id + "/add-categories", req)
+        .put("/api/restaurant/" + id + "/add-categories", req)
         .then((response) => {
           return response;
         });
@@ -185,7 +185,7 @@ class RestaurantService {
   updateRestaurantOpeningHours(req, id) {
     try {
       return api
-        .put("/restaurant/" + id + "/set-opening-hours", req)
+        .put("/api/restaurant/" + id + "/set-opening-hours", req)
         .then((response) => {
           return response;
         });
@@ -194,14 +194,11 @@ class RestaurantService {
     }
   }
 
-  getCurrentRestaurantUUID() {
-    let restaurantUUID = TokenService.getRestaurantUUID();
-    return restaurantUUID;
-  }
+
 
   addImageToRestaurantGallery(req, id) {
     try {
-      return api.post("/restaurant/image/add/" + id, req).then((response) => {
+      return api.post("/api/restaurant/image/add/" + id, req).then((response) => {
         return response;
       });
     } catch (e) {
@@ -211,7 +208,7 @@ class RestaurantService {
 
   deleteImageFromRestaurantGallery(id) {
     try {
-      return api.delete("/restaurant/image/" + id).then((response) => {
+      return api.delete("/api/restaurant/image/" + id).then((response) => {
         return response;
       });
     } catch (e) {
@@ -222,7 +219,7 @@ class RestaurantService {
   getReviews() {
     try {
       return api
-        .get("/review/restaurant/" + this.getCurrentRestaurantUUID())
+        .get("/api/review/restaurant/" + this.getCurrentRestaurantUUID())
         .then((response) => {
           return response;
         });
@@ -234,7 +231,7 @@ class RestaurantService {
   getNumberOfFavorites() {
     try {
       return api
-        .get("/restaurant/favorites/" + this.getCurrentRestaurantUUID())
+        .get("/api/restaurant/favorites/" + this.getCurrentRestaurantUUID())
         .then((response) => {
           return response;
         });
@@ -245,7 +242,7 @@ class RestaurantService {
 
   addReview(req) {
     try {
-      return api.post("/review/add", req).then((response) => {
+      return api.post("/api/review/add", req).then((response) => {
         return response;
       });
     } catch (e) {

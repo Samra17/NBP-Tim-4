@@ -8,6 +8,7 @@ import RegisterPage from "./shared/RegisterPage/RegisterPage";
 import NotFound from "./shared/util/NotFound";
 import CustomerDetails from "./customer/CustomerDetails/CustomerDetails";
 import RestaurantDetails from "./restaurantManager/RestaurantDetails/RestaurantDetails";
+import RestaurantOverview from "./customer/Restaurant/RestaurantOverview";
 
 function App() {
   return (
@@ -24,6 +25,10 @@ function App() {
           <Route
             path="/restaurant/menus"
             element={<RestaurantDetails></RestaurantDetails>}
+          ></Route>
+          <Route
+            path="/customer/restaurant"
+            element={<RestaurantOverview></RestaurantOverview>}
           ></Route>
         </Route>
       </Routes>

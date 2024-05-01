@@ -81,7 +81,6 @@ public class MenuRepository {
     }
 
     public List<Menu> getActiveMenusForRestaurant(int restaurantID) {
-
         PreparedStatement preparedStatement = null;
         try {
             String sql = "SELECT * FROM nbp_menu WHERE active = 1 AND restaurant_id=? AND is_deleted=0";

@@ -2,10 +2,10 @@ import api from "./api";
 import restaurantService from "./restaurant.service";
 
 class MenuService {
-  getActiveRestaurantMenus(restaurantUUID) {
+  getActiveRestaurantMenus(id) {
     try {
       return api
-        .get("/menu/restaurant-menus/active/" + restaurantUUID)
+        .get("/api/menu/restaurant-menus/active/" + id)
         .then((response) => {
           return response;
         });

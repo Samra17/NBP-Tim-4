@@ -67,10 +67,14 @@ function ListContainer({
     if (pagination == "server") {
       setLoading(true);
       handlePagination(title,page, perPage, setTotalPages,setLoading, filterData);
-    } else
+    } else {
       setCurrentPage(
         items.slice((p - 1) * perPage, (p - 1) * perPage + perPage)
       );
+      console.log("Client side " + perPage)
+      console.log(items.slice((p - 1) * perPage, (p - 1) * perPage + perPage))
+    }
+
   };
 
   
@@ -313,7 +317,82 @@ function ListContainer({
           {showFilters && categories ? filters() : <></>}
           <Row xs={1} md={grid ? 2 : 1} className="gy-2 gx-2 mw-100">
             {items.length > 0 && !loading ? (
+              pagination == "server" ?
               items.map((i) => (
+                <Col key={i.id}>
+                  {type == "restaurant" ? (
+                    <RestaurantCard
+                      grid={grid}
+                      style={{ width: "100%" }}
+                      res={i}
+                    />
+                  ) : type == "order" ? (
+                    <OrderCard
+                      grid={grid}
+                      style={{ width: "100%" }}
+                      order={i}
+                      moveOrder={moveOrder}
+                      changeOrder={changeOrder}
+                      setAlert={setAlert}
+                      alert={alert}
+                      setShowAlert={setShowAlert}
+                    />
+                  ) : type == "coupon" ? (
+                    <CouponCard
+                      coupon={i}
+                      setCoupons={setItems}
+                      style={{ width: "100%" }}
+                    />
+                  ) : type === "menu" ? (
+                    <>
+                      <MenuItem
+                        grid={grid}
+                        style={{ width: "100%" }}
+                        menuItem={i}
+                        setOrderList={setOrderList}
+                        orderList={orderList}
+                      />
+                    </>
+                  ) : type == "menus" ? (
+                    <MenuCard
+                      grid={grid}
+                      style={{ width: "100%" }}
+                      menu={i}
+                      menus={items}
+                      setMenus={setItems}
+                      alert={alert}
+                      setAlert={setAlert}
+                      showAlert={showAlert}
+                      setShowAlert={setShowAlert}
+                      setLoading={setLoadingPage}
+                    />
+                  ) : type == "menuItems" ? (
+                    <MenuItem
+                      grid={grid}
+                      style={{ width: "100%" }}
+                      menuItem={i}
+                      setOrderList={setOrderList}
+                      orderList={orderList}
+                      setMenuItems={setItems}
+                      menuItems={items}
+                      setLoading={setLoadingPage}
+                      alert={alert}
+                      setAlert={setAlert}
+                      showAlert={showAlert}
+                      setShowAlert={setShowAlert}
+                    />
+                  ) : type == "review" ? (
+                    <ReviewCard
+                      grid={grid}
+                      style={{ width: "100%" }}
+                      review={i}
+                    />
+                  ) : (
+                    <></>
+                  )}
+                </Col>
+              )) :
+              currentPage.map((i) => (
                 <Col key={i.id}>
                   {type == "restaurant" ? (
                     <RestaurantCard

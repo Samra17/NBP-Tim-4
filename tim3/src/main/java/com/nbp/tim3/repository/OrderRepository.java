@@ -254,9 +254,9 @@ public class OrderRepository {
 
             if (resultSet.next()) {
                 int result = resultSet.getInt("result");
-                if(result == 1)
+                if (result == 1)
                     throw new InvalidRequestException(String.format("User with id %d does not have an address!", orderCreateRequest.getCustomerId()));
-                else if(result == 2)
+                else if (result == 2)
                     throw new InvalidRequestException(String.format("Restaurant with id %d does not have an address!", orderCreateRequest.getRestaurantId()));
             } else {
                 logger.error("Error checking address_id constraints.");
@@ -269,7 +269,11 @@ public class OrderRepository {
             preparedStatement.setInt(3, orderCreateRequest.getEstimatedDeliveryTime());
             preparedStatement.setFloat(4, orderCreateRequest.getDeliveryFee());
             preparedStatement.setFloat(5, orderCreateRequest.getTotalPrice());
-            preparedStatement.setInt(6, orderCreateRequest.getCouponId());
+            if (orderCreateRequest.getCouponId() != null) {
+                preparedStatement.setInt(6, orderCreateRequest.getCouponId());
+            } else {
+                preparedStatement.setObject(6, null);
+            }
             preparedStatement.setInt(7, orderCreateRequest.getCustomerId());
             preparedStatement.setInt(8, orderCreateRequest.getRestaurantId());
             preparedStatement.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()));
@@ -286,22 +290,21 @@ public class OrderRepository {
                 }
             }
 
-
-            StringBuilder orderMenuItemsSql = new StringBuilder("INSERT INTO nbp_order_menu_item (quantity, menu_item_id, order_id) VALUES ");
-            List<OrderCreateRequest.OrderMenuItemPair> menuItems = orderCreateRequest.getMenuItemIds();
-
-            orderMenuItemsSql.append("(?, ?, ?),".repeat(menuItems.size() - 1));
-            orderMenuItemsSql.append("(?, ?, ?)");
-            String orderMenuItemsSqlString = orderMenuItemsSql.toString();
-            preparedStatementOrderMenuItems = connection.prepareStatement(orderMenuItemsSqlString);
-
+            var menuItems = orderCreateRequest.getMenuItemIds();
             for (int i = 0; i < menuItems.size(); i++) {
-                preparedStatementOrderMenuItems.setInt(i + 1, menuItems.get(i).getQuantity());
-                preparedStatementOrderMenuItems.setInt(i + 2, menuItems.get(i).getId());
-                preparedStatementOrderMenuItems.setInt(i + 3, orderId);
+
+                String orderMenuItemsSql = "INSERT INTO nbp_order_menu_item (quantity, menu_item_id, order_id) VALUES (?,?,?)";
+
+                preparedStatementOrderMenuItems = connection.prepareStatement(orderMenuItemsSql);
+
+
+                preparedStatementOrderMenuItems.setInt(1, menuItems.get(i).getQuantity());
+                preparedStatementOrderMenuItems.setInt(2, menuItems.get(i).getId());
+                preparedStatementOrderMenuItems.setInt(3, orderId);
+                preparedStatementOrderMenuItems.executeUpdate();
+
             }
 
-            preparedStatementOrderMenuItems.executeUpdate();
 
             connection.commit();
             return orderId;

@@ -134,7 +134,7 @@ function Actions({
           </ButtonGroup>
         );
         break;
-      case "IN_PREPARATION":
+      case "ACCEPTED":
         setNoActions(false);
         return (
           <ButtonGroup>

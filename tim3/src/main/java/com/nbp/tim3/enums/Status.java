@@ -28,7 +28,7 @@ public enum Status {
                     return DELIVERED;
                 }
 
-            
+
         }
         throw new IllegalArgumentException("No enum constant " + Status.class.getName() + " with value " + value);
     }

@@ -12,6 +12,8 @@ import { useState } from "react";
 import { Form } from "react-bootstrap";
 import StarRatings from "react-star-ratings";
 import restaurantService from "../../service/restaurant.service";
+import userService from "../../service/user.service";
+import tokenService from "../../service/token.service";
 
 function AddReviewPopup({
   show,
@@ -35,6 +37,7 @@ function AddReviewPopup({
         restaurantId: restaurantId,
         rating: rating,
         comment: comment,
+        userId: tokenService.getUserId()
       };
     document.body.style.cursor = "wait";
     restaurantService.addReview(req).then((res) => {

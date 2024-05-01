@@ -13,10 +13,10 @@ class DiscountService {
     }
   }
 
-  getAllCouponsForRestaurant(restaurant_uuid) {
+  getAllCouponsForRestaurant(id) {
     try {
       return api
-        .get("/coupon/res/" +restaurant_uuid)
+        .get("/api/coupon/res/" +id)
         .then((response) => {
           return response;
         });
@@ -50,7 +50,7 @@ class DiscountService {
   }
 
   applyCoupon(id) {
-    return api.post("/coupon/apply/"+id);
+    return api.post("api/coupon/apply/"+id);
   }
 
   getUserScore() {

@@ -9,7 +9,6 @@ function Header() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  console.log("HEADER");
 
   const customerOptions = () => {
     const logout = () => {

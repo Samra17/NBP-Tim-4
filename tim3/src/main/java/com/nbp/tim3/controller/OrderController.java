@@ -26,9 +26,6 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    private final List<Character> chars = Arrays.asList('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'W', 'X', 'Y', 'Z',
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '!', '#', '$', '%', '&', '/', '(', ')', '=', '?', '*');
 
     @PreAuthorize("hasRole('CUSTOMER')")
     @Operation(description = "Create an order with possibility of using a coupon")
@@ -163,13 +160,13 @@ public class OrderController {
                     content = @Content)}
     )
     @ResponseStatus(HttpStatus.OK)
-    @PutMapping("{orderId}/status")
+    @PutMapping("/status/{orderId}/{status}")
     public ResponseEntity<?> changeOrderStatus(
             @Parameter(description = "Order ID", required = true)
             @PathVariable("orderId") Integer orderId,
             @Parameter(description = "New order status", required = true)
-            @RequestParam("status") Status status) {
-        orderService.changeOrderStatus(orderId, status);
+            @PathVariable("status") String status) {
+        orderService.changeOrderStatus(orderId, Status.fromString(status));
         return ResponseEntity.ok(orderService.getById(orderId));
     }
 
@@ -210,18 +207,19 @@ public class OrderController {
                     content = @Content)}
     )
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/get/restaurant/{restaurantId}")
+    @GetMapping("/get/restaurant/{status}")
     public ResponseEntity<OrderPaginatedResponse> getOrdersByStatusForRestaurant(
-            @Parameter(description = "Restaurant ID", required = true)
-            @PathVariable("restaurantId") Integer restaurantId,
             @Parameter(description = "Page number", required = true)
             @RequestParam(value = "page", defaultValue = "1") Integer page,
             @Parameter(description = "Records per page", required = true)
             @RequestParam(value = "perPage", defaultValue = "10") Integer perPage,
             @Parameter(description = "Order status", required = false)
-            @RequestParam(value = "status", required = false) Status status
+            @PathVariable(value = "status", required = false) String status,
+            @Parameter(description = "User username", required = false)
+            @RequestHeader(value = "username", required = false) String username
             ) {
-        return ResponseEntity.ok(orderService.getByRestaurantIdAndStatusPage(restaurantId, status, page, perPage));
+
+        return ResponseEntity.ok(orderService.getByRestaurantIdAndStatusPage(username, Status.fromString(status), page, perPage));
     }
 
 }

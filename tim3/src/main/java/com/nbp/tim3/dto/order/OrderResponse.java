@@ -21,7 +21,7 @@ public class OrderResponse {
     private Integer courierId;
     private Float deliveryFee;
     private String orderCode;
-    private List<OrderMenuItemResponse> items;
+    private List<String> items;
     private String restaurantName;
     private String customerPhoneNumber;
     private String customerAddress;

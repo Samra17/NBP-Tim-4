@@ -6,7 +6,7 @@ class OrderService {
     getUserOrders() {
         try {
           return api
-              .get("/order/getforuser")
+              .get("/api/order/getforuser")
               .then(response=> {
                 return response;
               })
@@ -19,7 +19,7 @@ class OrderService {
       getAdminOrders() {
         try {
           return api
-              .get("/order/adminorders")
+              .get("/api/order/adminorders")
               .then(response=> {
                 return response;
               })
@@ -32,7 +32,7 @@ class OrderService {
       getAdminSpending() {
         try {
           return api
-              .get("/order/adminspending")
+              .get("/api/order/adminspending")
               .then(response=> {
                 return response;
               })
@@ -45,7 +45,7 @@ class OrderService {
       getAdminRestaurantRevenue() {
         try {
           return api
-              .get("/order/adminrestaurantrevenue")
+              .get("/api/order/adminrestaurantrevenue")
               .then(response=> {
                 return response;
               })
@@ -57,7 +57,7 @@ class OrderService {
 
       changeOrderStatus(orderId, status) {
        return api
-          .put("/order/status/" + orderId + "/" + status)
+          .put("/api/order/status/" + orderId + "/" + status)
           
       }
 
@@ -72,7 +72,7 @@ class OrderService {
         //znaci da je dostavljac prihvatio narudzbu za dostavu
         //posto ovo poziva courier, njegov uuid ce biti u headeru, jer je on current user
         return api
-          .put("/order/adddeliveryperson/" + orderId)
+          .put("/api/order/adddeliveryperson/" + orderId)
           
       }
 
@@ -99,39 +99,35 @@ class OrderService {
       }
 
       getReadyForDeliveryOrders() {
-        return api.get("/order/get/readyfordelivery")
+        return api.get("/api/order/get/readyfordelivery")
       }
 
       getDeliveryPersonOrders() {
-        return api.get("/order/get/deliveryperson")
+        return api.get("/api/order/get/deliveryperson")
       }
 
-      getRestaurantPastOrders(uuid) {
-        //treba vratiti narudzbe za restoran ciji je UUID proslijeđen
-        //narudzbe moraju imati status Delivered
-        return api.get("/order/get/restaurant/" + uuid +"/delivered")
+      getRestaurantPastOrders(page,perPage) {
+      
+        return api.get("/api/order/get/restaurant/delivered?page=${page}&perPage=${perPage}")
       }
 
-      getRestaurantPendingOrders(uuid) {
-        //treba vratiti narudzbe za restoran ciji je UUID proslijeđen
-        //narudzbe moraju imati status Pending (sve novokreirane narudzbe neka imaju ovaj status) 
-        return api.get("/order/get/restaurant/" + uuid +"/pending")
+      getRestaurantPendingOrders(page,perPage) {
+       
+        return api.get(`/api/order/get/restaurant/pending?page=${page}&perPage=${perPage}`)
       }
 
-      getRestaurantInPreparationOrders(uuid) {
-        //treba vratiti narudzbe za restoran ciji je UUID proslijeđen
-        //narudzbe moraju imati status In preparation
-        return api.get("/order/get/restaurant/" + uuid +"/in-preparation")
+      getRestaurantInPreparationOrders(page,perPage) {
+        
+        return api.get(`/api/order/get/restaurant/in-preparation?page=${page}&perPage=${perPage}`)
       }
 
-      getRestaurantReadyOrders(uuid) {
-        //treba vratiti narudzbe za restoran ciji je UUID proslijeđen
-        //narudzbe moraju imati status Ready for delivery
-        return api.get("/order/get/restaurant/" + uuid +"/ready-for-delivery")
+      getRestaurantReadyOrders(page,perPage) {
+        
+        return api.get(`/api/order/get/restaurant/ready-for-delivery?page=${page}&perPage=${perPage}`)
       }
 
       createOrder(orderCreateRequest) {
-        return api.post("/order/add", orderCreateRequest)
+        return api.post("/api/order/add", orderCreateRequest)
       }
 
 }

@@ -139,10 +139,16 @@ public class RestaurantRepository {
         } finally {
             if (exception && connection != null) {
                 try {
-                    Objects.requireNonNull(preparedStatement).close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                }
+            }
+
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
                 }
             }
         }
@@ -216,10 +222,16 @@ public class RestaurantRepository {
         } finally {
             if (exception && connection != null) {
                 try {
-                    Objects.requireNonNull(preparedStatement).close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                }
+            }
+
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
                 }
             }
         }
@@ -265,10 +277,16 @@ public class RestaurantRepository {
         } finally {
             if (exception && connection != null) {
                 try {
-                    Objects.requireNonNull(preparedStatement).close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                }
+            }
+
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
                 }
             }
         }
@@ -362,10 +380,16 @@ public class RestaurantRepository {
         } finally {
             if (exception && connection != null) {
                 try {
-                    Objects.requireNonNull(preparedStatement).close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                }
+            }
+
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
                 }
             }
         }
@@ -437,10 +461,16 @@ public class RestaurantRepository {
         } finally {
             if (exception && connection != null) {
                 try {
-                    Objects.requireNonNull(preparedStatement).close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                }
+            }
+
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
                 }
             }
         }
@@ -620,10 +650,16 @@ public class RestaurantRepository {
         } finally {
             if (exception && connection != null) {
                 try {
-                    Objects.requireNonNull(preparedStatement).close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                }
+            }
+
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
                 }
             }
         }
@@ -670,10 +706,16 @@ public class RestaurantRepository {
         } finally {
             if (exception && connection != null) {
                 try {
-                    Objects.requireNonNull(preparedStatement).close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                }
+            }
+
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
                 }
             }
         }
@@ -836,10 +878,16 @@ public class RestaurantRepository {
         } finally {
             if (exception && connection != null) {
                 try {
-                    Objects.requireNonNull(preparedStatement).close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                }
+            }
+
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
                 }
             }
         }
@@ -1001,10 +1049,16 @@ public class RestaurantRepository {
         } finally {
             if (exception && connection != null) {
                 try {
-                    Objects.requireNonNull(preparedStatement).close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                }
+            }
+
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
                 }
             }
         }
@@ -1190,10 +1244,16 @@ public class RestaurantRepository {
         } finally {
             if (exception && connection != null) {
                 try {
-                    Objects.requireNonNull(preparedStatement).close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                }
+            }
+
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
                 }
             }
         }
@@ -1327,10 +1387,16 @@ public class RestaurantRepository {
         } finally {
             if (exception && connection != null) {
                 try {
-                    Objects.requireNonNull(preparedStatement).close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                }
+            }
+
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
                 }
             }
         }
@@ -1464,10 +1530,16 @@ public class RestaurantRepository {
         } finally {
             if (exception && connection != null) {
                 try {
-                    Objects.requireNonNull(callableStatement).close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                }
+            }
+
+            if (callableStatement != null) {
+                try {
+                    callableStatement.close();
+                } catch (SQLException e) {
                 }
             }
         }
@@ -1611,10 +1683,16 @@ public class RestaurantRepository {
         } finally {
             if (exception && connection != null) {
                 try {
-                    Objects.requireNonNull(callableStatement).close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                }
+            }
+
+            if (callableStatement != null) {
+                try {
+                    callableStatement.close();
+                } catch (SQLException e) {
                 }
             }
         }
@@ -1683,10 +1761,16 @@ public class RestaurantRepository {
         } finally {
             if (exception && connection != null) {
                 try {
-                    Objects.requireNonNull(callableStatement).close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                }
+            }
+
+            if (callableStatement != null) {
+                try {
+                    callableStatement.close();
+                } catch (SQLException e) {
                 }
             }
         }
@@ -1732,10 +1816,16 @@ public class RestaurantRepository {
         } finally {
             if (exception && connection != null) {
                 try {
-                    Objects.requireNonNull(preparedStatement).close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                }
+            }
+
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
                 }
             }
         }
@@ -1745,7 +1835,7 @@ public class RestaurantRepository {
     public int countNumberOfFavorites(int restaurantId) {
         String sql = "SELECT COUNT(id) as cnt FROM nbp_favorite_restaurant WHERE restaurant_id=?";
 
-        PreparedStatement preparedStatement = null;
+        PreparedStatement preparedStatement;
         try {
             Connection connection = dbConnectionService.getConnection();
             preparedStatement = connection.prepareStatement(sql);
@@ -1759,18 +1849,19 @@ public class RestaurantRepository {
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
-        } finally {
+        }
+
+        if (preparedStatement != null) {
             try {
-                Objects.requireNonNull(preparedStatement).close();
+                preparedStatement.close();
             } catch (SQLException e) {
-                throw new RuntimeException(e);
             }
         }
 
         return 0;
     }
 
-    private String constructQuery(FilterRestaurantRequest filter, String sortBy, boolean ascending, int id) {
+    private String constructQuery(FilterRestaurantRequest filter,String sortBy,boolean ascending, int id) {
         String baseQuery = "SELECT * FROM (" +
                 "    SELECT ROW_NUMBER() OVER (ORDER BY nr.id) rnum, " +
                 "COUNT(*) OVER () RESULT_COUNT,\n" +
@@ -1830,7 +1921,7 @@ public class RestaurantRepository {
                 "            WHEN TO_CHAR(SYSDATE, 'HH24:MI') >= noh.opening_time \n" +
                 "                 AND TO_CHAR(SYSDATE, 'HH24:MI') <= noh.closing_time THEN 1 \n" +
                 "            ELSE 0 \n" +
-                "        END";
+                "        END" ;
 
         String orderBy = "";
 
@@ -1839,12 +1930,12 @@ public class RestaurantRepository {
                 "    rnum >= ?\n" +
                 "    AND rnum <= ?";
 
-        if (id > -1) {
+        if(id > -1){
             whereClause = "WHERE nr.id=?";
         }
 
-        if (filter != null) {
-            if (filter.getCategoryIds() != null && !filter.getCategoryIds().isEmpty()) {
+        if(filter != null) {
+            if(filter.getCategoryIds() != null && !filter.getCategoryIds().isEmpty()) {
 
                 StringJoiner joiner = new StringJoiner(",", "", "");
                 for (int i = 0; i < filter.getCategoryIds().size(); i++) {
@@ -1855,19 +1946,19 @@ public class RestaurantRepository {
                 whereClause = "WHERE nrc.category_id IN " + categories;
             }
 
-            if (filter.getName() != null) {
+            if(filter.getName() != null) {
                 String whereName = "UPPER(nr.name) LIKE UPPER(?)";
-                if (whereClause.isEmpty()) {
+                if(whereClause.isEmpty()) {
                     whereClause = "WHERE " + whereName;
                 } else {
                     whereClause += " AND " + whereName;
                 }
             }
 
-            if (filter.isOfferingDiscount()) {
+            if(filter.isOfferingDiscount()) {
                 String discountWhere = "EXISTS(SELECT nc.id FROM NBP_COUPON nc WHERE nc.QUANTITY>0 AND nc.RESTAURANT_ID=nr.id)";
 
-                if (whereClause.isEmpty()) {
+                if(whereClause.isEmpty()) {
                     whereClause = "WHERE " + discountWhere;
                 } else {
                     whereClause += " AND " + discountWhere;
@@ -1875,9 +1966,9 @@ public class RestaurantRepository {
             }
         }
 
-        if (sortBy != null && !sortBy.isEmpty()) {
+        if(sortBy!= null && !sortBy.isEmpty()) {
             String dir = "";
-            if (ascending)
+            if(ascending)
                 dir = "ASC";
             else
                 dir = "DESC";
@@ -1892,9 +1983,10 @@ public class RestaurantRepository {
             }
         }
 
-        return String.format("%s %s %s %s %s", baseQuery, whereClause, groupBy, orderBy, endQuery);
+        return String.format("%s %s %s %s %s",baseQuery,whereClause,groupBy,orderBy,endQuery);
 
     }
+
 
 
 }

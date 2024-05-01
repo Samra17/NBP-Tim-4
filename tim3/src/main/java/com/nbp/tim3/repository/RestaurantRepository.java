@@ -36,7 +36,7 @@ public class RestaurantRepository {
     @Autowired
     UserRepository userRepository;
 
-    public void addRestaurant(Restaurant restaurant, Address address, int managerId)  {
+    public void addRestaurant(Restaurant restaurant, Address address, int managerId) {
         String sqlRes = "INSERT INTO nbp_restaurant(name,address_id,manager_id) VALUES(?,?,?)";
         String sqlAdr = "INSERT INTO nbp_address(street,municipality,map_coordinates) VALUES (?,?,?)";
         String checkManagerId =
@@ -52,39 +52,40 @@ public class RestaurantRepository {
 
         boolean exception = false;
 
+        PreparedStatement preparedStatement = null;
         try {
             connection = dbConnectionService.getConnection();
-            String returnCols[] = { "id" };
+            String returnCols[] = {"id"};
 
-            PreparedStatement preparedStatement = connection.prepareStatement(checkManagerId);
-            preparedStatement.setInt(1,managerId);
-            preparedStatement.setInt(2,managerId);
-            preparedStatement.setInt(3,managerId);
+            preparedStatement = connection.prepareStatement(checkManagerId);
+            preparedStatement.setInt(1, managerId);
+            preparedStatement.setInt(2, managerId);
+            preparedStatement.setInt(3, managerId);
             ResultSet resultSet = preparedStatement.executeQuery();
 
-                if (resultSet.next()) {
-                    int result = resultSet.getInt("result");
-                    if(result == 1)
-                        throw new InvalidRequestException(String.format("User with id %d does not exist!",managerId));
-                    else if(result == 2)
-                        throw new InvalidRequestException(String.format("User with id %d does not have the Manager role!",managerId));
-                    else if (result == 3)
-                        throw new InvalidRequestException(String.format("User with id %d already has an assigned restaurant!",managerId));
-                } else {
-                    logger.error("Error checking manager_id constraints.");
-                }
+            if (resultSet.next()) {
+                int result = resultSet.getInt("result");
+                if (result == 1)
+                    throw new InvalidRequestException(String.format("User with id %d does not exist!", managerId));
+                else if (result == 2)
+                    throw new InvalidRequestException(String.format("User with id %d does not have the Manager role!", managerId));
+                else if (result == 3)
+                    throw new InvalidRequestException(String.format("User with id %d already has an assigned restaurant!", managerId));
+            } else {
+                logger.error("Error checking manager_id constraints.");
+            }
 
 
-            preparedStatement = connection.prepareStatement(sqlAdr,returnCols);
-            preparedStatement.setString(1,address.getStreet());
-            preparedStatement.setString(2,address.getMunicipality());
-            preparedStatement.setString(3,address.getMapCoordinates());
+            preparedStatement = connection.prepareStatement(sqlAdr, returnCols);
+            preparedStatement.setString(1, address.getStreet());
+            preparedStatement.setString(2, address.getMunicipality());
+            preparedStatement.setString(3, address.getMapCoordinates());
 
             int rowCount = preparedStatement.executeUpdate();
 
-            if(rowCount > 0) {
+            if (rowCount > 0) {
                 ResultSet rs = preparedStatement.getGeneratedKeys();
-                if(rs.next()) {
+                if (rs.next()) {
                     int generatedId = rs.getInt(1);
                     address.setId(generatedId);
                 } else {
@@ -92,17 +93,17 @@ public class RestaurantRepository {
                 }
             }
 
-            preparedStatement = connection.prepareStatement(sqlRes,returnCols);
+            preparedStatement = connection.prepareStatement(sqlRes, returnCols);
             preparedStatement.setString(1, restaurant.getName());
-            preparedStatement.setInt(2,address.getId());
-            preparedStatement.setInt(3,managerId);
+            preparedStatement.setInt(2, address.getId());
+            preparedStatement.setInt(3, managerId);
 
 
             rowCount = preparedStatement.executeUpdate();
 
-            if(rowCount > 0) {
+            if (rowCount > 0) {
                 ResultSet rs = preparedStatement.getGeneratedKeys();
-                if(rs.next()) {
+                if (rs.next()) {
                     int generatedId = rs.getInt(1);
                     restaurant.setId(generatedId);
                 } else {
@@ -114,15 +115,13 @@ public class RestaurantRepository {
 
 
             logger.info(String.format("Successfully inserted %d rows into Restaurant.", rowCount));
-        }
-
-        catch (SQLException e) {
+        } catch (SQLException e) {
             logger.error(e.getMessage());
 
             exception = true;
 
-            if(e.getSQLState().startsWith("23")) {
-                if(e.getErrorCode() == 1) {
+            if (e.getSQLState().startsWith("23")) {
+                if (e.getErrorCode() == 1) {
                     if (e.getMessage().contains("NBP_ADDRESS_UN"))
                         throw new InvalidRequestException(String.format("Map coordinates %s already in use!", address.getMapCoordinates()));
                     else
@@ -133,24 +132,30 @@ public class RestaurantRepository {
             }
 
 
-
         } catch (Exception e) {
             exception = true;
             e.printStackTrace();
             throw e;
         } finally {
-            if(exception && connection!=null) {
+            if (exception && connection != null) {
                 try {
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
             }
+
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
+                }
+            }
         }
 
     }
 
-    public void updateRestaurant(Restaurant restaurant, Address address)  {
+    public void updateRestaurant(Restaurant restaurant, Address address) {
         String sqlRes = "UPDATE nbp_restaurant" +
                 " SET name=?,logo=? WHERE id=?";
         String sqlUpdateAdr = "UPDATE nbp_address SET street=?, municipality=?, map_coordinates=? WHERE id=" +
@@ -160,53 +165,52 @@ public class RestaurantRepository {
 
         boolean exception = false;
 
+        PreparedStatement preparedStatement = null;
         try {
             connection = dbConnectionService.getConnection();
 
-          PreparedStatement preparedStatement = connection.prepareStatement(sqlUpdateAdr);
-          preparedStatement.setString(1, address.getStreet());
-          preparedStatement.setString(2, address.getMunicipality());
-          preparedStatement.setString(3, address.getMapCoordinates());
-          preparedStatement.setInt(4, restaurant.getId());
+            preparedStatement = connection.prepareStatement(sqlUpdateAdr);
+            preparedStatement.setString(1, address.getStreet());
+            preparedStatement.setString(2, address.getMunicipality());
+            preparedStatement.setString(3, address.getMapCoordinates());
+            preparedStatement.setInt(4, restaurant.getId());
 
-          int rowCount = preparedStatement.executeUpdate();
+            int rowCount = preparedStatement.executeUpdate();
 
-        if (rowCount > 0) {
-            ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
-            if (generatedKeys.next()) {
-                int id = generatedKeys.getInt(1);
-                System.out.println("ID of the updated row: " + id);
-                address.setId(id);
+            if (rowCount > 0) {
+                ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    int id = generatedKeys.getInt(1);
+                    System.out.println("ID of the updated row: " + id);
+                    address.setId(id);
+                }
+                logger.info(String.format("Updated %d rows in Address!", rowCount));
             }
-            logger.info(String.format("Updated %d rows in Address!",rowCount));
-        }
 
-        preparedStatement = connection.prepareStatement(sqlRes);
-        preparedStatement.setString(1,restaurant.getName());
-        preparedStatement.setString(2,restaurant.getLogo());
-        preparedStatement.setInt(3,restaurant.getId());
+            preparedStatement = connection.prepareStatement(sqlRes);
+            preparedStatement.setString(1, restaurant.getName());
+            preparedStatement.setString(2, restaurant.getLogo());
+            preparedStatement.setInt(3, restaurant.getId());
 
-        rowCount = preparedStatement.executeUpdate();
+            rowCount = preparedStatement.executeUpdate();
 
-        connection.commit();
+            connection.commit();
 
 
-        logger.info(String.format("Successfully updated %d rows in Restaurant.", rowCount));
+            logger.info(String.format("Successfully updated %d rows in Restaurant.", rowCount));
 
 
-        }
-
-        catch (SQLException e) {
+        } catch (SQLException e) {
             logger.error(e.getMessage());
 
             exception = true;
 
-            if(e.getSQLState().startsWith("23")) {
-                if(e.getErrorCode() == 1) {
+            if (e.getSQLState().startsWith("23")) {
+                if (e.getErrorCode() == 1) {
                     if (e.getMessage().contains("NBP_ADDRESS_UN"))
                         throw new InvalidRequestException(String.format("Map coordinates %s already in use!", address.getMapCoordinates()));
                     else
-                        throw new InvalidRequestException(String.format("Restaurant with %s name already exists!",restaurant.getName()));
+                        throw new InvalidRequestException(String.format("Restaurant with %s name already exists!", restaurant.getName()));
                 }
             }
 
@@ -216,18 +220,25 @@ public class RestaurantRepository {
             e.printStackTrace();
             throw e;
         } finally {
-            if(exception && connection!=null) {
+            if (exception && connection != null) {
                 try {
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
             }
+
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
+                }
+            }
         }
 
     }
 
-    public boolean checkExists(int id)  {
+    public boolean checkExists(int id) {
         String sqlRes = "SELECT CASE WHEN COUNT(1) > 0 THEN 1 ELSE 0 END AS exists_row " +
                 "FROM nbp_restaurant WHERE id = ?";
 
@@ -235,26 +246,25 @@ public class RestaurantRepository {
 
         boolean exception = false;
 
+        PreparedStatement preparedStatement = null;
         try {
             connection = dbConnectionService.getConnection();
-            String returnCols[] = { "id" };
+            String returnCols[] = {"id"};
 
-            PreparedStatement preparedStatement = connection.prepareStatement(sqlRes);
+            preparedStatement = connection.prepareStatement(sqlRes);
             preparedStatement.setInt(1, id);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            if(resultSet.next()) {
+            if (resultSet.next()) {
                 int exists = resultSet.getInt(1);
 
-                if(exists==1)
+                if (exists == 1)
                     return true;
             }
 
             connection.commit();
-        }
-
-        catch (SQLException e) {
+        } catch (SQLException e) {
             logger.error(e.getMessage());
 
             exception = true;
@@ -265,45 +275,53 @@ public class RestaurantRepository {
             e.printStackTrace();
             throw e;
         } finally {
-            if(exception && connection!=null) {
+            if (exception && connection != null) {
                 try {
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
             }
+
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
+                }
+            }
         }
         return false;
     }
 
-    public RestaurantPaginatedShortResponse getRestaurants(PaginatedRequest request, String username, FilterRestaurantRequest filter, String sortBy, boolean ascending)  {
+    public RestaurantPaginatedShortResponse getRestaurants(PaginatedRequest request, String username, FilterRestaurantRequest filter, String sortBy, boolean ascending) {
 
 
         Connection connection = null;
 
         boolean exception = false;
 
-        String query = constructQuery(filter, sortBy, ascending,-1);
+        String query = constructQuery(filter, sortBy, ascending, -1);
 
 
         int paramIndex = 1;
 
-        int offset = (request.getPage()-1)*request.getRecordsPerPage();
+        int offset = (request.getPage() - 1) * request.getRecordsPerPage();
 
         User user = userRepository.getByUsername(username);
 
         int userId = user != null ? user.getId() : -1;
 
+        PreparedStatement preparedStatement = null;
         try {
             connection = dbConnectionService.getConnection();
 
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement = connection.prepareStatement(query);
 
-            preparedStatement.setInt(paramIndex,userId);
-            paramIndex +=1;
+            preparedStatement.setInt(paramIndex, userId);
+            paramIndex += 1;
 
-            if(filter != null) {
-                if(filter.getCategoryIds() != null && !filter.getCategoryIds().isEmpty()) {
+            if (filter != null) {
+                if (filter.getCategoryIds() != null && !filter.getCategoryIds().isEmpty()) {
                     List<Integer> categoryIds = filter.getCategoryIds();
 
                     for (Integer categoryId : categoryIds) {
@@ -312,16 +330,16 @@ public class RestaurantRepository {
                     }
                 }
 
-                if(filter.getName()!=null) {
+                if (filter.getName() != null) {
                     preparedStatement.setString(paramIndex, "%" + filter.getName() + "%");
-                    paramIndex +=1;
+                    paramIndex += 1;
                 }
             }
 
 
-            preparedStatement.setInt(paramIndex,offset +1);
+            preparedStatement.setInt(paramIndex, offset + 1);
             paramIndex += 1;
-            preparedStatement.setInt(paramIndex,offset + request.getRecordsPerPage());
+            preparedStatement.setInt(paramIndex, offset + request.getRecordsPerPage());
 
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -337,15 +355,15 @@ public class RestaurantRepository {
                         resultSet.getInt("is_open") != 0,
                         resultSet.getString("map_coordinates"),
                         resultSet.getString("categories") != null ?
-                        new TreeSet<>(Arrays.asList(resultSet.getString("categories").split(",")))
-                        : new TreeSet<String>(),
+                                new TreeSet<>(Arrays.asList(resultSet.getString("categories").split(",")))
+                                : new TreeSet<String>(),
                         resultSet.getFloat("rating"),
                         resultSet.getInt("customers_rated"),
                         resultSet.getInt("customers_favorited"),
-                        resultSet.getInt("customer_favorite")>0);
+                        resultSet.getInt("customer_favorite") > 0);
 
 
-                response.setTotalPages((resultSet.getInt("result_count") + request.getRecordsPerPage()-1)/request.getRecordsPerPage());
+                response.setTotalPages((resultSet.getInt("result_count") + request.getRecordsPerPage() - 1) / request.getRecordsPerPage());
                 response.getRestaurants().add(r);
             }
 
@@ -355,17 +373,23 @@ public class RestaurantRepository {
         } catch (SQLException e) {
             exception = true;
             logger.error(e.getMessage());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             exception = true;
             e.printStackTrace();
             throw e;
         } finally {
-            if(exception && connection!=null) {
+            if (exception && connection != null) {
                 try {
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                }
+            }
+
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
                 }
             }
         }
@@ -377,8 +401,7 @@ public class RestaurantRepository {
 
         boolean exception = false;
 
-        String query = constructQuery(null, null, false,id);
-
+        String query = constructQuery(null, null, false, id);
 
 
         int paramIndex = 1;
@@ -387,20 +410,21 @@ public class RestaurantRepository {
 
         int userId = user != null ? user.getId() : -1;
 
+        PreparedStatement preparedStatement = null;
         try {
             connection = dbConnectionService.getConnection();
 
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement = connection.prepareStatement(query);
 
-            preparedStatement.setInt(paramIndex,userId);
-            paramIndex +=1;
+            preparedStatement.setInt(paramIndex, userId);
+            paramIndex += 1;
 
-            preparedStatement.setInt(paramIndex,id);
-            paramIndex +=1;
+            preparedStatement.setInt(paramIndex, id);
+            paramIndex += 1;
 
-            preparedStatement.setInt(paramIndex,1);
-            paramIndex +=1;
-            preparedStatement.setInt(paramIndex,1);
+            preparedStatement.setInt(paramIndex, 1);
+            paramIndex += 1;
+            preparedStatement.setInt(paramIndex, 1);
 
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -408,19 +432,18 @@ public class RestaurantRepository {
             RestaurantShortResponse response = null;
 
             if (resultSet.next()) {
-                 response = new RestaurantShortResponse(id, resultSet.getString("name"),
+                response = new RestaurantShortResponse(id, resultSet.getString("name"),
                         resultSet.getString("street"),
                         resultSet.getString("logo"),
                         resultSet.getInt("is_open") != 0,
                         resultSet.getString("map_coordinates"),
-                         resultSet.getString("categories") != null ?
-                                 new TreeSet<>(Arrays.asList(resultSet.getString("categories").split(",")))
-                                 : new TreeSet<String>(),
+                        resultSet.getString("categories") != null ?
+                                new TreeSet<>(Arrays.asList(resultSet.getString("categories").split(",")))
+                                : new TreeSet<String>(),
                         resultSet.getFloat("rating"),
                         resultSet.getInt("customers_rated"),
                         resultSet.getInt("customers_favorited"),
-                        resultSet.getInt("customer_favorite")>0);
-
+                        resultSet.getInt("customer_favorite") > 0);
 
 
             }
@@ -431,17 +454,23 @@ public class RestaurantRepository {
         } catch (SQLException e) {
             exception = true;
             logger.error(e.getMessage());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             exception = true;
             e.printStackTrace();
             throw e;
         } finally {
-            if(exception && connection!=null) {
+            if (exception && connection != null) {
                 try {
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                }
+            }
+
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
                 }
             }
         }
@@ -503,17 +532,18 @@ public class RestaurantRepository {
                 "    AND rnum <= ?";
 
 
-        int offset = (paginatedRequest.getPage()-1)*paginatedRequest.getRecordsPerPage();
+        int offset = (paginatedRequest.getPage() - 1) * paginatedRequest.getRecordsPerPage();
 
 
+        PreparedStatement preparedStatement = null;
         try {
             connection = dbConnectionService.getConnection();
 
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement = connection.prepareStatement(query);
 
 
-            preparedStatement.setInt(1,offset +1);
-            preparedStatement.setInt(2,offset + paginatedRequest.getRecordsPerPage());
+            preparedStatement.setInt(1, offset + 1);
+            preparedStatement.setInt(2, offset + paginatedRequest.getRecordsPerPage());
 
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -524,10 +554,10 @@ public class RestaurantRepository {
 
             while (resultSet.next()) {
                 RestaurantResponse r = new RestaurantResponse(resultSet.getInt("id"), resultSet.getString("name"),
-                        new AddressResponse(resultSet.getInt("address_id"),resultSet.getString("street"),
+                        new AddressResponse(resultSet.getInt("address_id"), resultSet.getString("street"),
                                 resultSet.getString("municipality"), resultSet.getString("map_coordinates")),
                         resultSet.getString("logo"),
-                        resultSet.getInt("manager_id") ,
+                        resultSet.getInt("manager_id"),
                         null,
                         null,
                         resultSet.getFloat("rating"),
@@ -537,18 +567,18 @@ public class RestaurantRepository {
                 List<String> categories = resultSet.getString("categories") != null ?
                         Arrays.asList(resultSet.getString("categories").split(",")) : new ArrayList<>();
 
-                if(!categories.isEmpty()) {
+                if (!categories.isEmpty()) {
                     List<CategoryResponse> categoryResponses = new ArrayList<>();
 
                     categories.forEach(c -> {
                         Pattern pattern = Pattern.compile("(\\d+)\\s(.+)");
                         Matcher matcher = pattern.matcher(c);
-                                if (matcher.find()) {
-                                    int id = Integer.parseInt(matcher.group(1));
-                                    String name = matcher.group(2);
-                                    CategoryResponse categoryResponse= new CategoryResponse(id,name);
-                                    categoryResponses.add(categoryResponse);
-                                }
+                        if (matcher.find()) {
+                            int id = Integer.parseInt(matcher.group(1));
+                            String name = matcher.group(2);
+                            CategoryResponse categoryResponse = new CategoryResponse(id, name);
+                            categoryResponses.add(categoryResponse);
+                        }
                     });
                     r.setCategories(categoryResponses);
                 }
@@ -556,7 +586,7 @@ public class RestaurantRepository {
                 List<String> openingTimes = resultSet.getString("opening_times") != null ?
                         Arrays.asList(resultSet.getString("opening_times").split(",")) : new ArrayList<>();
 
-                if(!openingTimes.isEmpty()) {
+                if (!openingTimes.isEmpty()) {
                     OpeningHoursResponse openingHoursResponse = new OpeningHoursResponse();
                     openingTimes.forEach(ot -> {
                         Pattern pattern = Pattern.compile("([a-zA-Z]+)\\s(\\d{2}:\\d{2})-(\\d{2}:\\d{2})");
@@ -566,7 +596,7 @@ public class RestaurantRepository {
                             String open = matcher.group(2);
                             String close = matcher.group(3);
 
-                            switch (day){
+                            switch (day) {
                                 case "Monday":
                                     openingHoursResponse.setMondayOpen(LocalTime.parse(open));
                                     openingHoursResponse.setMondayClose(LocalTime.parse(close));
@@ -603,7 +633,7 @@ public class RestaurantRepository {
                 }
 
 
-                response.setTotalPages((resultSet.getInt("result_count") + paginatedRequest.getRecordsPerPage()-1)/paginatedRequest.getRecordsPerPage());
+                response.setTotalPages((resultSet.getInt("result_count") + paginatedRequest.getRecordsPerPage() - 1) / paginatedRequest.getRecordsPerPage());
                 response.getRestaurants().add(r);
             }
 
@@ -613,17 +643,23 @@ public class RestaurantRepository {
         } catch (SQLException e) {
             exception = true;
             logger.error(e.getMessage());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             exception = true;
             e.printStackTrace();
             throw e;
         } finally {
-            if(exception && connection!=null) {
+            if (exception && connection != null) {
                 try {
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                }
+            }
+
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
                 }
             }
         }
@@ -641,20 +677,21 @@ public class RestaurantRepository {
                 "WHERE nu.username =?";
 
 
+        PreparedStatement preparedStatement = null;
         try {
             connection = dbConnectionService.getConnection();
 
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement = connection.prepareStatement(query);
 
-            preparedStatement.setString(1,managerUsername);
+            preparedStatement.setString(1, managerUsername);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
             Integer response = null;
 
             if (resultSet.next()) {
-               int id = resultSet.getInt("id");
-               response = Integer.valueOf(id);
+                int id = resultSet.getInt("id");
+                response = Integer.valueOf(id);
             }
 
             connection.commit();
@@ -662,17 +699,23 @@ public class RestaurantRepository {
         } catch (SQLException e) {
             exception = true;
             logger.error(e.getMessage());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             exception = true;
             e.printStackTrace();
             throw e;
         } finally {
-            if(exception && connection!=null) {
+            if (exception && connection != null) {
                 try {
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                }
+            }
+
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
                 }
             }
         }
@@ -726,15 +769,14 @@ public class RestaurantRepository {
                 "        nr.MANAGER_ID";
 
 
-
-
+        PreparedStatement preparedStatement = null;
         try {
             connection = dbConnectionService.getConnection();
 
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement = connection.prepareStatement(query);
 
 
-            preparedStatement.setString(1,managerUsername);
+            preparedStatement.setString(1, managerUsername);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -743,10 +785,10 @@ public class RestaurantRepository {
 
             if (resultSet.next()) {
                 response = new RestaurantResponse(resultSet.getInt("id"), resultSet.getString("name"),
-                        new AddressResponse(resultSet.getInt("address_id"),resultSet.getString("street"),
+                        new AddressResponse(resultSet.getInt("address_id"), resultSet.getString("street"),
                                 resultSet.getString("municipality"), resultSet.getString("map_coordinates")),
                         resultSet.getString("logo"),
-                        resultSet.getInt("manager_id") ,
+                        resultSet.getInt("manager_id"),
                         null,
                         null,
                         resultSet.getFloat("rating"),
@@ -756,7 +798,7 @@ public class RestaurantRepository {
                 List<String> categories = resultSet.getString("categories") != null ?
                         Arrays.asList(resultSet.getString("categories").split(",")) : new ArrayList<>();
 
-                if(!categories.isEmpty()) {
+                if (!categories.isEmpty()) {
                     List<CategoryResponse> categoryResponses = new ArrayList<>();
 
                     categories.forEach(c -> {
@@ -765,7 +807,7 @@ public class RestaurantRepository {
                         if (matcher.find()) {
                             int id = Integer.parseInt(matcher.group(1));
                             String name = matcher.group(2);
-                            CategoryResponse categoryResponse= new CategoryResponse(id,name);
+                            CategoryResponse categoryResponse = new CategoryResponse(id, name);
                             categoryResponses.add(categoryResponse);
                         }
                     });
@@ -775,7 +817,7 @@ public class RestaurantRepository {
                 List<String> openingTimes = resultSet.getString("opening_times") != null ?
                         Arrays.asList(resultSet.getString("opening_times").split(",")) : new ArrayList<>();
 
-                if(!openingTimes.isEmpty()) {
+                if (!openingTimes.isEmpty()) {
                     OpeningHoursResponse openingHoursResponse = new OpeningHoursResponse();
                     openingTimes.forEach(ot -> {
                         Pattern pattern = Pattern.compile("([a-zA-Z]+)\\s(\\d{2}:\\d{2})-(\\d{2}:\\d{2})");
@@ -785,7 +827,7 @@ public class RestaurantRepository {
                             String open = matcher.group(2);
                             String close = matcher.group(3);
 
-                            switch (day){
+                            switch (day) {
                                 case "Monday":
                                     openingHoursResponse.setMondayOpen(LocalTime.parse(open));
                                     openingHoursResponse.setMondayClose(LocalTime.parse(close));
@@ -829,17 +871,23 @@ public class RestaurantRepository {
         } catch (SQLException e) {
             exception = true;
             logger.error(e.getMessage());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             exception = true;
             e.printStackTrace();
             throw e;
         } finally {
-            if(exception && connection!=null) {
+            if (exception && connection != null) {
                 try {
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                }
+            }
+
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
                 }
             }
         }
@@ -879,7 +927,7 @@ public class RestaurantRepository {
                 "    LEFT JOIN \n" +
                 "    \tNBP_RESTAURANT_CATEGORY nrc ON nrc.RESTAURANT_ID = nr.ID \n" +
                 "    LEFT JOIN \n" +
-                "    \t NBP_CATEGORY nc ON nc.ID = nrc.CATEGORY_ID \n"  +
+                "    \t NBP_CATEGORY nc ON nc.ID = nrc.CATEGORY_ID \n" +
                 "\n WHERE nr.id = ?" +
                 "GROUP BY \n" +
                 "        nr.ID, \n" +
@@ -892,15 +940,14 @@ public class RestaurantRepository {
                 "        nr.MANAGER_ID";
 
 
-
-
+        PreparedStatement preparedStatement = null;
         try {
             connection = dbConnectionService.getConnection();
 
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement = connection.prepareStatement(query);
 
 
-            preparedStatement.setInt(1,id);
+            preparedStatement.setInt(1, id);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -909,10 +956,10 @@ public class RestaurantRepository {
 
             if (resultSet.next()) {
                 response = new RestaurantResponse(resultSet.getInt("id"), resultSet.getString("name"),
-                        new AddressResponse(resultSet.getInt("address_id"),resultSet.getString("street"),
+                        new AddressResponse(resultSet.getInt("address_id"), resultSet.getString("street"),
                                 resultSet.getString("municipality"), resultSet.getString("map_coordinates")),
                         resultSet.getString("logo"),
-                        resultSet.getInt("manager_id") ,
+                        resultSet.getInt("manager_id"),
                         null,
                         null,
                         resultSet.getFloat("rating"),
@@ -922,7 +969,7 @@ public class RestaurantRepository {
                 List<String> categories = resultSet.getString("categories") != null ?
                         Arrays.asList(resultSet.getString("categories").split(",")) : new ArrayList<>();
 
-                if(!categories.isEmpty()) {
+                if (!categories.isEmpty()) {
                     List<CategoryResponse> categoryResponses = new ArrayList<>();
 
                     categories.forEach(c -> {
@@ -931,7 +978,7 @@ public class RestaurantRepository {
                         if (matcher.find()) {
                             int catId = Integer.parseInt(matcher.group(1));
                             String name = matcher.group(2);
-                            CategoryResponse categoryResponse= new CategoryResponse(catId,name);
+                            CategoryResponse categoryResponse = new CategoryResponse(catId, name);
                             categoryResponses.add(categoryResponse);
                         }
                     });
@@ -941,7 +988,7 @@ public class RestaurantRepository {
                 List<String> openingTimes = resultSet.getString("opening_times") != null ?
                         Arrays.asList(resultSet.getString("opening_times").split(",")) : new ArrayList<>();
 
-                if(!openingTimes.isEmpty()) {
+                if (!openingTimes.isEmpty()) {
                     OpeningHoursResponse openingHoursResponse = new OpeningHoursResponse();
                     openingTimes.forEach(ot -> {
                         Pattern pattern = Pattern.compile("([a-zA-Z]+)\\s(\\d{2}:\\d{2})-(\\d{2}:\\d{2})");
@@ -951,7 +998,7 @@ public class RestaurantRepository {
                             String open = matcher.group(2);
                             String close = matcher.group(3);
 
-                            switch (day){
+                            switch (day) {
                                 case "Monday":
                                     openingHoursResponse.setMondayOpen(LocalTime.parse(open));
                                     openingHoursResponse.setMondayClose(LocalTime.parse(close));
@@ -995,17 +1042,23 @@ public class RestaurantRepository {
         } catch (SQLException e) {
             exception = true;
             logger.error(e.getMessage());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             exception = true;
             e.printStackTrace();
             throw e;
         } finally {
-            if(exception && connection!=null) {
+            if (exception && connection != null) {
                 try {
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                }
+            }
+
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
                 }
             }
         }
@@ -1048,7 +1101,7 @@ public class RestaurantRepository {
                 "    LEFT JOIN \n" +
                 "    \t NBP_CATEGORY nc ON nc.ID = nrc.CATEGORY_ID \n" +
                 "   WHERE EXISTS (SELECT nrc2.id FROM NBP_RESTAURANT_CATEGORY nrc2 WHERE nrc2.category_id IN" +
-                " ("+ "?,".repeat(categoryIds.size() - 1) + "?) AND nrc2.restaurant_id=nr.id)" +
+                " (" + "?,".repeat(categoryIds.size() - 1) + "?) AND nrc2.restaurant_id=nr.id)" +
                 "GROUP BY \n" +
                 "        nr.ID, \n" +
                 "        nr.NAME, \n" +
@@ -1067,13 +1120,13 @@ public class RestaurantRepository {
                 "    AND rnum <= ?";
 
 
+        int offset = (paginatedRequest.getPage() - 1) * paginatedRequest.getRecordsPerPage();
 
-        int offset = (paginatedRequest.getPage()-1)*paginatedRequest.getRecordsPerPage();
-
+        PreparedStatement preparedStatement = null;
         try {
             connection = dbConnectionService.getConnection();
 
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement = connection.prepareStatement(query);
 
             int paramIndex = 1;
 
@@ -1082,9 +1135,9 @@ public class RestaurantRepository {
                 paramIndex++;
             }
 
-            preparedStatement.setInt(paramIndex,offset +1);
+            preparedStatement.setInt(paramIndex, offset + 1);
             paramIndex++;
-            preparedStatement.setInt(paramIndex,offset + paginatedRequest.getRecordsPerPage());
+            preparedStatement.setInt(paramIndex, offset + paginatedRequest.getRecordsPerPage());
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -1095,10 +1148,10 @@ public class RestaurantRepository {
 
             while (resultSet.next()) {
                 var restaurant = new RestaurantResponse(resultSet.getInt("id"), resultSet.getString("name"),
-                        new AddressResponse(resultSet.getInt("address_id"),resultSet.getString("street"),
+                        new AddressResponse(resultSet.getInt("address_id"), resultSet.getString("street"),
                                 resultSet.getString("municipality"), resultSet.getString("map_coordinates")),
                         resultSet.getString("logo"),
-                        resultSet.getInt("manager_id") ,
+                        resultSet.getInt("manager_id"),
                         null,
                         null,
                         resultSet.getFloat("rating"),
@@ -1108,7 +1161,7 @@ public class RestaurantRepository {
                 List<String> categories = resultSet.getString("categories") != null ?
                         Arrays.asList(resultSet.getString("categories").split(",")) : new ArrayList<>();
 
-                if(!categories.isEmpty()) {
+                if (!categories.isEmpty()) {
                     List<CategoryResponse> categoryResponses = new ArrayList<>();
 
                     categories.forEach(c -> {
@@ -1117,7 +1170,7 @@ public class RestaurantRepository {
                         if (matcher.find()) {
                             int id = Integer.parseInt(matcher.group(1));
                             String name = matcher.group(2);
-                            CategoryResponse categoryResponse= new CategoryResponse(id,name);
+                            CategoryResponse categoryResponse = new CategoryResponse(id, name);
                             categoryResponses.add(categoryResponse);
                         }
                     });
@@ -1127,7 +1180,7 @@ public class RestaurantRepository {
                 List<String> openingTimes = resultSet.getString("opening_times") != null ?
                         Arrays.asList(resultSet.getString("opening_times").split(",")) : new ArrayList<>();
 
-                if(!openingTimes.isEmpty()) {
+                if (!openingTimes.isEmpty()) {
                     OpeningHoursResponse openingHoursResponse = new OpeningHoursResponse();
                     openingTimes.forEach(ot -> {
                         Pattern pattern = Pattern.compile("([a-zA-Z]+)\\s(\\d{2}:\\d{2})-(\\d{2}:\\d{2})");
@@ -1137,7 +1190,7 @@ public class RestaurantRepository {
                             String open = matcher.group(2);
                             String close = matcher.group(3);
 
-                            switch (day){
+                            switch (day) {
                                 case "Monday":
                                     openingHoursResponse.setMondayOpen(LocalTime.parse(open));
                                     openingHoursResponse.setMondayClose(LocalTime.parse(close));
@@ -1172,7 +1225,7 @@ public class RestaurantRepository {
 
                     restaurant.setOpeningHours(openingHoursResponse);
 
-                    response.setTotalPages((resultSet.getInt("result_count") + paginatedRequest.getRecordsPerPage()-1)/paginatedRequest.getRecordsPerPage());
+                    response.setTotalPages((resultSet.getInt("result_count") + paginatedRequest.getRecordsPerPage() - 1) / paginatedRequest.getRecordsPerPage());
                     response.getRestaurants().add(restaurant);
                 }
 
@@ -1184,17 +1237,23 @@ public class RestaurantRepository {
         } catch (SQLException e) {
             exception = true;
             logger.error(e.getMessage());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             exception = true;
             e.printStackTrace();
             throw e;
         } finally {
-            if(exception && connection!=null) {
+            if (exception && connection != null) {
                 try {
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                }
+            }
+
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
                 }
             }
         }
@@ -1261,7 +1320,7 @@ public class RestaurantRepository {
                 "            WHEN TO_CHAR(SYSDATE, 'HH24:MI') >= noh.opening_time \n" +
                 "                 AND TO_CHAR(SYSDATE, 'HH24:MI') <= noh.closing_time THEN 1 \n" +
                 "            ELSE 0 \n" +
-                "        END) "  +
+                "        END) " +
                 " WHERE \n" +
                 "    rnum >= ?\n" +
                 "    AND rnum <= ?";
@@ -1269,24 +1328,25 @@ public class RestaurantRepository {
 
         int paramIndex = 1;
 
-        int offset = (paginatedRequest.getPage()-1)*paginatedRequest.getRecordsPerPage();
+        int offset = (paginatedRequest.getPage() - 1) * paginatedRequest.getRecordsPerPage();
 
         User user = userRepository.getByUsername(username);
 
         int userId = user != null ? user.getId() : -1;
 
+        PreparedStatement preparedStatement = null;
         try {
             connection = dbConnectionService.getConnection();
 
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement = connection.prepareStatement(query);
 
-            preparedStatement.setInt(paramIndex,userId);
-            paramIndex +=1;
-
-
-            preparedStatement.setInt(paramIndex,offset +1);
+            preparedStatement.setInt(paramIndex, userId);
             paramIndex += 1;
-            preparedStatement.setInt(paramIndex,offset + paginatedRequest.getRecordsPerPage());
+
+
+            preparedStatement.setInt(paramIndex, offset + 1);
+            paramIndex += 1;
+            preparedStatement.setInt(paramIndex, offset + paginatedRequest.getRecordsPerPage());
 
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -1307,10 +1367,10 @@ public class RestaurantRepository {
                         resultSet.getFloat("rating"),
                         resultSet.getInt("customers_rated"),
                         resultSet.getInt("customers_favorited"),
-                        resultSet.getInt("customer_favorite")>0);
+                        resultSet.getInt("customer_favorite") > 0);
 
 
-                response.setTotalPages((resultSet.getInt("result_count") + paginatedRequest.getRecordsPerPage()-1)/paginatedRequest.getRecordsPerPage());
+                response.setTotalPages((resultSet.getInt("result_count") + paginatedRequest.getRecordsPerPage() - 1) / paginatedRequest.getRecordsPerPage());
                 response.getRestaurants().add(r);
             }
 
@@ -1320,17 +1380,23 @@ public class RestaurantRepository {
         } catch (SQLException e) {
             exception = true;
             logger.error(e.getMessage());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             exception = true;
             e.printStackTrace();
             throw e;
         } finally {
-            if(exception && connection!=null) {
+            if (exception && connection != null) {
                 try {
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                }
+            }
+
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
                 }
             }
         }
@@ -1342,16 +1408,17 @@ public class RestaurantRepository {
         Connection connection = null;
 
         boolean exception = false;
+        CallableStatement callableStatement = null;
         try {
             connection = dbConnectionService.getConnection();
 
             String procedureCall = "{call update_restaurant_categories(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
-            CallableStatement callableStatement = connection.prepareCall(procedureCall);
+            callableStatement = connection.prepareCall(procedureCall);
 
             callableStatement.setInt(1, id);
-            callableStatement.setString(2,categoryIds.stream()
-                                                        .map(Object::toString)
-                                                        .collect(Collectors.joining(",")));
+            callableStatement.setString(2, categoryIds.stream()
+                    .map(Object::toString)
+                    .collect(Collectors.joining(",")));
 
             callableStatement.registerOutParameter(3, Types.INTEGER);
             callableStatement.registerOutParameter(4, Types.VARCHAR);
@@ -1371,167 +1438,20 @@ public class RestaurantRepository {
 
 
             var response = new RestaurantResponse(id, callableStatement.getString(4),
-                        new AddressResponse(callableStatement.getInt(6),callableStatement.getString(8),
-                                callableStatement.getString(9), callableStatement.getString(7)),
-                        callableStatement.getString(5),
-                        callableStatement.getInt(10) ,
-                        null,
-                        null,
-                        callableStatement.getFloat(13),
-                        callableStatement.getInt(14),
-                        callableStatement.getInt(15));
-
-                List<String> categories = callableStatement.getString(11) != null ?
-                        Arrays.asList(callableStatement.getString(11).split(",")) : new ArrayList<>();
-
-                if(!categories.isEmpty()) {
-                    List<CategoryResponse> categoryResponses = new ArrayList<>();
-
-                    categories.forEach(c -> {
-                        Pattern pattern = Pattern.compile("(\\d+)\\s(.+)");
-                        Matcher matcher = pattern.matcher(c);
-                        if (matcher.find()) {
-                            int category_id = Integer.parseInt(matcher.group(1));
-                            String category_name = matcher.group(2);
-                            CategoryResponse categoryResponse= new CategoryResponse(category_id,category_name);
-                            categoryResponses.add(categoryResponse);
-                        }
-                    });
-                    response.setCategories(categoryResponses);
-                }
-
-                List<String> openingTimes = callableStatement.getString(12) != null ?
-                        Arrays.asList(callableStatement.getString(12).split(",")) : new ArrayList<>();
-
-                if(!openingTimes.isEmpty()) {
-                    OpeningHoursResponse openingHoursResponse = new OpeningHoursResponse();
-                    openingTimes.forEach(ot -> {
-                        Pattern pattern = Pattern.compile("([a-zA-Z]+)\\s(\\d{2}:\\d{2})-(\\d{2}:\\d{2})");
-                        Matcher matcher = pattern.matcher(ot);
-                        if (matcher.find()) {
-                            String day = matcher.group(1);
-                            String open = matcher.group(2);
-                            String close = matcher.group(3);
-
-                            switch (day){
-                                case "Monday":
-                                    openingHoursResponse.setMondayOpen(LocalTime.parse(open));
-                                    openingHoursResponse.setMondayClose(LocalTime.parse(close));
-                                    break;
-                                case "Tuesday":
-                                    openingHoursResponse.setTuesdayOpen(LocalTime.parse(open));
-                                    openingHoursResponse.setTuesdayClose(LocalTime.parse(close));
-                                    break;
-                                case "Wednesday":
-                                    openingHoursResponse.setWednesdayOpen(LocalTime.parse(open));
-                                    openingHoursResponse.setWednesdayClose(LocalTime.parse(close));
-                                    break;
-                                case "Thursday":
-                                    openingHoursResponse.setThursdayOpen(LocalTime.parse(open));
-                                    openingHoursResponse.setThursdayClose(LocalTime.parse(close));
-                                    break;
-                                case "Friday":
-                                    openingHoursResponse.setFridayOpen(LocalTime.parse(open));
-                                    openingHoursResponse.setFridayClose(LocalTime.parse(close));
-                                    break;
-                                case "Saturday":
-                                    openingHoursResponse.setSaturdayOpen(LocalTime.parse(open));
-                                    openingHoursResponse.setSaturdayClose(LocalTime.parse(close));
-                                    break;
-                                case "Sunday":
-                                    openingHoursResponse.setSundayOpen(LocalTime.parse(open));
-                                    openingHoursResponse.setSundayClose(LocalTime.parse(close));
-                                    break;
-                            }
-                        }
-                    });
-
-                    response.setOpeningHours(openingHoursResponse);
-                }
-
-
-
-            connection.commit();
-
-            return response;
-        } catch (SQLException e) {
-            exception = true;
-            logger.error(e.getMessage());
-        }
-        catch (Exception e) {
-            exception = true;
-            e.printStackTrace();
-            throw e;
-        } finally {
-            if(exception && connection!=null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-        return null;
-    }
-
-    public RestaurantResponse setRestaurantOpeningHours(int id, OpeningHoursCreateRequest request) {
-        Connection connection = null;
-
-        boolean exception = false;
-        try {
-            connection = dbConnectionService.getConnection();
-
-            String procedureCall = "{call update_restaurant_opening_hours(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
-            CallableStatement callableStatement = connection.prepareCall(procedureCall);
-
-            callableStatement.setInt(1, id);
-            callableStatement.setString(2,request.getMondayOpen() != null ? request.getMondayOpen().toString() : null);
-            callableStatement.setString(3,request.getMondayClose() != null ? request.getMondayClose().toString() : null);
-            callableStatement.setString(4,request.getTuesdayOpen() != null ? request.getTuesdayOpen().toString() : null);
-            callableStatement.setString(5,request.getTuesdayClose() != null ? request.getTuesdayClose().toString() : null);
-            callableStatement.setString(6,request.getWednesdayOpen() != null ? request.getWednesdayOpen().toString() : null);
-            callableStatement.setString(7,request.getWednesdayClose() != null ? request.getWednesdayClose().toString() : null);
-            callableStatement.setString(8,request.getThursdayOpen() != null ? request.getThursdayOpen().toString() : null);
-            callableStatement.setString(9,request.getThursdayClose() != null ? request.getThursdayClose().toString() : null);
-            callableStatement.setString(10,request.getFridayOpen() != null ? request.getFridayOpen().toString() : null);
-            callableStatement.setString(11,request.getFridayClose() != null ? request.getFridayClose().toString() : null);
-            callableStatement.setString(12,request.getSaturdayOpen() != null ? request.getSaturdayOpen().toString() : null);
-            callableStatement.setString(13,request.getSaturdayClose() != null ? request.getSaturdayClose().toString() : null);
-            callableStatement.setString(14,request.getSundayOpen() != null ? request.getSundayOpen().toString() : null);
-            callableStatement.setString(15,request.getSundayClose() != null ? request.getSundayClose().toString() : null);
-
-            callableStatement.registerOutParameter(16, Types.INTEGER);
-            callableStatement.registerOutParameter(17, Types.VARCHAR);
-            callableStatement.registerOutParameter(18, Types.VARCHAR);
-            callableStatement.registerOutParameter(19, Types.INTEGER);
-            callableStatement.registerOutParameter(20, Types.VARCHAR);
-            callableStatement.registerOutParameter(21, Types.VARCHAR);
-            callableStatement.registerOutParameter(22, Types.VARCHAR);
-            callableStatement.registerOutParameter(23, Types.INTEGER);
-            callableStatement.registerOutParameter(24, Types.VARCHAR);
-            callableStatement.registerOutParameter(25, Types.VARCHAR);
-            callableStatement.registerOutParameter(26, Types.FLOAT);
-            callableStatement.registerOutParameter(27, Types.INTEGER);
-            callableStatement.registerOutParameter(28, Types.INTEGER);
-
-            callableStatement.execute();
-
-
-            var response = new RestaurantResponse(id, callableStatement.getString(17),
-                    new AddressResponse(callableStatement.getInt(19),callableStatement.getString(21),
-                            callableStatement.getString(22), callableStatement.getString(20)),
-                    callableStatement.getString(18),
-                    callableStatement.getInt(23) ,
+                    new AddressResponse(callableStatement.getInt(6), callableStatement.getString(8),
+                            callableStatement.getString(9), callableStatement.getString(7)),
+                    callableStatement.getString(5),
+                    callableStatement.getInt(10),
                     null,
                     null,
-                    callableStatement.getFloat(26),
-                    callableStatement.getInt(27),
-                    callableStatement.getInt(28));
+                    callableStatement.getFloat(13),
+                    callableStatement.getInt(14),
+                    callableStatement.getInt(15));
 
-            List<String> categories = callableStatement.getString(24) != null ?
-                    Arrays.asList(callableStatement.getString(24).split(",")) : new ArrayList<>();
+            List<String> categories = callableStatement.getString(11) != null ?
+                    Arrays.asList(callableStatement.getString(11).split(",")) : new ArrayList<>();
 
-            if(!categories.isEmpty()) {
+            if (!categories.isEmpty()) {
                 List<CategoryResponse> categoryResponses = new ArrayList<>();
 
                 categories.forEach(c -> {
@@ -1540,17 +1460,17 @@ public class RestaurantRepository {
                     if (matcher.find()) {
                         int category_id = Integer.parseInt(matcher.group(1));
                         String category_name = matcher.group(2);
-                        CategoryResponse categoryResponse= new CategoryResponse(category_id,category_name);
+                        CategoryResponse categoryResponse = new CategoryResponse(category_id, category_name);
                         categoryResponses.add(categoryResponse);
                     }
                 });
                 response.setCategories(categoryResponses);
             }
 
-            List<String> openingTimes = callableStatement.getString(25) != null ?
-                    Arrays.asList(callableStatement.getString(25).split(",")) : new ArrayList<>();
+            List<String> openingTimes = callableStatement.getString(12) != null ?
+                    Arrays.asList(callableStatement.getString(12).split(",")) : new ArrayList<>();
 
-            if(!openingTimes.isEmpty()) {
+            if (!openingTimes.isEmpty()) {
                 OpeningHoursResponse openingHoursResponse = new OpeningHoursResponse();
                 openingTimes.forEach(ot -> {
                     Pattern pattern = Pattern.compile("([a-zA-Z]+)\\s(\\d{2}:\\d{2})-(\\d{2}:\\d{2})");
@@ -1560,7 +1480,7 @@ public class RestaurantRepository {
                         String open = matcher.group(2);
                         String close = matcher.group(3);
 
-                        switch (day){
+                        switch (day) {
                             case "Monday":
                                 openingHoursResponse.setMondayOpen(LocalTime.parse(open));
                                 openingHoursResponse.setMondayClose(LocalTime.parse(close));
@@ -1597,6 +1517,158 @@ public class RestaurantRepository {
             }
 
 
+            connection.commit();
+
+            return response;
+        } catch (SQLException e) {
+            exception = true;
+            logger.error(e.getMessage());
+        } catch (Exception e) {
+            exception = true;
+            e.printStackTrace();
+            throw e;
+        } finally {
+            if (exception && connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            if (callableStatement != null) {
+                try {
+                    callableStatement.close();
+                } catch (SQLException e) {
+                }
+            }
+        }
+        return null;
+    }
+
+    public RestaurantResponse setRestaurantOpeningHours(int id, OpeningHoursCreateRequest request) {
+        Connection connection = null;
+
+        boolean exception = false;
+        CallableStatement callableStatement = null;
+        try {
+            connection = dbConnectionService.getConnection();
+
+            String procedureCall = "{call update_restaurant_opening_hours(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
+            callableStatement = connection.prepareCall(procedureCall);
+
+            callableStatement.setInt(1, id);
+            callableStatement.setString(2, request.getMondayOpen() != null ? request.getMondayOpen().toString() : null);
+            callableStatement.setString(3, request.getMondayClose() != null ? request.getMondayClose().toString() : null);
+            callableStatement.setString(4, request.getTuesdayOpen() != null ? request.getTuesdayOpen().toString() : null);
+            callableStatement.setString(5, request.getTuesdayClose() != null ? request.getTuesdayClose().toString() : null);
+            callableStatement.setString(6, request.getWednesdayOpen() != null ? request.getWednesdayOpen().toString() : null);
+            callableStatement.setString(7, request.getWednesdayClose() != null ? request.getWednesdayClose().toString() : null);
+            callableStatement.setString(8, request.getThursdayOpen() != null ? request.getThursdayOpen().toString() : null);
+            callableStatement.setString(9, request.getThursdayClose() != null ? request.getThursdayClose().toString() : null);
+            callableStatement.setString(10, request.getFridayOpen() != null ? request.getFridayOpen().toString() : null);
+            callableStatement.setString(11, request.getFridayClose() != null ? request.getFridayClose().toString() : null);
+            callableStatement.setString(12, request.getSaturdayOpen() != null ? request.getSaturdayOpen().toString() : null);
+            callableStatement.setString(13, request.getSaturdayClose() != null ? request.getSaturdayClose().toString() : null);
+            callableStatement.setString(14, request.getSundayOpen() != null ? request.getSundayOpen().toString() : null);
+            callableStatement.setString(15, request.getSundayClose() != null ? request.getSundayClose().toString() : null);
+
+            callableStatement.registerOutParameter(16, Types.INTEGER);
+            callableStatement.registerOutParameter(17, Types.VARCHAR);
+            callableStatement.registerOutParameter(18, Types.VARCHAR);
+            callableStatement.registerOutParameter(19, Types.INTEGER);
+            callableStatement.registerOutParameter(20, Types.VARCHAR);
+            callableStatement.registerOutParameter(21, Types.VARCHAR);
+            callableStatement.registerOutParameter(22, Types.VARCHAR);
+            callableStatement.registerOutParameter(23, Types.INTEGER);
+            callableStatement.registerOutParameter(24, Types.VARCHAR);
+            callableStatement.registerOutParameter(25, Types.VARCHAR);
+            callableStatement.registerOutParameter(26, Types.FLOAT);
+            callableStatement.registerOutParameter(27, Types.INTEGER);
+            callableStatement.registerOutParameter(28, Types.INTEGER);
+
+            callableStatement.execute();
+
+
+            var response = new RestaurantResponse(id, callableStatement.getString(17),
+                    new AddressResponse(callableStatement.getInt(19), callableStatement.getString(21),
+                            callableStatement.getString(22), callableStatement.getString(20)),
+                    callableStatement.getString(18),
+                    callableStatement.getInt(23),
+                    null,
+                    null,
+                    callableStatement.getFloat(26),
+                    callableStatement.getInt(27),
+                    callableStatement.getInt(28));
+
+            List<String> categories = callableStatement.getString(24) != null ?
+                    Arrays.asList(callableStatement.getString(24).split(",")) : new ArrayList<>();
+
+            if (!categories.isEmpty()) {
+                List<CategoryResponse> categoryResponses = new ArrayList<>();
+
+                categories.forEach(c -> {
+                    Pattern pattern = Pattern.compile("(\\d+)\\s(.+)");
+                    Matcher matcher = pattern.matcher(c);
+                    if (matcher.find()) {
+                        int category_id = Integer.parseInt(matcher.group(1));
+                        String category_name = matcher.group(2);
+                        CategoryResponse categoryResponse = new CategoryResponse(category_id, category_name);
+                        categoryResponses.add(categoryResponse);
+                    }
+                });
+                response.setCategories(categoryResponses);
+            }
+
+            List<String> openingTimes = callableStatement.getString(25) != null ?
+                    Arrays.asList(callableStatement.getString(25).split(",")) : new ArrayList<>();
+
+            if (!openingTimes.isEmpty()) {
+                OpeningHoursResponse openingHoursResponse = new OpeningHoursResponse();
+                openingTimes.forEach(ot -> {
+                    Pattern pattern = Pattern.compile("([a-zA-Z]+)\\s(\\d{2}:\\d{2})-(\\d{2}:\\d{2})");
+                    Matcher matcher = pattern.matcher(ot);
+                    if (matcher.find()) {
+                        String day = matcher.group(1);
+                        String open = matcher.group(2);
+                        String close = matcher.group(3);
+
+                        switch (day) {
+                            case "Monday":
+                                openingHoursResponse.setMondayOpen(LocalTime.parse(open));
+                                openingHoursResponse.setMondayClose(LocalTime.parse(close));
+                                break;
+                            case "Tuesday":
+                                openingHoursResponse.setTuesdayOpen(LocalTime.parse(open));
+                                openingHoursResponse.setTuesdayClose(LocalTime.parse(close));
+                                break;
+                            case "Wednesday":
+                                openingHoursResponse.setWednesdayOpen(LocalTime.parse(open));
+                                openingHoursResponse.setWednesdayClose(LocalTime.parse(close));
+                                break;
+                            case "Thursday":
+                                openingHoursResponse.setThursdayOpen(LocalTime.parse(open));
+                                openingHoursResponse.setThursdayClose(LocalTime.parse(close));
+                                break;
+                            case "Friday":
+                                openingHoursResponse.setFridayOpen(LocalTime.parse(open));
+                                openingHoursResponse.setFridayClose(LocalTime.parse(close));
+                                break;
+                            case "Saturday":
+                                openingHoursResponse.setSaturdayOpen(LocalTime.parse(open));
+                                openingHoursResponse.setSaturdayClose(LocalTime.parse(close));
+                                break;
+                            case "Sunday":
+                                openingHoursResponse.setSundayOpen(LocalTime.parse(open));
+                                openingHoursResponse.setSundayClose(LocalTime.parse(close));
+                                break;
+                        }
+                    }
+                });
+
+                response.setOpeningHours(openingHoursResponse);
+            }
+
 
             connection.commit();
 
@@ -1604,17 +1676,23 @@ public class RestaurantRepository {
         } catch (SQLException e) {
             exception = true;
             logger.error(e.getMessage());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             exception = true;
             e.printStackTrace();
             throw e;
         } finally {
-            if(exception && connection!=null) {
+            if (exception && connection != null) {
                 try {
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                }
+            }
+
+            if (callableStatement != null) {
+                try {
+                    callableStatement.close();
+                } catch (SQLException e) {
                 }
             }
         }
@@ -1641,36 +1719,35 @@ public class RestaurantRepository {
 
         boolean exception = false;
 
+        CallableStatement callableStatement = null;
         try {
             connection = dbConnectionService.getConnection();
 
-            CallableStatement callableStatement = connection.prepareCall(sql);
-            callableStatement.setInt(1,restaurantId);
-            callableStatement.setString(2,username);
+            callableStatement = connection.prepareCall(sql);
+            callableStatement.setInt(1, restaurantId);
+            callableStatement.setString(2, username);
             callableStatement.setInt(3, restaurantId);
             callableStatement.setString(4, username);
-            callableStatement.registerOutParameter(5,Types.INTEGER);
-            callableStatement.registerOutParameter(6,Types.INTEGER);
+            callableStatement.registerOutParameter(5, Types.INTEGER);
+            callableStatement.registerOutParameter(6, Types.INTEGER);
 
             callableStatement.execute();
 
             FavoriteRestaurantResponse response = new FavoriteRestaurantResponse(callableStatement.getInt(5),
-                    callableStatement.getInt(6),restaurantId);
+                    callableStatement.getInt(6), restaurantId);
 
             connection.commit();
 
 
             logger.info("Successfully inserted row into Favorite Restaurant.");
             return response;
-        }
-
-        catch (SQLException e) {
+        } catch (SQLException e) {
             logger.error(e.getMessage());
 
             exception = true;
 
             if ("02000".equals(e.getSQLState())) {
-                throw new InvalidRequestException(String.format("User with username %s does not exist!",username));
+                throw new InvalidRequestException(String.format("User with username %s does not exist!", username));
             } else if (e.getErrorCode() == 1) {
                 throw new InvalidRequestException("Restaurant already in user favorites!");
             } else {
@@ -1682,11 +1759,18 @@ public class RestaurantRepository {
             e.printStackTrace();
             throw e;
         } finally {
-            if(exception && connection!=null) {
+            if (exception && connection != null) {
                 try {
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                }
+            }
+
+            if (callableStatement != null) {
+                try {
+                    callableStatement.close();
+                } catch (SQLException e) {
                 }
             }
         }
@@ -1696,19 +1780,20 @@ public class RestaurantRepository {
     public int removeRestaurantFromFavorites(int restaurantId, String username) {
         String sql =
                 "  DELETE FROM nbp_favorite_restaurant nfr WHERE nfr.restaurant_id = ? AND customer_id=" +
-                "  (SELECT nu.id FROM nbp.nbp_user nu WHERE nu.username = ?)";
+                        "  (SELECT nu.id FROM nbp.nbp_user nu WHERE nu.username = ?)";
 
 
         Connection connection = null;
 
         boolean exception = false;
 
+        PreparedStatement preparedStatement = null;
         try {
             connection = dbConnectionService.getConnection();
 
-            PreparedStatement preparedStatement = connection.prepareCall(sql);
-            preparedStatement.setInt(1,restaurantId);
-            preparedStatement.setString(2,username);
+            preparedStatement = connection.prepareCall(sql);
+            preparedStatement.setInt(1, restaurantId);
+            preparedStatement.setString(2, username);
 
 
             int rowCount = preparedStatement.executeUpdate();
@@ -1716,12 +1801,10 @@ public class RestaurantRepository {
             connection.commit();
 
 
-            logger.info(String.format("Successfully deleted %d rows from Favorite Restaurant.",rowCount));
+            logger.info(String.format("Successfully deleted %d rows from Favorite Restaurant.", rowCount));
 
             return rowCount;
-        }
-
-        catch (SQLException e) {
+        } catch (SQLException e) {
             logger.error(e.getMessage());
 
             exception = true;
@@ -1731,11 +1814,18 @@ public class RestaurantRepository {
             e.printStackTrace();
             throw e;
         } finally {
-            if(exception && connection!=null) {
+            if (exception && connection != null) {
                 try {
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
+                }
+            }
+
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
                 }
             }
         }
@@ -1745,19 +1835,27 @@ public class RestaurantRepository {
     public int countNumberOfFavorites(int restaurantId) {
         String sql = "SELECT COUNT(id) as cnt FROM nbp_favorite_restaurant WHERE restaurant_id=?";
 
+        PreparedStatement preparedStatement;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, restaurantId);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                return  resultSet.getInt("cnt");
+                return resultSet.getInt("cnt");
             }
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        }
+
+        if (preparedStatement != null) {
+            try {
+                preparedStatement.close();
+            } catch (SQLException e) {
+            }
         }
 
         return 0;

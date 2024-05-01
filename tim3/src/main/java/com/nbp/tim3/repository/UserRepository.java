@@ -71,10 +71,11 @@ public class UserRepository {
     public User getByUsername(String username) {
         String sql = "SELECT * FROM nbp.nbp_user WHERE username=?";
 
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1,username);
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, username);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -87,15 +88,15 @@ public class UserRepository {
                 String password = resultSet.getString("password");
                 String phoneNumber = resultSet.getString("phone_number");
 
-                User user = new User(id,firstName,lastName,email,password,username,phoneNumber,null,null);
+                User user = new User(id, firstName, lastName, email, password, username, phoneNumber, null, null);
 
-                if(resultSet.getObject("role_id") != null) {
+                if (resultSet.getObject("role_id") != null) {
                     int roleId = resultSet.getInt("role_id");
                     Role role = roleRepository.getById(roleId);
                     user.setRole(role);
                 }
 
-                if(resultSet.getObject("address_id") != null) {
+                if (resultSet.getObject("address_id") != null) {
                     int addressId = resultSet.getInt("address_id");
                     Address address = addressRepository.getById(addressId);
                     user.setAddress(address);
@@ -104,10 +105,18 @@ public class UserRepository {
                 return user;
             }
 
-            return  null;
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        } finally {
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
     }
 

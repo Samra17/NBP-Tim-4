@@ -51,9 +51,11 @@ public class OrderRepository {
 
         OrderPaginatedResponse orderPaginatedResponse = new OrderPaginatedResponse();
         List<OrderResponse> orders = new ArrayList<>();
+
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, status != null ? status.name() : null);
             preparedStatement.setInt(2, restaurantId);
             preparedStatement.setInt(3, (page - 1) * size);
@@ -71,6 +73,12 @@ public class OrderRepository {
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         orderPaginatedResponse.setCurrentPage(page);
@@ -108,9 +116,10 @@ public class OrderRepository {
         sql.append("GROUP BY r.name " + "ORDER BY order_count ").append(sortType.toUpperCase());
 
         Map<String, Long> orderMap= new HashMap<>();
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql.toString());
+            preparedStatement = connection.prepareStatement(sql.toString());
             // Set the restaurant IDs as parameters
             for (int i = 0; i < restaurantIds.size(); i++) {
                 preparedStatement.setString(i + 1, restaurantIds.get(i));
@@ -124,6 +133,12 @@ public class OrderRepository {
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
         return orderMap;
     }
@@ -132,9 +147,10 @@ public class OrderRepository {
 
         OrderPaginatedResponse orderPaginatedResponse = new OrderPaginatedResponse();
         List<OrderResponse> orders = new ArrayList<>();
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setLong(1, userId);
             preparedStatement.setInt(2, (page - 1) * size);
             preparedStatement.setInt(3, size);
@@ -151,6 +167,12 @@ public class OrderRepository {
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         orderPaginatedResponse.setCurrentPage(page);
@@ -162,9 +184,10 @@ public class OrderRepository {
         String sql = orderSelectSql + " WHERE ord.id=?";
 
         OrderResponse orderResponse = new OrderResponse();
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, id);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -176,6 +199,12 @@ public class OrderRepository {
             return null;
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -196,10 +225,13 @@ public class OrderRepository {
         boolean exception = false;
 
         Connection connection = null;
+        PreparedStatement preparedStatementOrderMenuItems = null;
+        PreparedStatement preparedStatement = null;
+        PreparedStatement preparedStatementAddress = null;
         try {
             connection = dbConnectionService.getConnection();
 
-            PreparedStatement preparedStatementAddress = connection.prepareStatement(checkAddressId);
+            preparedStatementAddress = connection.prepareStatement(checkAddressId);
             preparedStatementAddress.setInt(1, orderCreateRequest.getCustomerId());
             preparedStatementAddress.setInt(2, orderCreateRequest.getRestaurantId());
             ResultSet resultSet = preparedStatementAddress.executeQuery();
@@ -214,9 +246,8 @@ public class OrderRepository {
                 logger.error("Error checking address_id constraints.");
             }
 
-
             String[] returnCol = {"id"};
-            PreparedStatement preparedStatement = connection.prepareStatement(sql, returnCol);
+            preparedStatement = connection.prepareStatement(sql, returnCol);
             preparedStatement.setString(1, UUID.randomUUID().toString());
             preparedStatement.setString(2, Status.NEW.toString());
             preparedStatement.setInt(3, orderCreateRequest.getEstimatedDeliveryTime());
@@ -246,7 +277,7 @@ public class OrderRepository {
             orderMenuItemsSql.append("(?, ?, ?),".repeat(menuItems.size() - 1));
             orderMenuItemsSql.append("(?, ?, ?)");
             String orderMenuItemsSqlString = orderMenuItemsSql.toString();
-            PreparedStatement preparedStatementOrderMenuItems = connection.prepareStatement(orderMenuItemsSqlString);
+            preparedStatementOrderMenuItems = connection.prepareStatement(orderMenuItemsSqlString);
 
             for (int i = 0; i < menuItems.size(); i++) {
                 preparedStatementOrderMenuItems.setInt(i + 1, menuItems.get(i).getQuantity());
@@ -284,6 +315,9 @@ public class OrderRepository {
         } finally {
             if (exception && connection != null) {
                 try {
+                    Objects.requireNonNull(preparedStatementOrderMenuItems).close();
+                    preparedStatement.close();
+                    preparedStatementAddress.close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
@@ -316,6 +350,7 @@ public class OrderRepository {
         boolean exception = false;
 
         Connection connection = null;
+        PreparedStatement preparedStatement = null;
         try {
             connection = dbConnectionService.getConnection();
 
@@ -324,7 +359,7 @@ public class OrderRepository {
                     "courier_id = NVL(?, courier_id) " +
                     "WHERE id = ?";
 
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, orderUpdateDto.getOrderStatus() != null ? orderUpdateDto.getOrderStatus().name() : null);
             preparedStatement.setObject(2, orderUpdateDto.getCourierId());
             preparedStatement.setInt(3, orderId);
@@ -355,6 +390,7 @@ public class OrderRepository {
         } finally {
             if (exception && connection != null) {
                 try {
+                    Objects.requireNonNull(preparedStatement).close();;
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);

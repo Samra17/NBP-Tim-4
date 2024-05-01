@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 public class OrderMenuItemRepository {
@@ -38,9 +39,10 @@ public class OrderMenuItemRepository {
 
 
         List<OrderMenuItemResponse> orderMenuItems = new ArrayList<>();
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setLong(1, orderId);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -57,6 +59,12 @@ public class OrderMenuItemRepository {
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         return orderMenuItems;

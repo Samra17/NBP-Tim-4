@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 public class CouponRepository {
@@ -25,9 +26,10 @@ public class CouponRepository {
     public CouponResponse getById(Integer id) {
         String sql = "SELECT * FROM nbp_coupon WHERE id=?";
 
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, id);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -40,6 +42,12 @@ public class CouponRepository {
             return null;
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -57,9 +65,10 @@ public class CouponRepository {
 
         CouponPaginatedResponse couponPaginatedResponse = new CouponPaginatedResponse();
         List<CouponResponse> couponResponses = new ArrayList<>();
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, page);
             preparedStatement.setInt(2, size);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -73,6 +82,12 @@ public class CouponRepository {
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         couponPaginatedResponse.setCurrentPage(page);
@@ -88,11 +103,12 @@ public class CouponRepository {
         boolean exception = false;
 
         Connection connection = null;
+        PreparedStatement preparedStatement = null;
         try {
             connection = dbConnectionService.getConnection();
 
             String[] returnCol = {"id"};
-            PreparedStatement preparedStatement = connection.prepareStatement(sql, returnCol);
+            preparedStatement = connection.prepareStatement(sql, returnCol);
             preparedStatement.setString(1, data.getCode());
             preparedStatement.setInt(2, data.getQuantity());
             preparedStatement.setFloat(3, data.getDiscountPercent());
@@ -130,6 +146,7 @@ public class CouponRepository {
         } finally {
             if (exception && connection != null) {
                 try {
+                    Objects.requireNonNull(preparedStatement).close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
@@ -146,10 +163,11 @@ public class CouponRepository {
         boolean exception = false;
 
         Connection connection = null;
+        PreparedStatement preparedStatement = null;
         try {
             connection = dbConnectionService.getConnection();
 
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, data.getCode());
             preparedStatement.setInt(2, data.getQuantity());
             preparedStatement.setFloat(3, data.getDiscountPercent());
@@ -178,6 +196,7 @@ public class CouponRepository {
         } finally {
             if (exception && connection != null) {
                 try {
+                    Objects.requireNonNull(preparedStatement).close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
@@ -191,9 +210,10 @@ public class CouponRepository {
         String sql = "UPDATE nbp_coupon SET quantity = 0 " +
                 "WHERE id = ?";
 
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1,id);
 
             int rowCount = preparedStatement.executeUpdate();
@@ -205,6 +225,12 @@ public class CouponRepository {
         } catch (SQLException e) {
             logger.error(String.format("Deleting coupon failed: %s", e.getMessage()));
             throw new RuntimeException(e);
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -217,9 +243,10 @@ public class CouponRepository {
 
         CouponPaginatedResponse couponPaginatedResponse = new CouponPaginatedResponse();
         List<CouponResponse> coupons = new ArrayList<>();
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, foreignKeyId);
             preparedStatement.setInt(2, (page - 1) * size);
             preparedStatement.setInt(3, size);
@@ -235,6 +262,12 @@ public class CouponRepository {
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         couponPaginatedResponse.setCurrentPage(page);
@@ -257,10 +290,12 @@ public class CouponRepository {
         boolean exception = false;
 
         Connection connection = null;
+        PreparedStatement preparedStatementQuantity = null;
+        PreparedStatement preparedStatement = null;
         try {
             connection = dbConnectionService.getConnection();
 
-            PreparedStatement preparedStatementQuantity = connection.prepareStatement(checkQuantityId);
+            preparedStatementQuantity = connection.prepareStatement(checkQuantityId);
             preparedStatementQuantity.setInt(1,id);
             ResultSet resultSet = preparedStatementQuantity.executeQuery();
 
@@ -271,7 +306,7 @@ public class CouponRepository {
                 }
             }
 
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, id);
 
             int rowCount = preparedStatement.executeUpdate();
@@ -290,6 +325,8 @@ public class CouponRepository {
         } finally {
             if (exception && connection != null) {
                 try {
+                    Objects.requireNonNull(preparedStatementQuantity).close();
+                    Objects.requireNonNull(preparedStatement).close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
@@ -309,12 +346,13 @@ public class CouponRepository {
                 "WHERE id IN (SELECT distinct(restaurant_id) FROM nbp_coupon WHERE restaurant_id IN ");
 
         List<Integer> filteredRestaurants = new ArrayList<>();
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
             sql.append("(");
             sql.append("?, ".repeat(restaurants.size()-1));
             sql.append("?))");
-            PreparedStatement preparedStatement = connection.prepareStatement(sql.toString());
+            preparedStatement = connection.prepareStatement(sql.toString());
 
             for (int i=1; i<=restaurants.size(); i++){
                 preparedStatement.setInt(i, restaurants.get(i-1));
@@ -328,6 +366,12 @@ public class CouponRepository {
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         return filteredRestaurants;

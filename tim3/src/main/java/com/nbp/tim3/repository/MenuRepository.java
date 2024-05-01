@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 public class MenuRepository {
@@ -26,10 +27,11 @@ public class MenuRepository {
     public Menu findById(int id) {
         String sql = "SELECT * FROM nbp_menu WHERE id=? AND is_deleted=0";
 
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setInt(1,id);
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, id);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -54,29 +56,37 @@ public class MenuRepository {
                     Double menuItemPrice = resultSetMenuItems.getDouble("price");
 
                     Double menuItemDiscountPrice = resultSetMenuItems.getDouble("discount_price");
-                    if(resultSetMenuItems.wasNull())
-                        menuItemDiscountPrice=null;
+                    if (resultSetMenuItems.wasNull())
+                        menuItemDiscountPrice = null;
                     String menuItemImage = resultSetMenuItems.getString("image");
                     Integer menuItemPrepTime = resultSetMenuItems.getInt("prep_time");
-                    MenuItem menuItem = new MenuItem(menuItemID,menuItemName, menuItemDescription, menuItemPrice, menuItemDiscountPrice, menuItemImage, menuItemPrepTime, id);
+                    MenuItem menuItem = new MenuItem(menuItemID, menuItemName, menuItemDescription, menuItemPrice, menuItemDiscountPrice, menuItemImage, menuItemPrepTime, id);
                     menuItems.add(menuItem);
                 }
-                Menu menu = new Menu(id, name, active,restaurantId, menuItems );
+                Menu menu = new Menu(id, name, active, restaurantId, menuItems);
                 return menu;
             }
-            return  null;
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
 
     }
 
     public List<Menu> getActiveMenusForRestaurant(int restaurantID) {
+
+        PreparedStatement preparedStatement = null;
         try {
             String sql = "SELECT * FROM nbp_menu WHERE active = 1 AND restaurant_id=? AND is_deleted=0";
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, restaurantID);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -102,30 +112,36 @@ public class MenuRepository {
                     String menuItemDescription = resultSetMenuItems.getString("description");
                     Double menuItemPrice = resultSetMenuItems.getDouble("price");
                     Double menuItemDiscountPrice = resultSetMenuItems.getDouble("discount_price");
-                    if(resultSetMenuItems.wasNull())
+                    if (resultSetMenuItems.wasNull())
                         menuItemDiscountPrice = null;
                     String menuItemImage = resultSetMenuItems.getString("image");
                     Integer menuItemPrepTime = resultSetMenuItems.getInt("prep_time");
-                    MenuItem menuItem = new MenuItem(menuItemID,menuItemName, menuItemDescription, menuItemPrice, menuItemDiscountPrice, menuItemImage, menuItemPrepTime, id);
+                    MenuItem menuItem = new MenuItem(menuItemID, menuItemName, menuItemDescription, menuItemPrice, menuItemDiscountPrice, menuItemImage, menuItemPrepTime, id);
                     menuItems.add(menuItem);
                 }
-                Menu menu = new Menu(id, name, active,restaurantId, menuItems );
+                Menu menu = new Menu(id, name, active, restaurantId, menuItems);
                 menus.add(menu);
 
             }
             return menus;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
     public List<MenuDto> getMenusForRestaurant(int restaurantID) {
+        PreparedStatement preparedStatement = null;
         try {
             String sql = "SELECT * FROM nbp_menu WHERE  restaurant_id=? AND is_deleted=0";
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, restaurantID);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -136,15 +152,20 @@ public class MenuRepository {
                 String name = resultSet.getString("name");
                 boolean active = resultSet.getBoolean("active");
                 int restaurantId = resultSet.getInt("restaurant_id");
-                MenuDto menu = new MenuDto(id, active, restaurantId, name );
+                MenuDto menu = new MenuDto(id, active, restaurantId, name);
                 menus.add(menu);
 
             }
             return menus;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -154,18 +175,21 @@ public class MenuRepository {
         String sql2 = "SELECT COUNT(*) FROM nbp_menu WHERE restaurant_id=? AND name=? AND is_deleted=0";
         var exception = false;
         Connection connection = null;
+        PreparedStatement preparedStatement1 = null;
+        PreparedStatement preparedStatement2 = null;
+        PreparedStatement preparedStatement = null;
         try {
             connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement1 = connection.prepareStatement(sql1);
+            preparedStatement1 = connection.prepareStatement(sql1);
             preparedStatement1.setInt(1, menu.getRestaurantID());
 
             ResultSet resultSet1 = preparedStatement1.executeQuery();
-            if(resultSet1.next()) {
+            if (resultSet1.next()) {
                 int rowCount1 = resultSet1.getInt(1);
                 if (rowCount1 == 0)
                     throw new InvalidRequestException(String.format("Restaurant with id %d does not exist!", menu.getRestaurantID()));
 
-                PreparedStatement preparedStatement2 = connection.prepareStatement(sql2);
+                preparedStatement2 = connection.prepareStatement(sql2);
                 preparedStatement2.setInt(1, menu.getRestaurantID());
                 preparedStatement2.setString(2, menu.getName());
                 ResultSet resultSet2 = preparedStatement2.executeQuery();
@@ -174,8 +198,8 @@ public class MenuRepository {
                     if (rowCount2 != 0)
                         throw new InvalidRequestException(String.format("Name %s already in use!", menu.getName()));
 
-                    String returnCols[] = { "id" };
-                    PreparedStatement preparedStatement = connection.prepareStatement(sql,returnCols);
+                    String returnCols[] = {"id"};
+                    preparedStatement = connection.prepareStatement(sql, returnCols);
                     preparedStatement.setString(1, menu.getName());
                     preparedStatement.setInt(2, menu.isActive() ? 1 : 0);
                     preparedStatement.setInt(3, menu.getRestaurantID());
@@ -184,9 +208,9 @@ public class MenuRepository {
 
                     connection.commit();
 
-                    if(rowCount > 0) {
+                    if (rowCount > 0) {
                         ResultSet rs = preparedStatement.getGeneratedKeys();
-                        if(rs.next()) {
+                        if (rs.next()) {
                             int generatedId = rs.getInt(1);
                             menu.setId(generatedId);
                         } else {
@@ -197,20 +221,20 @@ public class MenuRepository {
                     logger.info(String.format("Successfully inserted %d rows into Menu.", rowCount));
                 }
 
-                }
-        }
-
-        catch (SQLException e) {
+            }
+        } catch (SQLException e) {
             exception = true;
             logger.error(e.getMessage());
         } catch (Exception e) {
             exception = true;
             logger.error(String.format("Creating new menu failed: %s", e.getMessage()));
             throw e;
-        }
-        finally {
-            if(exception && connection!=null) {
+        } finally {
+            if (exception && connection != null) {
                 try {
+                    Objects.requireNonNull(preparedStatement).close();;
+                    Objects.requireNonNull(preparedStatement1).close();;
+                    Objects.requireNonNull(preparedStatement2).close();;
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
@@ -222,10 +246,11 @@ public class MenuRepository {
     public boolean deleteMenu(int id) {
         Connection connection = null;
         var exception = false;
-        try  {
+        PreparedStatement preparedStatement = null;
+        try {
             connection = dbConnectionService.getConnection();
             String sqlQuery = "UPDATE nbp_menu SET is_deleted = 1 WHERE id = ?";
-            PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);
+            preparedStatement = connection.prepareStatement(sqlQuery);
             preparedStatement.setInt(1, id);
             int rowCount = preparedStatement.executeUpdate();
 
@@ -245,10 +270,10 @@ public class MenuRepository {
             logger.error(String.format("Deleting a menu failed: %s", e.getMessage()));
             exception = true;
             return false;
-        }
-        finally {
-            if(exception && connection!=null) {
+        } finally {
+            if (exception && connection != null) {
                 try {
+                    Objects.requireNonNull(preparedStatement).close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
@@ -262,9 +287,11 @@ public class MenuRepository {
         String sql = "UPDATE nbp_menu SET name=?, active=? WHERE id=?";
         String sql2 = "SELECT COUNT(*) FROM nbp_menu WHERE restaurant_id=? AND name=? AND id!=? AND is_deleted=0";
 
+        PreparedStatement preparedStatement2 = null;
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement2 = connection.prepareStatement(sql2);
+            preparedStatement2 = connection.prepareStatement(sql2);
             preparedStatement2.setInt(1, menu.getRestaurantID());
             preparedStatement2.setString(2, menu.getName());
             preparedStatement2.setInt(3, id);
@@ -275,7 +302,7 @@ public class MenuRepository {
                     throw new InvalidRequestException(String.format("Name %s already in use!", menu.getName()));
             }
 
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, menu.getName());
             preparedStatement.setInt(2, menu.isActive() ? 1 : 0);
             preparedStatement.setInt(3, id);
@@ -287,19 +314,25 @@ public class MenuRepository {
             logger.info(String.format("Successfully updated %d rows into Menu.", rowCount));
 
             return rowCount;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.error(String.format("Creating new menu failed: %s", e.getMessage()));
             throw e;
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
     public Integer findMenuRestaurant(int id) {
         String sql = "SELECT * FROM nbp_menu WHERE id=? AND is_deleted=0";
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setInt(1,id);
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, id);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -307,42 +340,50 @@ public class MenuRepository {
                 Integer restaurantId = resultSet.getInt("restaurant_id");
                 return restaurantId;
             }
-            return  null;
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
     public void addMenuItemsToMenu(int id, List<MenuItemDto> menuItemsDao) {
         boolean exception = false;
         Connection connection = null;
-        String returnCols[] = { "id" };
+        String returnCols[] = {"id"};
         String sql = "INSERT INTO nbp_menu_item(name, description, price, discount_price, prep_time, image, menu_id) VALUES(?,?,?,?,?,?,?)";
         String sql1 = "SELECT COUNT(*) FROM nbp_menu WHERE id=? AND is_deleted=0";
 
+        PreparedStatement preparedStatement1 = null;
+        PreparedStatement preparedStatement = null;
         try {
             connection = dbConnectionService.getConnection();
 
-            PreparedStatement preparedStatement1 = connection.prepareStatement(sql1);
+            preparedStatement1 = connection.prepareStatement(sql1);
             preparedStatement1.setInt(1, id);
 
             ResultSet resultSet1 = preparedStatement1.executeQuery();
-            if(resultSet1.next()) {
+            if (resultSet1.next()) {
                 int rowCount1 = resultSet1.getInt(1);
                 if (rowCount1 == 0)
                     throw new InvalidRequestException(String.format("Menu with id %d does not exist!", id));
             }
 
-            for(var menuItemDao: menuItemsDao) {
-                PreparedStatement preparedStatement = connection.prepareStatement(sql,returnCols);
-                preparedStatement.setString(1,menuItemDao.getName());
+            for (var menuItemDao : menuItemsDao) {
+                preparedStatement = connection.prepareStatement(sql, returnCols);
+                preparedStatement.setString(1, menuItemDao.getName());
                 preparedStatement.setString(2, menuItemDao.getDescription());
-                if(menuItemDao.getDiscount_price() == null)
+                if (menuItemDao.getDiscount_price() == null)
                     preparedStatement.setNull(4, Types.FLOAT);
                 else
                     preparedStatement.setDouble(4, menuItemDao.getDiscount_price());
-                if(menuItemDao.getPrep_time() == null)
+                if (menuItemDao.getPrep_time() == null)
                     preparedStatement.setNull(5, Types.NUMERIC);
                 else
                     preparedStatement.setDouble(5, menuItemDao.getPrep_time());
@@ -350,19 +391,18 @@ public class MenuRepository {
                 preparedStatement.setString(6, menuItemDao.getImage());
                 preparedStatement.setInt(7, id);
                 int rowCount = preparedStatement.executeUpdate();
-                if(rowCount > 0) {
+                if (rowCount > 0) {
                     ResultSet rs = preparedStatement.getGeneratedKeys();
-                    if(!rs.next()) {
+                    if (!rs.next()) {
                         logger.error("No generated ID!");
                     }
                 }
             }
-        connection.commit();
-        }
-        catch (SQLException e) {
+            connection.commit();
+        } catch (SQLException e) {
             logger.error(e.getMessage());
             exception = true;
-            if(e.getSQLState().startsWith("23")) {
+            if (e.getSQLState().startsWith("23")) {
                 if (e.getMessage().contains("FK_MENU_ITEM_MENU")) {
                     throw new InvalidRequestException(String.format("Menu with id %d does not exist!", id));
                 }
@@ -372,8 +412,10 @@ public class MenuRepository {
             logger.error(e.getMessage());
             throw e;
         } finally {
-            if(exception && connection!=null) {
+            if (exception && connection != null) {
                 try {
+                    Objects.requireNonNull(preparedStatement).close();
+                    Objects.requireNonNull(preparedStatement1).close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);

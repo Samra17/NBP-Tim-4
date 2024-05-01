@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
+import java.util.Objects;
 
 @Repository
 public class MenuItemRepository {
@@ -21,10 +22,11 @@ public class MenuItemRepository {
     public MenuItem findById(int id) {
         String sql = "SELECT * FROM nbp_menu_item WHERE id=? AND is_deleted=0";
 
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setInt(1,id);
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, id);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -33,28 +35,35 @@ public class MenuItemRepository {
                 String description = resultSet.getString("description");
                 Double price = resultSet.getDouble("price");
                 Double discountPrice = resultSet.getDouble("discount_price");
-                if(resultSet.wasNull())
+                if (resultSet.wasNull())
                     discountPrice = null;
                 String image = resultSet.getString("image");
                 Integer prepTime = resultSet.getInt("prep_time");
                 int menuId = resultSet.getInt("menu_id");
-                MenuItem menuItem = new MenuItem(id,name, description, price, discountPrice, image, prepTime, menuId);
-                return  menuItem;
+                MenuItem menuItem = new MenuItem(id, name, description, price, discountPrice, image, prepTime, menuId);
+                return menuItem;
             }
-            return  null;
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
-    public boolean deleteMenuItem(int id)  {
+    public boolean deleteMenuItem(int id) {
         Connection connection = null;
         var exception = false;
-        try  {
+        PreparedStatement preparedStatement = null;
+        try {
             connection = dbConnectionService.getConnection();
             String sqlQuery = "UPDATE nbp_menu_item SET is_deleted = 1 WHERE id = ?";
-            PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);
+            preparedStatement = connection.prepareStatement(sqlQuery);
             preparedStatement.setInt(1, id);
             int rowCount = preparedStatement.executeUpdate();
 
@@ -69,10 +78,10 @@ public class MenuItemRepository {
             logger.error(String.format("Deleting a menu item failed: %s", e.getMessage()));
             exception = true;
             return false;
-        }
-        finally {
-            if(exception && connection!=null) {
+        } finally {
+            if (exception && connection != null) {
                 try {
+                    Objects.requireNonNull(preparedStatement).close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
@@ -86,9 +95,12 @@ public class MenuItemRepository {
         String sql2 = "SELECT COUNT(*) FROM nbp_menu_item WHERE id=? AND is_deleted=0";
         boolean exception = false;
         Connection connection = null;
+        PreparedStatement preparedStatement2 = null;
+        PreparedStatement preparedStatement = null;
+
         try {
             connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement2 = connection.prepareStatement(sql2);
+            preparedStatement2 = connection.prepareStatement(sql2);
             preparedStatement2.setInt(1, id);
             ResultSet resultSet2 = preparedStatement2.executeQuery();
             if (resultSet2.next()) {
@@ -97,14 +109,14 @@ public class MenuItemRepository {
                     throw new InvalidRequestException(String.format("Menu item with id %d does not exist!", id));
             }
 
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1,menuItem.getName());
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, menuItem.getName());
             preparedStatement.setString(2, menuItem.getDescription());
-            if(menuItem.getDiscount_price() == null)
+            if (menuItem.getDiscount_price() == null)
                 preparedStatement.setNull(4, Types.FLOAT);
             else
                 preparedStatement.setDouble(4, menuItem.getDiscount_price());
-            if(menuItem.getPrep_time() == null)
+            if (menuItem.getPrep_time() == null)
                 preparedStatement.setNull(5, Types.NUMERIC);
             else
                 preparedStatement.setDouble(5, menuItem.getPrep_time());
@@ -119,15 +131,15 @@ public class MenuItemRepository {
             logger.info(String.format("Successfully updated %d rows into menu_item.", rowCount));
 
             return rowCount;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.error(String.format("Updating a menu item failed: %s", e.getMessage()));
-            exception=true;
+            exception = true;
             throw e;
-        }
-        finally {
-            if(exception && connection!=null) {
+        } finally {
+            if (exception && connection != null) {
                 try {
+                    Objects.requireNonNull(preparedStatement).close();
+                    Objects.requireNonNull(preparedStatement2).close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Repository
@@ -25,10 +26,11 @@ public class CategoryRepository {
     public void addCategory(Category category) {
         String sql = "INSERT INTO nbp_category(name) VALUES(?)";
 
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
             String returnCols[] = { "id" };
-            PreparedStatement preparedStatement = connection.prepareStatement(sql,returnCols);
+            preparedStatement = connection.prepareStatement(sql,returnCols);
             preparedStatement.setString(1, category.getName());
 
 
@@ -57,6 +59,12 @@ public class CategoryRepository {
 
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
 
     }
@@ -64,9 +72,10 @@ public class CategoryRepository {
     public int updateCategory(Category category) {
         String sql = "UPDATE nbp_category SET name=? WHERE id=?";
 
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, category.getName());
             preparedStatement.setInt(2, category.getId());
 
@@ -90,6 +99,12 @@ public class CategoryRepository {
          catch (Exception e) {
             e.printStackTrace();
             return 0;
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
 
     }
@@ -98,9 +113,10 @@ public class CategoryRepository {
         List<Category> categories = new ArrayList<>();
         String sql = "SELECT * FROM nbp_category";
 
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -117,15 +133,22 @@ public class CategoryRepository {
         } catch (Exception e) {
             e.printStackTrace();
             return categories;
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
     public Category getById(int id) {
         String sql = "SELECT * FROM nbp_category WHERE id=?";
 
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1,id);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -141,14 +164,21 @@ public class CategoryRepository {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
     public boolean deleteCategory(int id) {
+        PreparedStatement preparedStatement = null;
         try  {
             Connection connection = dbConnectionService.getConnection();
             String sqlQuery = "DELETE FROM nbp_category WHERE id = ?";
-            PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery);
+            preparedStatement = connection.prepareStatement(sqlQuery);
 
             preparedStatement.setInt(1, id);
 
@@ -164,6 +194,12 @@ public class CategoryRepository {
         } catch (SQLException e) {
             e.printStackTrace();
             return  false;
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

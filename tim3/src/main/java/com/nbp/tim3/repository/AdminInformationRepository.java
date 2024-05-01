@@ -11,10 +11,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Repository
 public class AdminInformationRepository {
@@ -31,9 +28,10 @@ public class AdminInformationRepository {
                         "JOIN nbp_order o ON r.id = o.restaurant_id " +
                         "GROUP BY r.name";
         Map<String, Long> orderMap= new HashMap<>();
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -43,6 +41,12 @@ public class AdminInformationRepository {
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
         return orderMap;
     }
@@ -52,9 +56,10 @@ public class AdminInformationRepository {
         String sql =    "SELECT SUM(o.total_price) AS total_orders_price " +
                         "FROM nbp_order o";
         long totalSpent = 0L;
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -64,6 +69,12 @@ public class AdminInformationRepository {
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
         return totalSpent;
     }
@@ -74,9 +85,10 @@ public class AdminInformationRepository {
                         "JOIN nbp_order o ON r.id = o.restaurant_id " +
                         "GROUP BY r.name";
         Map<String, Long> orderMap= new HashMap<>();
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -86,6 +98,12 @@ public class AdminInformationRepository {
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
         return orderMap;
     }

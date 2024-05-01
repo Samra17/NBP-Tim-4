@@ -13,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 public class RestaurantImageRepository {
@@ -28,23 +29,29 @@ public class RestaurantImageRepository {
 
         boolean exception = false;
 
+        PreparedStatement preparedStatement = null;
         try {
             connection = dbConnectionService.getConnection();
 
-            PreparedStatement preparedStatement = connection.prepareStatement(sqlImage);
-            preparedStatement.setString(1,imageURL);
-            preparedStatement.setInt(2,restaurantId);
+            preparedStatement = connection.prepareStatement(sqlImage);
+            preparedStatement.setString(1, imageURL);
+            preparedStatement.setInt(2, restaurantId);
 
             preparedStatement.executeQuery();
 
             connection.commit();
 
             logger.info("Successfully inserted image url into RestaurantImage.");
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             logger.error(e.getMessage());
 
             throw new InvalidRequestException("Error while uploading image.");
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -55,10 +62,11 @@ public class RestaurantImageRepository {
 
         boolean exception = false;
 
+        PreparedStatement preparedStatement = null;
         try {
             connection = dbConnectionService.getConnection();
 
-            PreparedStatement preparedStatement = connection.prepareStatement(sqlImage);
+            preparedStatement = connection.prepareStatement(sqlImage);
             preparedStatement.setInt(1, imageId);
 
             preparedStatement.executeQuery();
@@ -66,11 +74,16 @@ public class RestaurantImageRepository {
             connection.commit();
 
             logger.info("Successfully deleted image from RestaurantImage.");
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             logger.error(e.getMessage());
 
             throw new InvalidRequestException("Error while deleteing image.");
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -81,16 +94,17 @@ public class RestaurantImageRepository {
 
         boolean exception = false;
 
+        PreparedStatement preparedStatement = null;
         try {
             connection = dbConnectionService.getConnection();
 
-            PreparedStatement preparedStatement = connection.prepareStatement(sqlImage);
+            preparedStatement = connection.prepareStatement(sqlImage);
             preparedStatement.setInt(1, restaurantId);
 
             ResultSet resultSet = preparedStatement.executeQuery();
             List<String> urlList = new ArrayList<>();
 
-            while(resultSet.next()) {
+            while (resultSet.next()) {
                 urlList.add(resultSet.getString("image"));
             }
 
@@ -99,11 +113,16 @@ public class RestaurantImageRepository {
             logger.info("Successfully fetched images from restaurant with id " + restaurantId);
 
             return urlList;
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             logger.error(e.getMessage());
 
             throw new InvalidRequestException("Error while fetching restaurant images.");
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

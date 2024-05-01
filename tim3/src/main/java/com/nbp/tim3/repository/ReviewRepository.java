@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 public class ReviewRepository {
@@ -60,11 +61,12 @@ public class ReviewRepository {
         boolean exception = false;
 
         Connection connection = null;
+        PreparedStatement preparedStatement = null;
         try {
             connection = dbConnectionService.getConnection();
 
             String[] returnCol = {"id"};
-            PreparedStatement preparedStatement = connection.prepareStatement(sql, returnCol);
+            preparedStatement = connection.prepareStatement(sql, returnCol);
             preparedStatement.setInt(1, data.getRating());
             preparedStatement.setString(2, data.getFeedback());
             preparedStatement.setInt(3, data.getRestaurantId());
@@ -104,6 +106,7 @@ public class ReviewRepository {
         } finally {
             if (exception && connection != null) {
                 try {
+                    Objects.requireNonNull(preparedStatement).close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
@@ -126,9 +129,10 @@ public class ReviewRepository {
 
         ReviewPaginatedResponse reviewPaginatedResponse = new ReviewPaginatedResponse();
         List<ReviewResponse> reviews = new ArrayList<>();
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, foreignKeyId);
             preparedStatement.setInt(2, (page - 1) * size);
             preparedStatement.setInt(3, size);
@@ -145,6 +149,12 @@ public class ReviewRepository {
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         reviewPaginatedResponse.setCurrentPage(page);
@@ -156,9 +166,10 @@ public class ReviewRepository {
 
         String sql = "DELETE FROM nbp_review WHERE id=?";
 
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1,id);
 
             int rowCount = preparedStatement.executeUpdate();
@@ -169,6 +180,12 @@ public class ReviewRepository {
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
 
     }
@@ -176,9 +193,10 @@ public class ReviewRepository {
     public Double calculateAverageRatingForRestaurant(int restaurantId) {
         String sql = "SELECT COALESCE(AVG(rating),0.) as average FROM nbp_review WHERE restaurant_id=?";
 
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, restaurantId);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -189,6 +207,12 @@ public class ReviewRepository {
             return null;
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
 
     }

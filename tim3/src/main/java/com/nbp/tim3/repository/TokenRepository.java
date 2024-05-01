@@ -17,6 +17,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 public class TokenRepository {
@@ -29,9 +30,10 @@ public class TokenRepository {
     public Token findByToken(String tokenBase64) {
         String sql = "SELECT * FROM nbp_token WHERE token = ? FETCH FIRST 1 ROW ONLY";
 
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, tokenBase64);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -51,6 +53,12 @@ public class TokenRepository {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
 
     }
@@ -61,11 +69,12 @@ public class TokenRepository {
         Connection connection = null;
         boolean exception = false;
 
+        PreparedStatement preparedStatement = null;
         try {
             connection = dbConnectionService.getConnection();
             String returnCols[] = { "id" };
 
-            PreparedStatement preparedStatement = connection.prepareStatement(sql,returnCols);
+            preparedStatement = connection.prepareStatement(sql,returnCols);
             preparedStatement.setString(1,token.getToken());
 
             if(token.isExpired())
@@ -120,6 +129,7 @@ public class TokenRepository {
         } finally {
             if(exception && connection!=null) {
                 try {
+                    Objects.requireNonNull(preparedStatement).close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
@@ -163,9 +173,10 @@ public class TokenRepository {
         Connection connection = null;
         boolean exception = false;
 
+        PreparedStatement preparedStatement = null;
         try {
             connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, userId);
 
 
@@ -187,6 +198,7 @@ public class TokenRepository {
         }  finally {
         if(exception && connection!=null) {
             try {
+                Objects.requireNonNull(preparedStatement).close();
                 connection.rollback();
             } catch (SQLException e) {
                 throw new RuntimeException(e);
@@ -200,9 +212,10 @@ public class TokenRepository {
         Connection connection = null;
         boolean exception = false;
 
+        PreparedStatement preparedStatement = null;
         try {
             connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, tokenId);
 
 
@@ -224,6 +237,7 @@ public class TokenRepository {
         }  finally {
             if(exception && connection!=null) {
                 try {
+                    Objects.requireNonNull(preparedStatement).close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);

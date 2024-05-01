@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 public class UserRepository {
@@ -28,9 +29,10 @@ public class UserRepository {
     public User getById(int id) {
         String sql = "SELECT * FROM nbp.nbp_user WHERE id=?";
 
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1,id);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -65,15 +67,22 @@ public class UserRepository {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
     public User getByUsername(String username) {
         String sql = "SELECT * FROM nbp.nbp_user WHERE username=?";
 
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1,username);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -108,6 +117,12 @@ public class UserRepository {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -119,12 +134,13 @@ public class UserRepository {
 
         boolean exception = false;
 
+        PreparedStatement preparedStatement = null;
         try {
             connection = dbConnectionService.getConnection();
             String returnCols[] = { "id" };
 
             if(address != null) {
-                PreparedStatement preparedStatement = connection.prepareStatement(sqlAdr, returnCols);
+                preparedStatement = connection.prepareStatement(sqlAdr, returnCols);
                 preparedStatement.setString(1, address.getStreet());
                 preparedStatement.setString(2, address.getMunicipality());
                 preparedStatement.setString(3, address.getMapCoordinates());
@@ -146,7 +162,7 @@ public class UserRepository {
                  sqlUser = "INSERT INTO nbp.nbp_user(first_name, last_name, email, password, username,phone_number, role_id) VALUES(?,?,?,?,?,?,?)";
             }
 
-            PreparedStatement preparedStatement = connection.prepareStatement(sqlUser,returnCols);
+            preparedStatement = connection.prepareStatement(sqlUser,returnCols);
             preparedStatement.setString(1, user.getFirstName());
             preparedStatement.setString(2,user.getLastName());
             preparedStatement.setString(3,user.getEmail());
@@ -201,6 +217,7 @@ public class UserRepository {
         } finally {
             if(exception && connection!=null) {
                 try {
+                    Objects.requireNonNull(preparedStatement).close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
@@ -221,12 +238,13 @@ public class UserRepository {
         boolean exception = false;
         int rowCount = 0;
 
+        PreparedStatement preparedStatement = null;
         try {
             connection = dbConnectionService.getConnection();
             String returnCols[] = { "id" };
 
             //Check whether user has an address
-            PreparedStatement preparedStatement = connection.prepareStatement(sqlSelectAdr);
+            preparedStatement = connection.prepareStatement(sqlSelectAdr);
             preparedStatement.setInt(1,user.getId());
 
             ResultSet rs = preparedStatement.executeQuery();
@@ -346,6 +364,7 @@ public class UserRepository {
         } finally {
             if(exception && connection!=null) {
                 try {
+                    Objects.requireNonNull(preparedStatement).close();
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
@@ -360,9 +379,10 @@ public class UserRepository {
                 "WHERE r.name IN ('ADMINISTRATOR','COURIER','RESTAURANT_MANAGER','CUSTOMER')";
         List<User> users = new ArrayList<>();
 
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -375,6 +395,12 @@ public class UserRepository {
 
         } catch (Exception e) {
             e.printStackTrace();
+        }  finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
         return users;
     }
@@ -384,9 +410,10 @@ public class UserRepository {
                 "WHERE r.name = 'RESTAURANT_MANAGER'";
         List<User> users = new ArrayList<>();
 
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -399,6 +426,12 @@ public class UserRepository {
 
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
         return users;
     }
@@ -408,9 +441,10 @@ public class UserRepository {
                 "WHERE r.name = 'COURIER'";
         List<User> users = new ArrayList<>();
 
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -423,6 +457,12 @@ public class UserRepository {
 
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
         return users;
     }

@@ -60,4 +60,12 @@ public class CouponService {
     public CouponPaginatedResponse getAllCouponsForRestaurant(Integer restaurantId, Integer page, Integer size) {
         return couponRepository.getByRestaurantIdPage(restaurantId, page, size);
     }
+
+    public CouponResponse getCouponByCode(String code) {
+        CouponResponse coupon = couponRepository.getByCode(code);
+        if (coupon == null)
+            throw new EntityNotFoundException(String.format("Coupon with code %s does not exist!", code));
+        return coupon;
+
+    }
 }

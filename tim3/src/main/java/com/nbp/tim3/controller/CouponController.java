@@ -48,6 +48,25 @@ public class CouponController {
         return new ResponseEntity<>(coupons, HttpStatus.OK);
     }
 
+    @Operation(description = "Get a coupon by coupon code")
+    @ApiResponses ( value = {
+            @ApiResponse(responseCode = "200", description = "Successfully found the coupon with provided code",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CouponResponse.class)),
+                    }),
+            @ApiResponse(responseCode = "404", description = "Coupon with provided code not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
+                    content = @Content)})
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(path = "/code/{code}")
+    public  @ResponseBody ResponseEntity<CouponResponse> getCouponByCode(
+            @Parameter(description = "Coupon Code", required = true)
+            @PathVariable String code) {
+        var coupon = couponService.getCouponByCode(code);
+        return new ResponseEntity<>(coupon, HttpStatus.OK);
+    }
+
     @Operation(description = "Get a coupon by coupon id")
     @ApiResponses ( value = {
             @ApiResponse(responseCode = "200", description = "Successfully found the coupon with provided ID",

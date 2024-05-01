@@ -376,4 +376,33 @@ public class CouponRepository {
 
         return filteredRestaurants;
     }
+
+    public CouponResponse getByCode(String code) {
+        String sql = "SELECT * FROM nbp_coupon WHERE code=?";
+
+        PreparedStatement preparedStatement = null;
+        try {
+            Connection connection = dbConnectionService.getConnection();
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, code);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                CouponResponse couponResponse = new CouponResponse();
+                mapCoupon(couponResponse, resultSet);
+                return couponResponse;
+            }
+            return null;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+    }
 }

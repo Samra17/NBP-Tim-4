@@ -33,8 +33,8 @@ public class OrderService {
         return orderRepository.getByCourierIdPage(customerId, page, size);
     }
 
-    public OrderPaginatedResponse getByRestaurantIdAndStatusPage(Integer restaurantId, Status status, Integer page, Integer size) {
-        return orderRepository.getByRestaurantIdAndStatusPage(restaurantId, status, page, size);
+    public OrderPaginatedResponse getByRestaurantIdAndStatusPage(String managerUserananem, Status status, Integer page, Integer size) {
+        return orderRepository.getByRestaurantManagerAndStatusPage(managerUserananem, status, page, size);
     }
 
     public Map<String, Long> getRestaurantOrdersSorted(List<String> restaurantIds, String sortType){
@@ -47,8 +47,8 @@ public class OrderService {
             throw new EntityNotFoundException(String.format("Order with id %d does not exist!", id));
         }
 
-        List<OrderMenuItemResponse> items = orderMenuItemRepository.getOrderMenuItemsByOrder(orderResponse.getId());
-        orderResponse.setItems(items);
+        //List<String> items = orderMenuItemRepository.getOrderMenuItemsByOrder(orderResponse.getId());
+        //orderResponse.setItems(items);
 
         return orderResponse;
     }

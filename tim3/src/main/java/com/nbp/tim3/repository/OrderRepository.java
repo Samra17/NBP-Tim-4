@@ -5,16 +5,13 @@ import com.nbp.tim3.dto.order.OrderPaginatedResponse;
 import com.nbp.tim3.dto.order.OrderResponse;
 import com.nbp.tim3.dto.order.OrderUpdateDto;
 import com.nbp.tim3.enums.Status;
-import com.nbp.tim3.model.Order;
 import com.nbp.tim3.service.DBConnectionService;
 import com.nbp.tim3.util.exception.InvalidRequestException;
-import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.lang.reflect.Field;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -27,35 +24,53 @@ public class OrderRepository {
     @Autowired
     DBConnectionService dbConnectionService;
 
-    private final String orderSelectSql = "SELECT ord.id as ORD_ID, ord.customer_id as CUSTOMER_ID, " +
-            " ord.RESTAURANT_ID as RES_ID, ord.EST_DELIVERY_TIME as ORD_EST_DELIVERY_TIME, " +
-            " ord.CREATED_AT as ORD_CREATED_AT, " +
-            " ord.COUPON_ID as COUPON_ID, ord.STATUS as ORD_STATUS, ord.TOTAL_PRICE as ORD_TOTAL_PRICE, ord.COURIER_ID as COURIER_ID, " +
-            " ord.DELIVERY_FEE as ORD_DELIVERY_FEE, ord.CODE as ORD_CODE, res.NAME as RES_NAME, customer.PHONE_NUMBER as CUST_PHONE_NUMBER, " +
-            " address_cust.STREET AS CUST_ADD_STREET, " +
-            " address_cust.MUNICIPALITY AS CUST_ADD_MUNICIPALITY," +
-            " address_res.STREET AS RES_ADD_STREET, " +
-            " address_res.MUNICIPALITY AS RES_ADD_MUNICIPALITY, " +
-            " COUNT(*) OVER() AS RESULT_COUNT " +
-            "FROM nbp_order ord " +
-            "JOIN nbp_restaurant res ON ord.restaurant_id = res.id " +
-            "JOIN nbp_address address_res ON res.address_id = address_res.id " +
-            "JOIN nbp.nbp_user customer ON ord.customer_id = customer.id " +
-            "JOIN nbp_address address_cust ON customer.address_id = address_cust.id " +
-            "LEFT JOIN nbp.nbp_user courier ON ord.courier_id = courier.id " +
-            "JOIN nbp_coupon coupon ON ord.coupon_id = coupon.id ";
+    private String getOrderSelectSql(String where) {
+        return "SELECT ord.id as ORD_ID, ord.customer_id as CUSTOMER_ID, " +
+                " ord.RESTAURANT_ID as RES_ID, ord.EST_DELIVERY_TIME as ORD_EST_DELIVERY_TIME, " +
+                " ord.CREATED_AT as ORD_CREATED_AT, " +
+                " ord.COUPON_ID as COUPON_ID, ord.STATUS as ORD_STATUS, ord.TOTAL_PRICE as ORD_TOTAL_PRICE, ord.COURIER_ID as COURIER_ID, " +
+                " ord.DELIVERY_FEE as ORD_DELIVERY_FEE, ord.CODE as ORD_CODE, res.NAME as RES_NAME, customer.PHONE_NUMBER as CUST_PHONE_NUMBER, " +
+                " address_cust.STREET AS CUST_ADD_STREET, " +
+                " address_cust.MUNICIPALITY AS CUST_ADD_MUNICIPALITY," +
+                " address_res.STREET AS RES_ADD_STREET, " +
+                " address_res.MUNICIPALITY AS RES_ADD_MUNICIPALITY, " +
+                "LISTAGG(mi.NAME || ' x ' || omi.QUANTITY, ', ') WITHIN GROUP (ORDER BY mi.ID) AS MENU_ITEMS, " +
+                " COUNT(*) OVER() AS RESULT_COUNT " +
+                "FROM nbp_order ord " +
+                "JOIN nbp_restaurant res ON ord.restaurant_id = res.id " +
+                "JOIN nbp_address address_res ON res.address_id = address_res.id " +
+                "JOIN nbp.nbp_user customer ON ord.customer_id = customer.id " +
+                "JOIN nbp_address address_cust ON customer.address_id = address_cust.id " +
+                "LEFT JOIN nbp.nbp_user courier ON ord.courier_id = courier.id " +
+                "JOIN nbp_coupon coupon ON ord.coupon_id = coupon.id " +
+                "JOIN nbp_order_menu_item omi ON omi.order_id = ord.id " +
+                "JOIN nbp_menu_item mi ON mi.id=omi.menu_item_id "
+                + where +
+                 " GROUP BY " +
+                "    ord.id, ord.customer_id, ord.RESTAURANT_ID, ord.EST_DELIVERY_TIME,\n" +
+                "    ord.CREATED_AT, ord.COUPON_ID, ord.STATUS, ord.TOTAL_PRICE, ord.COURIER_ID,\n" +
+                "    ord.DELIVERY_FEE, ord.CODE, res.NAME, customer.PHONE_NUMBER,\n" +
+                "    address_cust.STREET, address_cust.MUNICIPALITY,\n" +
+                "    address_res.STREET, address_res.MUNICIPALITY";
+    }
 
-    public OrderPaginatedResponse getByRestaurantIdAndStatusPage(Integer restaurantId, Status status, Integer page, Integer size) {
-        String sql = orderSelectSql +
-                "WHERE (UPPER(ord.status)=NVL(?, ord.status)) AND ord.restaurant_id=? OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+    public OrderPaginatedResponse getByRestaurantManagerAndStatusPage(String managerUseraname, Status status, Integer page, Integer size) {
+        String sql =  getOrderSelectSql(
+                "WHERE (UPPER(ord.status)=NVL(?, ord.status)) AND ord.restaurant_id IN " +
+                "(SELECT r.id FROM nbp_restaurant r WHERE r.manager_id = " +
+                "(SELECT nu.id FROM nbp.nbp_user nu WHERE nu.username=? )) "
+                );
+
+        sql += " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
         OrderPaginatedResponse orderPaginatedResponse = new OrderPaginatedResponse();
         List<OrderResponse> orders = new ArrayList<>();
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, status != null ? status.name() : null);
-            preparedStatement.setInt(2, restaurantId);
+            preparedStatement.setString(2, managerUseraname);
             preparedStatement.setInt(3, (page - 1) * size);
             preparedStatement.setInt(4, size);
 
@@ -65,12 +80,20 @@ public class OrderRepository {
                 OrderResponse orderResponse = new OrderResponse();
                 mapOrder(orderResponse, resultSet);
                 orders.add(orderResponse);
-                orderPaginatedResponse.setTotalPages((resultSet.getInt("result_count") + size-1)/size);
+                orderPaginatedResponse.setTotalPages((resultSet.getInt("result_count") + size - 1) / size);
 
             }
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
 
         orderPaginatedResponse.setCurrentPage(page);
@@ -81,14 +104,16 @@ public class OrderRepository {
 
 
     public OrderPaginatedResponse getByCustomerIdPage(Integer customerId, Integer page, Integer size) {
-        String sql = orderSelectSql +
-                "WHERE ord.customer_id=? OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        String sql = getOrderSelectSql(
+                "WHERE ord.customer_id=?");
+        sql += " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         return getByUserIdPage(customerId, page, size, sql);
     }
 
     public OrderPaginatedResponse getByCourierIdPage(Integer courierId, Integer page, Integer size) {
-        String sql = orderSelectSql +
-                "WHERE ord.courier_id=? OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        String sql = getOrderSelectSql(
+                "WHERE ord.courier_id=?");
+        sql += " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         return getByUserIdPage(courierId, page, size, sql);
     }
 
@@ -159,7 +184,7 @@ public class OrderRepository {
     }
 
     public OrderResponse getById(Integer id) {
-        String sql = orderSelectSql + " WHERE ord.id=?";
+        String sql = getOrderSelectSql(" WHERE ord.id=?");
 
         OrderResponse orderResponse = new OrderResponse();
         try {
@@ -309,6 +334,10 @@ public class OrderRepository {
         orderResponse.setEstimatedDeliveryTime(resultSet.getInt("ord_est_delivery_time"));
         orderResponse.setRestaurantName(resultSet.getString("res_name"));
         orderResponse.setRestaurantId(resultSet.getInt("res_id"));
+
+        List<String> items = List.of(resultSet.getString("MENU_ITEMS").split(", "));
+
+        orderResponse.setItems(items);
 
     }
 

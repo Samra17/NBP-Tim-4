@@ -82,14 +82,15 @@ function OrderCard({ order,moveOrder,changeOrder,setAlert,setShowAlert,alert }) 
 
                         <Card.Body className="p-2" >
                             <Row>
+                                {order.items ? 
                                 <Col className='col-5'>
                                     <div className='menu-items content' id={"menu-item" + order.id} onClick={() => toggleMenuItems(order.id)}>
-                                        {Object.keys(order.menuItemCount).map((k) => {
-                                            return <Card.Text>{k} x {order.menuItemCount[k]}</Card.Text>
+                                        {Object.keys(order.items).map((k) => {
+                                            return <Card.Text key={k}>{order.items[k]}</Card.Text>
                                         })}
 
                                     </div>
-                                </Col>
+                                </Col> : <></> }
                                 <Col className="col-7" style={{ marginTop: '5rem' }}>
                                     <div style={{ position: "absolute", bottom: 5, padding: 2 }}>
                                         {additionalInfo()}

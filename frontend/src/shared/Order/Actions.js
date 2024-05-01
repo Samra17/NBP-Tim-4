@@ -99,7 +99,7 @@ function Actions({
 
   const restaurantManagerActions = () => {
     switch (order.orderStatus) {
-      case "Pending":
+      case "NEW":
         setNoActions(false);
         return (
           <ButtonGroup>
@@ -134,7 +134,7 @@ function Actions({
           </ButtonGroup>
         );
         break;
-      case "In preparation":
+      case "IN_PREPARATION":
         setNoActions(false);
         return (
           <ButtonGroup>
@@ -163,7 +163,7 @@ function Actions({
 
   const courierActions = () => {
     switch (order.orderStatus) {
-      case "Ready for delivery":
+      case "READY_FOR_DELIVERY":
         setNoActions(false);
         return (
           <ButtonGroup>
@@ -185,7 +185,7 @@ function Actions({
           </ButtonGroup>
         );
         break;
-      case "In delivery":
+      case "IN_DELIVERY":
         setNoActions(false);
         return (
           <ButtonGroup>
@@ -214,7 +214,7 @@ function Actions({
 
   const customerActions = () => {
     switch (order.orderStatus) {
-      case "Pending":
+      case "NEW":
         setNoActions(false);
         return (
           <ButtonGroup>

@@ -59,7 +59,7 @@ function ListContainer({
 
   useEffect(() => {
     console.log("GO TO PAGE")
-    console.log(items)
+    console.log(totalPages)
     goToPage(page);
   }, [page,trigger]);
 
@@ -401,7 +401,7 @@ function ListContainer({
               </span>
             )}
           </Row>
-          {(pagination == "server" && totalPages>1) || items.length > perPage ? (
+          
             <div>
               <hr></hr>
               <PaginationControl
@@ -411,9 +411,7 @@ function ListContainer({
                 limit={perPage}
               />
             </div>
-          ) : (
-            <></>
-          )}
+          
         </Container>
       </Loader>
     </>

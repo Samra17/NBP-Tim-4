@@ -29,9 +29,10 @@ public class TokenRepository {
     public Token findByToken(String tokenBase64) {
         String sql = "SELECT * FROM nbp_token WHERE token = ? FETCH FIRST 1 ROW ONLY";
 
+        PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, tokenBase64);
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -42,15 +43,23 @@ public class TokenRepository {
                 boolean expired = resultSet.getBoolean("expired");
                 boolean revoked = resultSet.getBoolean("revoked");
 
-                Token token = new Token(tokenValue,expired,revoked);
+                Token token = new Token(tokenValue, expired, revoked);
                 token.setId(resultSet.getInt("id"));
                 return token;
             }
 
-            return  null;
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        } finally {
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
 
     }

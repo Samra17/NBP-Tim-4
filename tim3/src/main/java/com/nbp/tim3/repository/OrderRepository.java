@@ -334,9 +334,15 @@ public class OrderRepository {
         } finally {
             if (exception && connection != null) {
                 try {
-                    Objects.requireNonNull(preparedStatementOrderMenuItems).close();
-                    preparedStatement.close();
-                    preparedStatementAddress.close();
+                    if (preparedStatementOrderMenuItems != null) {
+                        preparedStatementOrderMenuItems.close();
+                    }
+                    if (preparedStatement != null) {
+                        preparedStatement.close();
+                    }
+                    if (preparedStatementAddress != null){
+                        preparedStatementAddress.close();
+                    }
                     connection.rollback();
                 } catch (SQLException e) {
                     throw new RuntimeException(e);

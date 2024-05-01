@@ -37,6 +37,7 @@ public class CouponController {
             @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)}
     )
+
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path="/all")
     public @ResponseBody ResponseEntity<CouponPaginatedResponse> getAllCoupons(

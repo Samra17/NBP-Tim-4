@@ -2,6 +2,7 @@ import React from "react";
 import { PaginationControl } from "react-bootstrap-pagination-control";
 import "./Pagination.css";
 export default ({ page, setPage, total, limit }) => {
+  console.log("TOTAL ITEMS: " + total)
   return (
     <PaginationControl
       page={page}

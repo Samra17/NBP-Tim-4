@@ -21,10 +21,10 @@ import OrderCard from "../../Order/OrderCard";
 import Loader from "../Loader/Loader";
 import PaginationControl from "../Pagination/PaginationControl";
 function ListContainer({
+  type = "restaurant",
   title,
   showFilters,
   items,
-  type = "restaurant",
   perPage = 4,
   categories = null,
   setItems,
@@ -38,10 +38,11 @@ function ListContainer({
   setOrderList,
   orderList,
   moveOrder,
-  pagination = false,
+  pagination = "client",
   handlePagination,
 }) {
-  const [page, setPage] = useState();
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState([]);
   const [filterData, setFilterData] = useState({
     sortBy: "RATING",
@@ -50,28 +51,29 @@ function ListContainer({
   const [loading, setLoading] = useState(false);
   const [openReportDialog, setOpenReportDialog] = useState(false);
   const [selectedValues, setSelectedValues] = useState([]);
+  const [trigger, setTrigger] = useState(false);
+
   const user = authService.getCurrentUser();
 
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log("GO TO PAGE")
+    console.log(items)
     goToPage(page);
-  }, [page]);
+  }, [page,trigger]);
 
   const goToPage = (p) => {
-    if (pagination) {
-      //handlePagination(page, perPage);
+    if (pagination == "server") {
+      setLoading(true);
+      handlePagination(title,page, perPage, setTotalPages,setLoading, filterData);
     } else
       setCurrentPage(
         items.slice((p - 1) * perPage, (p - 1) * perPage + perPage)
       );
   };
 
-  console.log(items);
-
-  useEffect(() => {
-    goToPage(1);
-  }, [items]);
+  
 
   const handleChange = (e) => {
     if (e.target.name == "offeringDiscount") {
@@ -82,15 +84,8 @@ function ListContainer({
   };
 
   const search = () => {
-    setLoading(true);
-    restaurantService.searchRestaurants(filterData).then((res) => {
-      setLoading(false);
-      if (res.status == 200) {
-        setItems(res.data.restaurants);
-        setPage(1);
-        console.log(res.data);
-      }
-    });
+    setPage(1);
+    setTrigger(!trigger);
   };
 
   const handleCategoryChange = (e) => {
@@ -318,7 +313,7 @@ function ListContainer({
           {showFilters && categories ? filters() : <></>}
           <Row xs={1} md={grid ? 2 : 1} className="gy-2 gx-2 mw-100">
             {items.length > 0 && !loading ? (
-              currentPage.map((i) => (
+              items.map((i) => (
                 <Col key={i.id}>
                   {type == "restaurant" ? (
                     <RestaurantCard
@@ -345,7 +340,6 @@ function ListContainer({
                     />
                   ) : type === "menu" ? (
                     <>
-                      samra
                       <MenuItem
                         grid={grid}
                         style={{ width: "100%" }}
@@ -407,13 +401,13 @@ function ListContainer({
               </span>
             )}
           </Row>
-          {items.length > perPage ? (
+          {(pagination == "server" && totalPages>1) || items.length > perPage ? (
             <div>
               <hr></hr>
               <PaginationControl
                 page={page}
                 setPage={setPage}
-                total={items.length}
+                total={pagination=="server" ? totalPages*perPage : items.length}
                 limit={perPage}
               />
             </div>

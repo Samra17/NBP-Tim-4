@@ -16,27 +16,62 @@ function Restaurants() {
   const [showAlert, setShowAlert] = useState(false);
   const perPage = 2;
 
-  async function handlePagination(page, perPage) {
+  async function handlePagination(title, page, perPage, setTotalPages,setContainerLoad, filterData) {
+
+    if(title.includes("Favorite")) {
+      restaurantService.getUserFavorites(page, perPage).then((res) => {
+        setContainerLoad(false);
+        if (res.status == 200)  {
+        setFavorites(res.data.restaurants);
+        setTotalPages(res.data.totalPages);
+        }
+        else {
+          setAlert({ ...alert, msg: [res.data], type: "error" });
+          setShowAlert(true);
+        }
+      })
+
+    } else {
+    console.log("Handle pagination SEARCH")
+    restaurantService.searchRestaurants(filterData, page, perPage).then((res) => {
+      setContainerLoad(false);
+      if (res.status == 200) {
+        setSearchResults(res.data.restaurants);
+        setTotalPages(res.data.totalPages);
+        console.log("SET RESTAURANTS")
+      }  else {
+        setAlert({ ...alert, msg: [res.data], type: "error" });
+        setShowAlert(true);
+        setSearchResults([]);
+      }
+    });
+
+  }
+
+    /*
     const restaurantsRes = await restaurantService.getAllRestaurants(
       page,
       perPage
     );
     if (restaurantsRes.status === 200) {
       setSearchResults(restaurantsRes.data.restaurants);
-    }
+    }*/
   }
 
   useEffect(() => {
     if (!mounted) {
       mounted = true;
       setLoading(true);
-      restaurantService.getAllRestaurants().then((res) => {
+      restaurantService.searchRestaurants({
+        sortBy: "RATING",
+        ascending: false,
+      }, 1, perPage).then((res) => {
         if (res.status == 200) {
           setSearchResults(res.data.restaurants);
-          restaurantService.getUserFavorites().then((res) => {
-            if (res.status == 200) setFavorites(res.data);
+          console.log("SET INTIAL RESTAURANTS")
+          restaurantService.getUserFavorites(1, perPage).then((res) => {
+            if (res.status == 200) setFavorites(res.data.restaurants);
             else {
-              console.log(res);
               setLoading(false);
               setAlert({ ...alert, msg: [res.data], type: "error" });
               setShowAlert(true);
@@ -51,7 +86,6 @@ function Restaurants() {
             });
           });
         } else {
-          console.log(res);
           setLoading(false);
           setAlert({ ...alert, msg: [res.data], type: "error" });
           setShowAlert(true);
@@ -87,6 +121,9 @@ function Restaurants() {
                   items={favorites}
                   title={"Favorite restaurants"}
                   showFilters={false}
+                  perPage={perPage}
+                  handlePagination={handlePagination}
+                  pagination="server"
                 ></ListContainer>
               ) : (
                 <></>
@@ -99,8 +136,8 @@ function Restaurants() {
                   perPage={perPage}
                   categories={categories}
                   setItems={setSearchResults}
-                  pagination={true}
-                  // handlePagination={handlePagination}
+                  pagination="server"
+                  handlePagination={handlePagination}
                 ></ListContainer>
               ) : (
                 <div style={{ display: "flex", justifyContent: "center" }}>

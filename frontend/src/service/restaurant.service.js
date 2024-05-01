@@ -44,10 +44,10 @@ class RestaurantService {
     }
   }
 
-  getUserFavorites() {
+  getUserFavorites(page, perPage) {
     try {
       return api
-        .get(`/api/restaurant/favorites?page=${1}&perPage=${10}`)
+        .get(`/api/restaurant/favorites?page=${page}&perPage=${perPage}`)
         .then((response) => {
           return response;
         });
@@ -56,39 +56,26 @@ class RestaurantService {
     }
   }
 
-  searchRestaurants(filters) {
-    let query = "";
+  searchRestaurants(filters, page, perPage) {
+    let query = `?page=${page}&perPage=${perPage}`;
     if (filters.name) {
-      if (query.length == 0) {
-        query += "?name=" + filters.name;
-      } else {
-        query += "&name=" + filters.name;
-      }
+      query += "&name=" + filters.name;
+      
     }
 
     if (filters.offeringDiscount) {
-      if (query.length == 0) {
-        query += "?isOfferingDiscount=" + filters.offeringDiscount;
-      } else {
-        query += "&isOfferingDiscount=" + filters.offeringDiscount;
-      }
+     query += "&isOfferingDiscount=" + filters.offeringDiscount;
+      
     }
 
     if (filters.categoryIds) {
       filters.categoryIds.forEach((cid) => {
-        if (query.length == 0) {
-          query += "?categoryIds=" + cid;
-        } else {
           query += "&categoryIds=" + cid;
-        }
       });
     }
 
-    if (query.length == 0) {
-      query += "?sortBy=" + filters.sortBy + "&ascending=" + filters.ascending;
-    } else {
-      query += "&sortBy=" + filters.sortBy + "&ascending=" + filters.ascending;
-    }
+    query += "&sortBy=" + filters.sortBy + "&ascending=" + filters.ascending;
+    
 
     try {
       return api.get("/api/restaurant/search" + query).then((response) => {

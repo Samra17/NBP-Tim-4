@@ -66,6 +66,7 @@ function RestaurantInformation() {
         if (res.status == 200) {
           setFormData(res.data);
           setRestaurant(res.data);
+      
           if (res.data.openingHours) {
             setFormattedHours({
               mondayOpen: res.data.openingHours.mondayOpen

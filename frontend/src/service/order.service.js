@@ -109,7 +109,7 @@ class OrderService {
 
       getRestaurantPastOrders(page,perPage) {
       
-        return api.get("/api/order/get/restaurant/delivered?page=${page}&perPage=${perPage}")
+        return api.get(`/api/order/get/restaurant/delivered?page=${page}&perPage=${perPage}`)
       }
 
       getRestaurantPendingOrders(page,perPage) {

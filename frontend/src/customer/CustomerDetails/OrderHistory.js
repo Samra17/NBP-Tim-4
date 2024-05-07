@@ -30,7 +30,7 @@ function OrderHistory() {
         }
       })
     } else if(role == "RESTAURANT_MANAGER") {
-      orderService.getRestaurantPastOrders(restaurantService.getCurrentRestaurantUUID()).then((res) => {
+      orderService.getRestaurantPastOrders(1,perPage).then((res) => {
         setLoading(false)
         if (res.status == 200) {
           setOrders(res.data.orders)
@@ -57,7 +57,7 @@ function OrderHistory() {
           }
         })
       } else if(role == "RESTAURANT_MANAGER") {
-        orderService.getRestaurantPastOrders(restaurantService.getCurrentRestaurantUUID()).then((res) => {
+        orderService.getRestaurantPastOrders(page,perPage).then((res) => {
           setContainerLoad(false);
           if (res.status == 200) {
             setOrders(res.data.orders)

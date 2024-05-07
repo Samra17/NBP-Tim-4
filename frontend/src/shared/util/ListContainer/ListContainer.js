@@ -58,8 +58,6 @@ function ListContainer({
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log("GO TO PAGE")
-    console.log(totalPages)
     goToPage(page);
   }, [page,trigger]);
 
@@ -71,8 +69,6 @@ function ListContainer({
       setCurrentPage(
         items.slice((p - 1) * perPage, (p - 1) * perPage + perPage)
       );
-      console.log("Client side " + perPage)
-      console.log(items.slice((p - 1) * perPage, (p - 1) * perPage + perPage))
     }
 
   };

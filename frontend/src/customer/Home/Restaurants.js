@@ -68,7 +68,6 @@ function Restaurants() {
       }, 1, perPage).then((res) => {
         if (res.status == 200) {
           setSearchResults(res.data.restaurants);
-          console.log("SET INTIAL RESTAURANTS")
           restaurantService.getUserFavorites(1, perPage).then((res) => {
             if (res.status == 200) setFavorites(res.data.restaurants);
             else {

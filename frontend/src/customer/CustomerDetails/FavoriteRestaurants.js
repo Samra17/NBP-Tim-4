@@ -7,6 +7,7 @@ import CustomAlert from '../../shared/util/Alert';
 
 function FavoriteRestaurants() {
   var mounted = false;
+  const perPage = 4;
   const [favorites, setFavorites] = useState();
   const [loading, setLoading] = useState(false)
   const [alert, setAlert] = useState({})
@@ -17,22 +18,40 @@ function FavoriteRestaurants() {
 
       mounted = true;
       setLoading(true)
-
-      restaurantService.getUserFavorites().then(res => {
-        setLoading(false)
-        if (res.status == 200)
-          setFavorites(res.data)
+      restaurantService.getUserFavorites(1, perPage).then((res) => {
+        setLoading(false);
+        if (res.status == 200)  {
+        setFavorites(res.data.restaurants);
+        }
         else {
-          console.log(res)
-          setAlert({ ...alert, msg: res.data, type: "error" })
-          setShowAlert(true)
+          setAlert({ ...alert, msg: [res.data], type: "error" });
+          setShowAlert(true);
         }
       })
+
     }
 
 
 
   }, [])
+
+  async function handlePagination(title, page, perPage, setTotalPages,setContainerLoad, filterData) {
+
+    
+      restaurantService.getUserFavorites(page, perPage).then((res) => {
+        setContainerLoad(false);
+        if (res.status == 200)  {
+        setFavorites(res.data.restaurants);
+        setTotalPages(res.data.totalPages);
+        }
+        else {
+          setAlert({ ...alert, msg: [res.data], type: "error" });
+          setShowAlert(true);
+        }
+      })
+
+  }
+
 
 
   return (
@@ -40,7 +59,7 @@ function FavoriteRestaurants() {
       <Loader isOpen={loading} >
         <CustomAlert setShow={setShowAlert} show={showAlert} type={alert.type} msg={alert.msg}></CustomAlert>
         {favorites ?
-          <ListContainer items={favorites} title={"Favorite restaurants"} showFilters={false} grid={false}></ListContainer>
+          <ListContainer items={favorites} title={"Favorite restaurants"} showFilters={false} grid={false} perPage={perPage} handlePagination={handlePagination} pagination='server'></ListContainer>
           : <></>}
       </Loader>
     </>

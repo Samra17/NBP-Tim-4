@@ -13,16 +13,17 @@ function OrderHistory() {
   const [alert, setAlert] = useState({})
   const [showAlert, setShowAlert] = useState(false)
   var mounted = false;
+  const perPage = 5;
 
   const role = authService.getCurrentUser().role;
   useEffect(() => {
     if (!mounted) {
       mounted = true
       if(role=="CUSTOMER") {
-      orderService.getUserOrders().then((res) => {
+      orderService.getUserOrders(1,perPage).then((res) => {
         setLoading(false)
         if (res.status == 200) {
-          setOrders(res.data)
+          setOrders(res.data.orders)
         } else {
           setAlert({ ...alert, msg: res.data, type: "error" })
           setShowAlert(true)
@@ -32,7 +33,7 @@ function OrderHistory() {
       orderService.getRestaurantPastOrders(restaurantService.getCurrentRestaurantUUID()).then((res) => {
         setLoading(false)
         if (res.status == 200) {
-          setOrders(res.data)
+          setOrders(res.data.orders)
         } else {
           setAlert({ ...alert, msg: res.data, type: "error" })
           setShowAlert(true)
@@ -41,6 +42,34 @@ function OrderHistory() {
     }
     }
   }, [])
+
+  async function handlePagination(title, page, perPage, setTotalPages,setContainerLoad, filterData) {
+
+      if(role=="CUSTOMER") {
+        orderService.getUserOrders(page,perPage).then((res) => {
+          setContainerLoad(false);
+          if (res.status == 200) {
+            setOrders(res.data.orders);
+            setTotalPages(res.data.totalPages);
+          } else {
+            setAlert({ ...alert, msg: res.data, type: "error" })
+            setShowAlert(true)
+          }
+        })
+      } else if(role == "RESTAURANT_MANAGER") {
+        orderService.getRestaurantPastOrders(restaurantService.getCurrentRestaurantUUID()).then((res) => {
+          setContainerLoad(false);
+          if (res.status == 200) {
+            setOrders(res.data.orders)
+            setTotalPages(res.data.totalPages);
+          } else {
+            setAlert({ ...alert, msg: res.data, type: "error" })
+            setShowAlert(true)
+          }
+        })
+      }
+
+  }
 
 
 
@@ -53,7 +82,9 @@ function OrderHistory() {
         grid={false}
         items={orders}
         setItems={setOrders}
-        perPage={5}
+        perPage={perPage}
+        handlePagination={handlePagination}
+        pagination='server'
       /> : <></>}
     </Loader>
   )

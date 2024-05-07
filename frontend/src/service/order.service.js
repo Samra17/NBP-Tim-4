@@ -3,10 +3,11 @@ import tokenService from "./token.service";
 
 class OrderService {
 
-    getUserOrders() {
+    getUserOrders(page,perPage) {
+      var id = tokenService.getUserId();
         try {
           return api
-              .get("/api/order/getforuser")
+              .get("/api/order/get/customer/" + id + "?page=" + page + "&perPage=" + perPage)
               .then(response=> {
                 return response;
               })

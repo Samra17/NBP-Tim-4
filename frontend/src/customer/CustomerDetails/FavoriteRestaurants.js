@@ -7,7 +7,7 @@ import CustomAlert from '../../shared/util/Alert';
 
 function FavoriteRestaurants() {
   var mounted = false;
-  const perPage = 4;
+  const perPage = 5;
   const [favorites, setFavorites] = useState();
   const [loading, setLoading] = useState(false)
   const [alert, setAlert] = useState({})

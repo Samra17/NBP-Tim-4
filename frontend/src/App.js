@@ -27,6 +27,10 @@ function App() {
             element={<CustomerDetails></CustomerDetails>}
           ></Route>
           <Route
+            path="/customer/order/history"
+            element={<CustomerDetails></CustomerDetails>}
+          ></Route>
+          <Route
             path="/restaurant/menus"
             element={<RestaurantDetails></RestaurantDetails>}
           ></Route>

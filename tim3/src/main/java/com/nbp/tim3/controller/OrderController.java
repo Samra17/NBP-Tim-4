@@ -63,7 +63,7 @@ public class OrderController {
 //        return ResponseEntity.ok(new Order());
 //    }
 //
-    @PreAuthorize("hasRole('ADMINISTRATOR')")
+    @PreAuthorize("hasAnyRole('ADMINISTRATOR','CUSTOMER')")
     @Operation(description = "Get all customer's orders")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully fetched customer's orders",

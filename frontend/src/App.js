@@ -9,6 +9,9 @@ import NotFound from "./shared/util/NotFound";
 import CustomerDetails from "./customer/CustomerDetails/CustomerDetails";
 import RestaurantDetails from "./restaurantManager/RestaurantDetails/RestaurantDetails";
 import RestaurantOverview from "./customer/Restaurant/RestaurantOverview";
+import AdminCouriers from "./admin/Home/AdminCouriers";
+import AdminOverview from "./admin/Home/AdminOverview";
+import AdminRestaurants from "./admin/Home/AdminRestaurants";
 
 function App() {
   return (
@@ -46,6 +49,9 @@ function App() {
             path="/restaurant/order/history"
             element={<RestaurantDetails></RestaurantDetails>}
           ></Route>
+          <Route path="/admin/overview" element={<AdminOverview></AdminOverview>}></Route>
+          <Route path="/admin/couriers" element={<AdminCouriers></AdminCouriers>}></Route>
+          
           
         </Route>
       </Routes>

@@ -20,7 +20,7 @@ class OrderService {
       getAdminOrders() {
         try {
           return api
-              .get("/api/order/adminorders")
+              .get("/api/admin/adminorders")
               .then(response=> {
                 return response;
               })
@@ -33,7 +33,7 @@ class OrderService {
       getAdminSpending() {
         try {
           return api
-              .get("/api/order/adminspending")
+              .get("/api/admin/adminspending")
               .then(response=> {
                 return response;
               })
@@ -46,7 +46,7 @@ class OrderService {
       getAdminRestaurantRevenue() {
         try {
           return api
-              .get("/api/order/adminrestaurantrevenue")
+              .get("/api/admin/adminrestaurantrevenue")
               .then(response=> {
                 return response;
               })

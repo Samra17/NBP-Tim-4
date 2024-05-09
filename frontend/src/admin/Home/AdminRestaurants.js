@@ -27,9 +27,8 @@ function AdminRestaurants() {
         if (!mounted) {
 
             mounted = true;
-            setLoading(true) // ... vrati ovo na true
+            setLoading(true) 
             restaurantService.getAllFullRestaurants().then(res => {
-                console.log(res.data)
                 if (res.status == 200) {
                     res.data.forEach(element => {
                         var cat = element.categories
@@ -39,7 +38,8 @@ function AdminRestaurants() {
                             element.categories += ", "
                         })
                         element.categories = element.categories.substring(0,element.categories.length-2)
-                        //console.log(element.categories)
+                        element.address = element.address.street
+                        
                     });
                     userService.getAllManagers().then(mng => {
                         //setLoading(false)
@@ -58,9 +58,6 @@ function AdminRestaurants() {
                             setLoading(false)
                         }
                     })
-                    
-
-                    
                     
 
                 }
@@ -108,7 +105,7 @@ function AdminRestaurants() {
             text: "Favourited",
             sort:true
         },
-      ];
+    ];
 
       const rowEvents = {
         onClick: (e, row, rowIndex) => {

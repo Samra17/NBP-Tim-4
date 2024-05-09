@@ -36,7 +36,7 @@ class RestaurantService {
 
   getAllFullRestaurants() {
     try {
-      return api.get("/restaurant/all/full").then((response) => {
+      return api.get("/api/restaurant/all/full").then((response) => {
         return response;
       });
     } catch (e) {

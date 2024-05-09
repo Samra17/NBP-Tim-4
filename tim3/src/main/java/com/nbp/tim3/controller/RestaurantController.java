@@ -128,16 +128,10 @@ public class RestaurantController {
     @PreAuthorize("hasRole('ADMINISTRATOR')")
     @GetMapping(path="/all/full")
     @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody ResponseEntity<RestaurantPaginatedResponse> getAllFullRestaurants(
-            @Parameter(description = "Page number", required = true)
-            @RequestParam(name="page") int page,
-            @Parameter(description = "Number of records per page", required = true)
-            @RequestParam(name="perPage") int recordsPerPage
+    public @ResponseBody ResponseEntity<List<RestaurantResponse>> getAllFullRestaurants(
     ) {
-        PaginatedRequest paginatedRequest = new PaginatedRequest(page,recordsPerPage);
-
-        var restaurants = restaurantService.getFullRestaurants(paginatedRequest);
-        return new ResponseEntity<>(restaurants, HttpStatus.OK);
+        var restaurants = restaurantService.getFullRestaurants();
+        return new ResponseEntity<List<RestaurantResponse>>(restaurants, HttpStatus.OK);
     }
 
 

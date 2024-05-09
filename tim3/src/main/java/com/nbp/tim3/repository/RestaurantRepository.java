@@ -478,7 +478,7 @@ public class RestaurantRepository {
     }
 
 
-    public RestaurantPaginatedResponse getFullRestaurants(PaginatedRequest paginatedRequest) {
+    public List<RestaurantResponse> getFullRestaurants() {
         Connection connection = null;
 
         boolean exception = false;
@@ -526,13 +526,10 @@ public class RestaurantRepository {
                 "        \n" +
                 "ORDER BY nr.id\n" +
                 "        )\n" +
-                "\n" +
-                "WHERE \n" +
-                "    rnum >= ?\n" +
-                "    AND rnum <= ?";
+                "\n";
 
 
-        int offset = (paginatedRequest.getPage() - 1) * paginatedRequest.getRecordsPerPage();
+
 
 
         PreparedStatement preparedStatement = null;
@@ -542,15 +539,9 @@ public class RestaurantRepository {
             preparedStatement = connection.prepareStatement(query);
 
 
-            preparedStatement.setInt(1, offset + 1);
-            preparedStatement.setInt(2, offset + paginatedRequest.getRecordsPerPage());
-
-
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            RestaurantPaginatedResponse response = new RestaurantPaginatedResponse();
-            response.setRestaurants(new ArrayList<>());
-            response.setCurrentPage(paginatedRequest.getPage());
+            List<RestaurantResponse> response = new ArrayList<>();
 
             while (resultSet.next()) {
                 RestaurantResponse r = new RestaurantResponse(resultSet.getInt("id"), resultSet.getString("name"),
@@ -632,9 +623,7 @@ public class RestaurantRepository {
                     r.setOpeningHours(openingHoursResponse);
                 }
 
-
-                response.setTotalPages((resultSet.getInt("result_count") + paginatedRequest.getRecordsPerPage() - 1) / paginatedRequest.getRecordsPerPage());
-                response.getRestaurants().add(r);
+                response.add(r);
             }
 
             connection.commit();

@@ -7,21 +7,23 @@ import { HeartFill } from "react-bootstrap-icons";
 import CustomAlert from "../../shared/util/Alert";
 
 function Reviews() {
-  const [reviews, setReviews] = useState();
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [favorites, setFavorites] = useState();
+  const [favorites, setFavorites] = useState([]);
   const [alert,setAlert] = useState({});
   const [showAlert,setShowAlert] = useState(false);
+  const [average,setAverage] = useState(0);
+  const perPage = 8;
 
   var mounted = false;
   useEffect(() => {
     if (!mounted) {
       mounted = true;
       setLoading(true);
-      restaurantService.getReviews().then((res) => {
+      restaurantService.getReviews(1, perPage).then((res) => {
         setLoading(false);
         if (res.status == 200) {
-          setReviews(res.data);
+          setReviews(res.data.reviews);
         } else {
             setAlert({msg:res.data,type:"error"})
             setShowAlert(true)
@@ -35,19 +37,32 @@ function Reviews() {
             setShowAlert(true)
         }
       });
+
+      restaurantService.getAvgRating().then((res) => {
+        if (res.status == 200) {
+          setAverage(res.data);
+        } else {
+            setAlert({msg:res.data,type:"error"})
+            setShowAlert(true)
+        }
+      });
+      
     }
   }, []);
 
-  const getAvg = () => {
-    var avg = 0.0;
-    reviews
-      .map((r) => r.rating)
-      .forEach((rating) => {
-        avg += rating;
-      });
+  async function handlePagination(title, page, perPage, setTotalPages,setContainerLoad, filterData) {
 
-    return reviews.length > 0 ? avg / reviews.length : 0.0;
-  };
+      restaurantService.getReviews(page, perPage).then((res) => {
+        setContainerLoad(false);
+        if (res.status == 200)  {
+          setReviews(res.data.reviews);
+        setTotalPages(res.data.totalPages);
+        }
+    }) 
+
+  }
+
+
 
   return (
     <Loader isOpen={loading}>
@@ -68,7 +83,7 @@ function Reviews() {
                 fontWeight: "regular",
               }}
             >
-              {getAvg()}
+              {average.toFixed(2)}
             </span>{" "}
             <span
               style={{ color: "grey", fontSize: "24px", fontWeight: "regular" }}
@@ -92,9 +107,11 @@ function Reviews() {
             title="Reviews"
             setItems={reviews}
             items={reviews}
-            perPage={8}
+            perPage={perPage}
             grid={false}
             type="review"
+            pagination="server"
+            handlePagination={handlePagination}
           ></ListContainer>
         </>
       ) : (

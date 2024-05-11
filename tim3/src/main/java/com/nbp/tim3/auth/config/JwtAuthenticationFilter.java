@@ -2,6 +2,7 @@ package com.nbp.tim3.auth.config;
 
 import com.nbp.tim3.auth.service.JwtService;
 import com.nbp.tim3.model.Token;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,7 +37,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
         final String jwtToken;
-        final String username;
+        String username = null;
+        String usernameHeader = "";
         if(authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request,response);
             return;
@@ -44,7 +46,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 
         jwtToken = authHeader.substring(7);
-        username = jwtService.extractUsername(jwtToken);
+        try {
+            username = jwtService.extractUsername(jwtToken);
+            usernameHeader = username;
+        } catch (ExpiredJwtException e) {
+            logger.error(e.getMessage());
+        }
 
         if(username!=null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
@@ -63,11 +70,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         }
 
+        String finalUsernameHeader = usernameHeader;
         HttpServletRequestWrapper wrapper = new HttpServletRequestWrapper((HttpServletRequest) request) {
             @Override
             public Enumeration<String> getHeaders(String name) {
                 if ("username".equals(name))
-                    return enumeration(singleton(username));
+                    return enumeration(singleton(finalUsernameHeader));
                 return super.getHeaders(name);
             }
         };

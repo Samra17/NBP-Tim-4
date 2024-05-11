@@ -9,6 +9,7 @@ import com.nbp.tim3.model.Restaurant;
 import com.nbp.tim3.repository.CategoryRepository;
 import com.nbp.tim3.repository.RestaurantRepository;
 import com.nbp.tim3.repository.ReviewRepository;
+import com.nbp.tim3.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,18 +22,8 @@ public class RestaurantService {
     @Autowired
     private RestaurantRepository restaurantRepository;
     @Autowired
-    private CategoryRepository categoryRepository;
-
-
-
-    @Autowired
     private ReviewRepository reviewRepository;
 
-    /*
-    @Autowired
-    private FavoriteRestaurantRepository favoriteRestaurantRepository;
-
-     */
 
 
     public RestaurantCreateResponse addNewRestaurant(RestaurantCreateRequest request) {
@@ -168,19 +159,18 @@ public class RestaurantService {
         return response;
     }
 
-    public Double calculateAverageRatingForRestaurant(int restaurantId) {
-        var exception = new EntityNotFoundException("Restaurant with id " + restaurantId + " does not exist!");
-        if(!restaurantRepository.checkExists(restaurantId))
-            throw exception;
+    public Double calculateAverageRatingForRestaurant(String username) {
+        int restaurantId = restaurantRepository.getRestaurantIdByManagerUsername(username);
         return reviewRepository.calculateAverageRatingForRestaurant(restaurantId);
 
     }
 
 
 
-    public int getCustomersFavorited(int restaurantId) {
+    public int getCustomersFavorited(String username) {
+        Integer restaurantId = restaurantRepository.getRestaurantIdByManagerUsername(username);
         var exception = new EntityNotFoundException("Restaurant with id " + restaurantId + " does not exist!");
-        if(!restaurantRepository.checkExists(restaurantId))
+        if(restaurantId == null)
             throw exception;
         return restaurantRepository.countNumberOfFavorites(restaurantId);
     }

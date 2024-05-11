@@ -3,7 +3,6 @@ package com.nbp.tim3.controller;
 import com.nbp.tim3.dto.review.ReviewCreateRequest;
 import com.nbp.tim3.dto.review.ReviewPaginatedResponse;
 import com.nbp.tim3.dto.review.ReviewResponse;
-import com.nbp.tim3.model.Review;
 import com.nbp.tim3.service.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,9 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @RestController
 @RequestMapping(path="/api/review")
@@ -37,16 +33,16 @@ public class ReviewController {
                     content = @Content),
             @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)})
-    @GetMapping(path="/restaurant/{restaurantId}")
+    @GetMapping(path="/restaurant")
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody ResponseEntity<ReviewPaginatedResponse> getReviewsForRestaurant (
-            @Parameter(description = "Restaurant ID", required = true)
-            @PathVariable Integer restaurantId,
             @Parameter(description = "Page number", required = true)
             @RequestHeader(value = "page", defaultValue = "1") Integer page,
             @Parameter(description = "Records per page", required = true)
-            @RequestHeader(value = "size", defaultValue = "10") Integer size) {
-        var reviews = reviewService.getReviewsByRestaurantId(restaurantId, page, size);
+            @RequestHeader(value = "size", defaultValue = "10") Integer size,
+            @Parameter(description = "User username", required = false)
+            @RequestHeader(value = "username", required = false) String username) {
+        var reviews = reviewService.getReviewsByRestaurantManager(username, page, size);
         return new ResponseEntity<>(reviews,HttpStatus.OK);
     }
 

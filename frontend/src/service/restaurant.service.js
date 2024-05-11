@@ -218,10 +218,10 @@ class RestaurantService {
     }
   }
 
-  getReviews() {
+  getReviews(page, perPage) {
     try {
       return api
-        .get("/api/review/restaurant/" + this.getCurrentRestaurantUUID())
+        .get(`/api/review/restaurant?page=${page}&perPage=${perPage}`)
         .then((response) => {
           return response;
         });
@@ -233,7 +233,19 @@ class RestaurantService {
   getNumberOfFavorites() {
     try {
       return api
-        .get("/api/restaurant/favorites/" + this.getCurrentRestaurantUUID())
+        .get("/api/restaurant/customers-favorited")
+        .then((response) => {
+          return response;
+        });
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  getAvgRating() {
+    try {
+      return api
+        .get("/api/restaurant/rating")
         .then((response) => {
           return response;
         });

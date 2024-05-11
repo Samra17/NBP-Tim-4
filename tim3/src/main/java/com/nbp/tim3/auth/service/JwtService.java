@@ -22,11 +22,7 @@ public class JwtService {
     private final long ACCESS_TOKEN_EXPIRATION;
     private final long REFRESH_TOKEN_EXPIRATION;
     public String extractUsername(String token) {
-        try {
             return extractClaim(token, Claims::getSubject);
-        } catch (ExpiredJwtException e) {
-            return  null;
-        }
     }
 
     public String extractRole(String token) {

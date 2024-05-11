@@ -296,13 +296,14 @@ public class RestaurantController {
             @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)
     })
-    @GetMapping(path="/{id}/rating")
+    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
+    @GetMapping(path="/rating")
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody ResponseEntity<Double> getAverageRatingForRestaurant(
-            @Parameter(description = "Restaurant ID", required = true)
-            @PathVariable int id) {
+            @Parameter(description = "User username", required = true)
+            @RequestHeader("username") String username) {
 
-        return new ResponseEntity<>(restaurantService.calculateAverageRatingForRestaurant(id),HttpStatus.OK);
+        return new ResponseEntity<>(restaurantService.calculateAverageRatingForRestaurant(username),HttpStatus.OK);
     }
 
 
@@ -532,10 +533,10 @@ public class RestaurantController {
                     content = @Content),
             @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)})
-    @GetMapping(path="/favorites/{id}")
+    @GetMapping(path="/customers-favorited")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Integer> getCustomersFavorited(@Parameter(description = "Restaurant Id",required = true)
-                                                      @PathVariable("id") int restaurantId) {
-        return ResponseEntity.ok(restaurantService.getCustomersFavorited(restaurantId));
+    public ResponseEntity<Integer> getCustomersFavorited(@Parameter(description = "User username", required = false)
+                                                             @RequestHeader(value = "username", required = false) String username) {
+        return ResponseEntity.ok(restaurantService.getCustomersFavorited(username));
     }
 }

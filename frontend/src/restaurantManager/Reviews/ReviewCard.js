@@ -48,9 +48,9 @@ function ReviewCard({ review, grid }) {
             {dateFormat(review.created, "dd/mm/yyyy")}
           </div>
         </Row>
-        {review.comment ? (
+        {review.feedback ? (
           <Row className="px-3" style={{marginTop:"35px"}}>
-            <span style={{ color: "#272D2F" }}>{review.comment}</span>
+            <span style={{ color: "#272D2F" }}>{review.feedback}</span>
           </Row>
         ) : (
           <></>

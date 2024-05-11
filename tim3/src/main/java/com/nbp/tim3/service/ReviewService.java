@@ -3,23 +3,19 @@ package com.nbp.tim3.service;
 import com.nbp.tim3.dto.review.ReviewCreateRequest;
 import com.nbp.tim3.dto.review.ReviewPaginatedResponse;
 import com.nbp.tim3.dto.review.ReviewResponse;
-import com.nbp.tim3.model.Review;
+import com.nbp.tim3.repository.RestaurantRepository;
 import com.nbp.tim3.repository.ReviewRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class ReviewService {
 
     @Autowired
     private ReviewRepository reviewRepository;
-    //@Autowired
-    //private RestaurantRepository restaurantRepository;
+    @Autowired
+    private RestaurantRepository restaurantRepository;
 
     public Integer addNewReview(ReviewCreateRequest request) {
         return reviewRepository.createReview(request);
@@ -29,7 +25,10 @@ public class ReviewService {
         return reviewRepository.getReviewById(id);
     }
 
-    public ReviewPaginatedResponse getReviewsByRestaurantId(Integer restaurantId, Integer page, Integer size) {
+    public ReviewPaginatedResponse getReviewsByRestaurantManager(String username, Integer page, Integer size) {
+        Integer restaurantId = restaurantRepository.getRestaurantIdByManagerUsername(username);
+        if(restaurantId == null)
+            throw new EntityNotFoundException("Restaurant with id " + restaurantId + " does not exist!");
         return reviewRepository.getByRestaurantIdPage(restaurantId, page, size);
     }
 

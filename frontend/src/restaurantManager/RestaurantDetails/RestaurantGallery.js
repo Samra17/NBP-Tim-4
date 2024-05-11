@@ -38,10 +38,13 @@ function RestaurantGallery() {
     let fileReader = new FileReader();
     fileReader.readAsDataURL(files[0]);
 
+    const formDataImage = new FormData();
+    formDataImage.append('file', files[0]);
+
     fileReader.onload = (event) => {
       setLoading(true);
       restaurantService
-        .addImageToRestaurantGallery({ imageData: event.target.result }, state)
+        .addImageToRestaurantGallery(formDataImage)
         .then((res) => {
           setLoading(false);
           if (res.status == 201) {
@@ -67,7 +70,7 @@ function RestaurantGallery() {
       .deleteImageFromRestaurantGallery(e.target.id)
       .then((res) => {
         setLoading(false);
-        if (res.status == 200) {
+        if (res.status == 204) {
           setImages(images.filter((i) => i.id != e.target.id));
         } else {
           setAlert({ ...alert, msg: res.data, type: "error" });

@@ -196,9 +196,11 @@ class RestaurantService {
 
 
 
-  addImageToRestaurantGallery(req, id) {
+  addImageToRestaurantGallery(req) {
     try {
-      return api.post("/api/restaurant/image/add/" + id, req).then((response) => {
+      return api.post("/api/restaurant/image/add", req, {headers: {
+        'Content-Type': 'multipart/form-data'}
+      }).then((response) => {
         return response;
       });
     } catch (e) {

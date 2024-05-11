@@ -1,5 +1,6 @@
 package com.nbp.tim3.repository;
 
+import com.nbp.tim3.dto.restaurantimage.RestaurantImageResponse;
 import com.nbp.tim3.service.DBConnectionService;
 import com.nbp.tim3.util.exception.InvalidRequestException;
 import org.slf4j.Logger;
@@ -120,8 +121,8 @@ public class RestaurantImageRepository {
         }
     }
 
-    public List<String> getImagesByRestaurantId(int restaurantId) {
-        String sqlImage = "SELECT image FROM nbp_restaurant_image nri WHERE nri.restaurant_id = ?";
+    public List<RestaurantImageResponse> getImagesByRestaurantId(int restaurantId) {
+        String sqlImage = "SELECT * FROM nbp_restaurant_image nri WHERE nri.restaurant_id = ?";
 
         Connection connection = null;
 
@@ -135,17 +136,20 @@ public class RestaurantImageRepository {
             preparedStatement.setInt(1, restaurantId);
 
             ResultSet resultSet = preparedStatement.executeQuery();
-            List<String> urlList = new ArrayList<>();
+            List<RestaurantImageResponse> images = new ArrayList<>();
 
             while (resultSet.next()) {
-                urlList.add(resultSet.getString("image"));
+                RestaurantImageResponse image = new RestaurantImageResponse();
+                image.setImageData(resultSet.getString("image"));
+                image.setId(resultSet.getInt("id"));
+                images.add(image);
             }
 
             connection.commit();
 
             logger.info("Successfully fetched images from restaurant with id " + restaurantId);
 
-            return urlList;
+            return images;
         } catch (SQLException e) {
             logger.error(e.getMessage());
 

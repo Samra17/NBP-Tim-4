@@ -458,7 +458,7 @@ public class RestaurantController {
     )
     @GetMapping(path="/image/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public @ResponseBody ResponseEntity<List<String>> getRestaurantImages(
+    public @ResponseBody ResponseEntity<List<RestaurantImageResponse>> getRestaurantImages(
             @Parameter(description = "Restaurant ID",required = true)
             @PathVariable int id)
     {

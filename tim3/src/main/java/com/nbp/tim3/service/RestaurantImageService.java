@@ -39,7 +39,7 @@ public class RestaurantImageService {
         return new RestaurantImageResponse(imageURL, restaurantId);
     }
 
-    public List<String> getRestaurantImages(int restaurantId) {
+    public List<RestaurantImageResponse> getRestaurantImages(int restaurantId) {
         return restaurantImageRepository.getImagesByRestaurantId(restaurantId);
     }
 

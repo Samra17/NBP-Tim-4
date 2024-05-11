@@ -69,11 +69,19 @@ class OrderService {
       }
 
       acceptOrderForCourier(orderId) {
-        //promjena status u In delivery
+        //promjena status u Accepted For Delivery
         //znaci da je dostavljac prihvatio narudzbu za dostavu
         //posto ovo poziva courier, njegov uuid ce biti u headeru, jer je on current user
         return api
-          .put("/api/order/adddeliveryperson/" + orderId)
+          .put("/api/order/" + orderId + "/delivery-person/add")
+          
+      }
+
+      pickUpOrder(orderId) {
+        //promjena status u In Delivery
+        //znaci da je dostavljac preuzeo narudzbu za dostavu
+        //posto ovo poziva courier, njegov uuid ce biti u headeru, jer je on current user
+        return this.changeOrderStatus(orderId, "in-delivery")
           
       }
 
@@ -99,12 +107,12 @@ class OrderService {
         return this.changeOrderStatus(orderId,"Cancelled")
       }
 
-      getReadyForDeliveryOrders() {
-        return api.get("/api/order/get/readyfordelivery")
+      getReadyForDeliveryOrders(page,perPage) {
+        return api.get(`/api/order/get/ready-for-delivery?page=${page}&perPage=${perPage}`)
       }
 
-      getDeliveryPersonOrders() {
-        return api.get("/api/order/get/deliveryperson")
+      getDeliveryPersonOrders(page,perPage) {
+        return api.get(`/api/order/get/delivery-person?page=${page}&perPage=${perPage}`)
       }
 
       getRestaurantPastOrders(page,perPage) {

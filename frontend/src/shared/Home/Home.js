@@ -1,7 +1,8 @@
 import React from "react";
 import Restaurants from "../../customer/Home/Restaurants";
 import authService from "../../service/auth.service";
-import Orders from "../../restaurantManager/Home/Orders";
+import RestaurantOrders from "../../restaurantManager/Home/RestaurantOrders";
+import Orders from "../../courier/Orders";
 
 function Home() {
   const user = authService.getCurrentUser();
@@ -13,9 +14,9 @@ function Home() {
       ) : user.role == "ADMINISTRATOR" ? (
         <>ADMINISTRATOR</>
       ) : user.role == "COURIER" ? (
-        <>COURIER</>
+       <Orders></Orders> 
       ) : user.role == "RESTAURANT_MANAGER" ? (
-        <Orders></Orders>
+        <RestaurantOrders></RestaurantOrders>
       ) : (
         <></>
       )}

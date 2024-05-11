@@ -42,7 +42,7 @@ public class OrderRepository {
                 "JOIN nbp.nbp_user customer ON ord.customer_id = customer.id " +
                 "JOIN nbp_address address_cust ON customer.address_id = address_cust.id " +
                 "LEFT JOIN nbp.nbp_user courier ON ord.courier_id = courier.id " +
-                "JOIN nbp_coupon coupon ON ord.coupon_id = coupon.id " +
+                "LEFT JOIN nbp_coupon coupon ON ord.coupon_id = coupon.id " +
                 "JOIN nbp_order_menu_item omi ON omi.order_id = ord.id " +
                 "JOIN nbp_menu_item mi ON mi.id=omi.menu_item_id "
                 + where +
@@ -51,7 +51,8 @@ public class OrderRepository {
                 "    ord.CREATED_AT, ord.COUPON_ID, ord.STATUS, ord.TOTAL_PRICE, ord.COURIER_ID,\n" +
                 "    ord.DELIVERY_FEE, ord.CODE, res.NAME, customer.PHONE_NUMBER,\n" +
                 "    address_cust.STREET, address_cust.MUNICIPALITY,\n" +
-                "    address_res.STREET, address_res.MUNICIPALITY";
+                "    address_res.STREET, address_res.MUNICIPALITY"+
+                " ORDER BY ord.CREATED_AT DESC";
     }
 
     public OrderPaginatedResponse getByRestaurantManagerAndStatusPage(String managerUseraname, Status status, Integer page, Integer size) {
@@ -111,7 +112,7 @@ public class OrderRepository {
 
     public OrderPaginatedResponse getByCourierIdPage(Integer courierId, Integer page, Integer size) {
         String sql = getOrderSelectSql(
-                "WHERE ord.courier_id=?");
+                "WHERE ord.courier_id=? AND (ord.status='IN_DELIVERY' OR ord.status='ACCEPTED_FOR_DELIVERY')");
         sql += " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
         return getByUserIdPage(courierId, page, size, sql);
     }
@@ -359,8 +360,8 @@ public class OrderRepository {
         orderResponse.setCourierId(resultSet.getInt("courier_id"));
         orderResponse.setCreatedTime(new Timestamp(resultSet.getDate("ord_created_at").getTime()).toLocalDateTime());
         orderResponse.setCustomerId(resultSet.getInt("customer_id"));
-        orderResponse.setCustomerAddress(resultSet.getString("cust_add_street") + ", " + resultSet.getString("cust_add_municipality"));
-        orderResponse.setRestaurantAddress(resultSet.getString("res_add_street") + ", " + resultSet.getString("res_add_municipality"));
+        orderResponse.setCustomerAddress(resultSet.getString("cust_add_street"));
+        orderResponse.setRestaurantAddress(resultSet.getString("res_add_street"));
 
         orderResponse.setCustomerPhoneNumber(resultSet.getString("cust_phone_number"));
         orderResponse.setDeliveryFee(resultSet.getFloat("ord_delivery_fee"));
@@ -427,5 +428,48 @@ public class OrderRepository {
             }
         }
 
+    }
+
+    public OrderPaginatedResponse getReadyForDeliveryOrdersPage(Integer page, Integer perPage) {
+        String sql =  getOrderSelectSql(
+                "WHERE (UPPER(ord.status)=NVL(?, ord.status)) "
+        );
+
+        sql += " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+        OrderPaginatedResponse orderPaginatedResponse = new OrderPaginatedResponse();
+        List<OrderResponse> orders = new ArrayList<>();
+
+        PreparedStatement preparedStatement = null;
+        try {
+            Connection connection = dbConnectionService.getConnection();
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, Status.READY_FOR_DELIVERY.name());
+            preparedStatement.setInt(2, (page - 1) * perPage);
+            preparedStatement.setInt(3, perPage);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                OrderResponse orderResponse = new OrderResponse();
+                mapOrder(orderResponse, resultSet);
+                orders.add(orderResponse);
+                orderPaginatedResponse.setTotalPages((resultSet.getInt("result_count") + perPage - 1) / perPage);
+
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        orderPaginatedResponse.setCurrentPage(page);
+        orderPaginatedResponse.setOrders(orders);
+        return orderPaginatedResponse;
     }
 }

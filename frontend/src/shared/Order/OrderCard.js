@@ -54,7 +54,7 @@ function OrderCard({ order,moveOrder,changeOrder,setAlert,setShowAlert,alert }) 
                     <>
                         <Row>
                             <Card.Text style={{ color: "white" }}>
-                                <span style={{ fontWeight: "bold", color: "#FE724C" }}>Pick up at: </span>{order.restaurantName}, Bulevar Meše Selimovića 2c, Sarajevo
+                                <span style={{ fontWeight: "bold", color: "#FE724C" }}>Pick up at: </span>{order.restaurantName}, {order.restaurantAddress}
                             </Card.Text>
                         </Row>
                         <Row>

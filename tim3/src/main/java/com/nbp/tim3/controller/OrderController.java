@@ -96,16 +96,36 @@ public class OrderController {
             @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)}
     )
-    @GetMapping("/get/delivery-person/{courierId}")
+    @GetMapping("/get/delivery-person")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<OrderPaginatedResponse> getOrdersByDeliveryPersonId(
-            @Parameter(description = "Courier ID", required = true)
-            @PathVariable("courierId") Integer courierId,
+            @Parameter(description = "Page number", required = true)
+            @RequestParam(value = "page", defaultValue = "1") Integer page,
+            @Parameter(description = "Records per page", required = true)
+            @RequestParam(value = "perPage", defaultValue = "10") Integer perPage,
+            @Parameter(description = "User username", required = false)
+            @RequestHeader(value = "username", required = false) String username) {
+        return ResponseEntity.ok(orderService.getOrdersByCourier(username, page, perPage));
+    }
+
+    @Operation(description = "Get all ready for delivery orders")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully fetched orders",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = OrderPaginatedResponse.class)) }),
+            @ApiResponse(responseCode = "404", description = "Courier not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
+                    content = @Content)}
+    )
+    @GetMapping("/get/ready-for-delivery")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<OrderPaginatedResponse> getReadyForDeliveryOrders(
             @Parameter(description = "Page number", required = true)
             @RequestParam(value = "page", defaultValue = "1") Integer page,
             @Parameter(description = "Records per page", required = true)
             @RequestParam(value = "perPage", defaultValue = "10") Integer perPage) {
-        return ResponseEntity.ok(orderService.getOrdersByCourierId(courierId, page, perPage));
+        return ResponseEntity.ok(orderService.getReadyForDeliveryOrders(page, perPage));
     }
 
     @Operation(description = "Get order by id")
@@ -184,14 +204,14 @@ public class OrderController {
                     content = @Content)}
     )
     @ResponseStatus(HttpStatus.OK)
-    @PutMapping("{orderId}/delivery-person/add/{courierId}")
+    @PutMapping("{orderId}/delivery-person/add")
     public ResponseEntity<OrderResponse> addDeliveryPersonToOrder(
             @Parameter(description = "Order ID", required = true)
             @PathVariable("orderId") Integer orderId,
-            @Parameter(description = "Courier ID", required = true)
-            @PathVariable("courierId") Integer courierId) {
+            @Parameter(description = "User username", required = false)
+            @RequestHeader(value = "username", required = false) String username) {
 
-        orderService.addDeliveryPerson(orderId, courierId);
+        orderService.addDeliveryPerson(orderId,username);
         return ResponseEntity.ok(orderService.getById(orderId));
     }
 

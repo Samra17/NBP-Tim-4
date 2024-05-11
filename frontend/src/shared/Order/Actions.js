@@ -84,6 +84,19 @@ function Actions({
     });
   };
 
+  const pickUpOrder = () => {
+    document.body.style.cursor = "wait";
+    orderService.pickUpOrder(order.id).then((res) => {
+      document.body.style.cursor = "default";
+
+      if (res.status == 200) {
+        setOrder(res.data)
+      } else {
+        handleError(res.data);
+      }
+    });
+  };
+
   const deliver = () => {
     document.body.style.cursor = "wait";
     orderService.orderDelivered(order.id).then((res) => {
@@ -185,6 +198,28 @@ function Actions({
           </ButtonGroup>
         );
         break;
+        case "ACCEPTED_FOR_DELIVERY":
+          setNoActions(false);
+          return (
+            <ButtonGroup>
+              <Button
+                style={{
+                  borderTopLeftRadius: 0,
+                  borderTopRightRadius: 0,
+                  borderBottomLeftRadius: 5,
+                  borderBottomRightRadius: 5,
+                  backgroundColor: "#FE724C",
+                  border: "#FE724C",
+                  width: "100px",
+                }}
+                variant="secondary"
+                onClick={pickUpOrder}
+              >
+                Pick up <Check2Circle />
+              </Button>
+            </ButtonGroup>
+          );
+          break;
       case "IN_DELIVERY":
         setNoActions(false);
         return (

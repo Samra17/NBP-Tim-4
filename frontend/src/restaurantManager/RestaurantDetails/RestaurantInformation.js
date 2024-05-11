@@ -19,6 +19,7 @@ import CustomAlert from "../../shared/util/Alert";
 import Loader from "../../shared/util/Loader/Loader";
 import "./Multiselect.css";
 import OpeningHoursForm from "./OpeningHoursForm";
+import { setMaxParallelImageRequests } from "@maptiler/sdk";
 
 function RestaurantInformation() {
   const [validated, setValidated] = useState();
@@ -29,6 +30,7 @@ function RestaurantInformation() {
   const [showAlert, setShowAlert] = useState(false);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState();
+  const [image, setImage] = useState();
   const inputRef = useRef(null);
   const [formattedHours, setFormattedHours] = useState({
     mondayOpen: dayjs(dayjs().format("YYYY-MM-DD") + "T09:00:00"),
@@ -305,12 +307,22 @@ function RestaurantInformation() {
                 .then((r3) => {
                   document.body.style.cursor = "default";
                   if (r3.status == 200) {
-                    setAlert({
-                      ...alert,
-                      type: "success",
-                      msg: "Successfully updated restaurant information!",
-                    });
-                    setShowAlert(true);
+                    if(image) {
+                      handleUpload().then((r4)=>{
+                        if(r4.status==201) {
+                          setAlert({
+                            ...alert,
+                            type: "success",
+                            msg: "Successfully updated restaurant information!",
+                          });
+                          setShowAlert(true);
+                        } else {
+                          setAlert({ ...alert, type: "error", msg: r4.data });
+                          setShowAlert(true);
+                        }
+                      })
+                    }
+                    
                     setRestaurant(r3.data);
                   } else {
                     setAlert({ ...alert, type: "error", msg: r3.data });
@@ -459,10 +471,20 @@ function RestaurantInformation() {
     let files = e.target.files;
     let fileReader = new FileReader();
     fileReader.readAsDataURL(files[0]);
+    setImage(files[0])
 
     fileReader.onload = (event) => {
-      setFormData({ ...formData, logo: event.target.result });
+      //setImage(event.target.result);
+      setFormData({...formData, logo: event.target.result});
     };
+  };
+
+  const handleUpload = () => {
+
+      const formDataImage = new FormData();
+      formDataImage.append('file', image);
+
+      return restaurantService.uploadLogo(formDataImage);
   };
 
   const setOpeningHours = (openingHours) => {

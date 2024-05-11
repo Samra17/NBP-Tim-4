@@ -475,15 +475,36 @@ public class RestaurantController {
                     content = @Content),
             @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)})
-    @PostMapping(path="/image/add/{id}")
+    @PostMapping(path="/image/add")
     @ResponseStatus(HttpStatus.CREATED)
     public @ResponseBody ResponseEntity<RestaurantImageResponse> addRestaurantImage (
             @Parameter(description = "Image file", required = true)
             @Valid @RequestParam("file") MultipartFile file,
-            @Parameter (description = "Restaurant id", required = true)
-            @PathVariable("id") int restaurantid)
+            @Parameter(description = "User username", required = true)
+            @RequestHeader("username") String username)
     {
-        return new ResponseEntity<>(restaurantImageService.uploadRestaurantImage(firebaseService.upload(file), restaurantid), HttpStatus.CREATED);
+        return new ResponseEntity<>(restaurantImageService.uploadRestaurantImage(firebaseService.upload(file), username), HttpStatus.CREATED);
+    }
+
+    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
+    @Operation(description = "Upload restaurant logo")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Successfully added restaurant image",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = RestaurantImageResponse.class)) }),
+            @ApiResponse(responseCode = "400", description = "Invalid information supplied",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
+                    content = @Content)})
+    @PostMapping(path="/logo/add")
+    @ResponseStatus(HttpStatus.CREATED)
+    public @ResponseBody ResponseEntity<RestaurantImageResponse> uploadRestaurantLogo (
+            @Parameter(description = "Image file", required = true)
+            @Valid @RequestPart("file") MultipartFile file,
+            @Parameter(description = "User username", required = true)
+            @RequestHeader("username") String username)
+    {
+        return new ResponseEntity<>(restaurantImageService.uploadRestaurantLogo(firebaseService.upload(file), username), HttpStatus.CREATED);
     }
 
     @PreAuthorize("hasRole('RESTAURANT_MANAGER')")

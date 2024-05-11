@@ -249,6 +249,21 @@ class RestaurantService {
       console.log(e);
     }
   }
+
+
+  uploadLogo(image) {
+    try {
+      return api.post("/api/restaurant/logo/add", image, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }).then((response) => {
+        return response;
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  }
 }
 
 export default new RestaurantService();

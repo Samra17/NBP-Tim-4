@@ -56,7 +56,6 @@ public class RestaurantService {
         var restaurant = new Restaurant();
         restaurant.setId(id);
         restaurant.setName(request.getName());
-        restaurant.setLogo(request.getLogo());
         Address address = new Address(0,request.getAddress(),request.getCity(),request.getMapCoordinates());
         restaurant.setAddress(address);
 

@@ -55,6 +55,39 @@ public class RestaurantImageRepository {
         }
     }
 
+    public void addLogo(String imageURL, int restaurantId) {
+        String sqlImage = "UPDATE nbp_restaurant SET logo=? WHERE id=?";
+
+        Connection connection = null;
+
+        boolean exception = false;
+
+        PreparedStatement preparedStatement = null;
+        try {
+            connection = dbConnectionService.getConnection();
+
+            preparedStatement = connection.prepareStatement(sqlImage);
+            preparedStatement.setString(1, imageURL);
+            preparedStatement.setInt(2, restaurantId);
+
+            preparedStatement.executeQuery();
+
+            connection.commit();
+
+            logger.info("Successfully inserted image url into RestaurantImage.");
+        } catch (SQLException e) {
+            logger.error(e.getMessage());
+
+            throw new InvalidRequestException("Error while uploading image.");
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     public void deleteImage(int imageId) {
         String sqlImage = "DELETE FROM nbp_restaurant_image nri WHERE nri.id = ?";
 

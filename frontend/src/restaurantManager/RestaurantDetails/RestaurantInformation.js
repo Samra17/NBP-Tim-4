@@ -64,7 +64,7 @@ function RestaurantInformation() {
       restaurantService.getManagersRestaurant().then((res) => {
         setLoading(false);
         if (res.status == 200) {
-          setFormData(res.data);
+          setFormData({...res.data, street: res.data.address.street, mapCoordinates: res.data.address.mapCoordinates});
           setRestaurant(res.data);
       
           if (res.data.openingHours) {
@@ -200,7 +200,7 @@ function RestaurantInformation() {
   };
 
   const setAddress = (addr, coordinates) => {
-    setFormData({ ...formData, address: addr, mapCoordinates: coordinates });
+    setFormData({ ...formData, street: addr, mapCoordinates: coordinates });
   };
 
   const handleSubmit = (e) => {
@@ -285,8 +285,9 @@ function RestaurantInformation() {
     var body = {
       name: formData.name,
       mapCoordinates: formData.mapCoordinates,
-      address: formData.address,
+      address: formData.street,
       logo: formData.logo,
+      city: 'Sarajevo'
     };
 
     var categories = formData.categories.map((c) => c.id);
@@ -331,7 +332,7 @@ function RestaurantInformation() {
   };
 
   const revert = () => {
-    setFormData(restaurant);
+    setFormData({...restaurant, street: restaurant.address.street, mapCoordinates: restaurant.address.mapCoordinates});
     setFormattedHours({
       mondayOpen: restaurant.openingHours.mondayOpen
         ? dayjs(
@@ -510,7 +511,7 @@ function RestaurantInformation() {
                         required
                         type="text"
                         name="address"
-                        value={formData.address}
+                        value={formData.street}
                       />
                     </Col>
                     <Col xs={1} className="p-0">

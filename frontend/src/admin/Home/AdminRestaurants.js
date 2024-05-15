@@ -187,15 +187,13 @@ function AdminRestaurants() {
                                 <br></br>
                                 Favourited: {chosenRestaurant.customersFavorited}
                                 <br></br>
-                                Do you want to delete this restaurant?
+                               
                             </Modal.Body>
                             <Modal.Footer>
                             <Button variant="secondary" onClick={closeModal}>
                                 Cancel
                             </Button>
-                            <Button variant="danger" onClick={deleteRestaurant}>
-                                Delete
-                            </Button>
+                            
                             </Modal.Footer>
                         </Modal>
                         

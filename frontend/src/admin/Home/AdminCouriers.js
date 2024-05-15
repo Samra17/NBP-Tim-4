@@ -142,15 +142,13 @@ function AdminCouriers() {
                                 <br></br>
                                 Phone number: {chosenCourier.phoneNumber}
                                 <br></br>
-                                Do you want to delete this courier?
+                                
                             </Modal.Body>
                             <Modal.Footer>
                             <Button variant="secondary" onClick={closeModal}>
                                 Cancel
                             </Button>
-                            <Button variant="danger" onClick={deleteCourier}>
-                                Delete
-                            </Button>
+                            
                             </Modal.Footer>
                         </Modal>
                         

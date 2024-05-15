@@ -10,9 +10,9 @@ import userService from "../../service/user.service";
 import restaurantService from "../../service/restaurant.service";
 
 function RestaurantOrders() {
-  const [pendingOrders, setPendingOrders] = useState();
-  const [inPreparationOrders, setInPreparationOrders] = useState();
-  const [readyOrders, setReadyOrders] = useState();
+  const [pendingOrders, setPendingOrders] = useState([]);
+  const [inPreparationOrders, setInPreparationOrders] = useState([]);
+  const [readyOrders, setReadyOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [alert, setAlert] = useState({});
@@ -64,44 +64,6 @@ function RestaurantOrders() {
     }
   }
 
-  useEffect(() => {
-    setLoading(true);
-    orderService
-      .getRestaurantPendingOrders(1,perPage)
-      .then((res) => {
-        setLoading(false);
-        if (res.status == 200) {
-          setPendingOrders(res.data.orders);
-        } else {
-          setAlert({ msg: res.data, type: "error" });
-          setShowAlert(true);
-        }
-      });
-
-    orderService
-      .getRestaurantReadyOrders(1, perPage)
-      .then((res) => {
-        setLoading(false);
-        if (res.status == 200) {
-          setReadyOrders(res.data.orders);
-        } else {
-          setAlert({ msg: res.data, type: "error" });
-          setShowAlert(true);
-        }
-      });
-    orderService
-      .getRestaurantInPreparationOrders(1, perPage
-      )
-      .then((res) => {
-        setLoading(false);
-        if (res.status == 200) {
-          setInPreparationOrders(res.data.orders);
-        } else {
-          setAlert({ msg: res.data, type: "error" });
-          setShowAlert(true);
-        }
-      });
-  }, []);
 
   const acceptOrder = (oldOrder, newOrder) => {
     setPendingOrders(pendingOrders.filter((o) => o.id != oldOrder.id));
@@ -147,7 +109,6 @@ function RestaurantOrders() {
               maxWidth: "95%",
             }}
           >
-            {pendingOrders ? (
               <ListContainer
                 items={pendingOrders}
                 title={"Pending orders"}
@@ -163,16 +124,7 @@ function RestaurantOrders() {
                 pagination="server"
                 handlePagination={handlePagination}
               ></ListContainer>
-            ) : (
-              <div style={{ display: "flex", justifyContent: "center" }}>
-                <Spinner
-                  animation="border"
-                  style={{ color: "white", marginTop: "20%" }}
-                />
-              </div>
-            )}
 
-            {inPreparationOrders ? (
               <ListContainer
                 items={inPreparationOrders}
                 title={"In preparation"}
@@ -188,16 +140,6 @@ function RestaurantOrders() {
                 pagination="server"
                 handlePagination={handlePagination}
               ></ListContainer>
-            ) : (
-              <div style={{ display: "flex", justifyContent: "center" }}>
-                <Spinner
-                  animation="border"
-                  style={{ color: "white", marginTop: "20%" }}
-                />
-              </div>
-            )}
-
-            {readyOrders ? (
               <ListContainer
                 items={readyOrders}
                 title={"Ready for delivery"}
@@ -209,14 +151,6 @@ function RestaurantOrders() {
                 pagination="server"
                 handlePagination={handlePagination}
               ></ListContainer>
-            ) : (
-              <div style={{ display: "flex", justifyContent: "center" }}>
-                <Spinner
-                  animation="border"
-                  style={{ color: "white", marginTop: "20%" }}
-                />
-              </div>
-            )}
           </Container>
         </>
       </Loader>

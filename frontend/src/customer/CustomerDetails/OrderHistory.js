@@ -8,7 +8,7 @@ import restaurantService from '../../service/restaurant.service'
 
 
 function OrderHistory() {
-  const [orders, setOrders] = useState()
+  const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [alert, setAlert] = useState({})
   const [showAlert, setShowAlert] = useState(false)
@@ -16,32 +16,7 @@ function OrderHistory() {
   const perPage = 5;
 
   const role = authService.getCurrentUser().role;
-  useEffect(() => {
-    if (!mounted) {
-      mounted = true
-      if(role=="CUSTOMER") {
-      orderService.getUserOrders(1,perPage).then((res) => {
-        setLoading(false)
-        if (res.status == 200) {
-          setOrders(res.data.orders)
-        } else {
-          setAlert({ ...alert, msg: res.data, type: "error" })
-          setShowAlert(true)
-        }
-      })
-    } else if(role == "RESTAURANT_MANAGER") {
-      orderService.getRestaurantPastOrders(1,perPage).then((res) => {
-        setLoading(false)
-        if (res.status == 200) {
-          setOrders(res.data.orders)
-        } else {
-          setAlert({ ...alert, msg: res.data, type: "error" })
-          setShowAlert(true)
-        }
-      })
-    }
-    }
-  }, [])
+  
 
   async function handlePagination(title, page, perPage, setTotalPages,setContainerLoad, filterData) {
 
@@ -74,9 +49,9 @@ function OrderHistory() {
 
 
   return (
-    <Loader isOpen={loading}>
+    <>
       <CustomAlert setShow={setShowAlert} show={showAlert} type={alert.type} msg={alert.msg}></CustomAlert>
-      {orders ? <ListContainer
+      <ListContainer
         title={role == "CUSTOMER" ? "My orders" : "Order history"}
         type="order"
         grid={false}
@@ -85,8 +60,8 @@ function OrderHistory() {
         perPage={perPage}
         handlePagination={handlePagination}
         pagination='server'
-      /> : <></>}
-    </Loader>
+      /> 
+      </>
   )
 }
 

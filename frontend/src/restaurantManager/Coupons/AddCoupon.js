@@ -10,19 +10,21 @@ import { useState } from "react";
 import authService from "../../service/auth.service";
 import discountService from "../../service/discount.service";
 
+
 export default function AddCoupon({
   open,
   setOpen,
   coupons,
   setCoupons,
-  restaurantUuid,
+  setShowAlert,
+  setAlert,
+  alert
 }) {
   const user = authService.getCurrentUser();
   const [newCoupon, setnewCoupon] = useState({
     code: "",
-    discount_percentage: 0,
-    quantity: 0,
-    restaurant_uuid: restaurantUuid,
+    discountPercent: 0,
+    quantity: 0
   });
   const [validation, setValidation] = useState(false);
 
@@ -31,13 +33,14 @@ export default function AddCoupon({
   };
 
   const handleCreate = () => {
-    setCoupons((oldArray) => [...oldArray, newCoupon]);
-    console.log(newCoupon);
     setOpen(false);
     discountService.addCoupon(newCoupon).then((res) => {
       if (res.status == 201) {
-        console.log(res.data);
-      } else console.log(res);
+        setCoupons((oldArray) => [...oldArray, newCoupon]);
+      } else {
+        //setAlert({ ...alert, msg: res.data, type: "error" });
+        setShowAlert(true);
+      }
     });
   };
 
@@ -54,10 +57,10 @@ export default function AddCoupon({
             type="text"
             fullWidth
             variant="standard"
-            helperText="The code needs to be 12 characters long!"
+            helperText="The code needs to be between 3 and 100 characters long!"
             error={!validation}
             onChange={(e) => {
-              if (e.target.value.length == 12) {
+              if (e.target.value.length > 2 && e.target.value.length <= 100 ) {
                 setValidation(true);
                 setnewCoupon({ ...newCoupon, ...{ code: e.target.value } });
               } else setValidation(false);
@@ -74,7 +77,7 @@ export default function AddCoupon({
             onChange={(e) => {
               setnewCoupon({
                 ...newCoupon,
-                ...{ discount_percentage: e.target.value },
+                ...{ discountPercent: e.target.value },
               });
             }}
           />

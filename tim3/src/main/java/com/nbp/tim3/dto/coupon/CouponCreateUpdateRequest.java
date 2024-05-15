@@ -18,7 +18,6 @@ public class CouponCreateUpdateRequest {
     @Positive(message = "Quantity can not be negative")
     private Integer quantity;
 
-    @NotNull(message = "Restaurant ID should not be null")
     private Integer restaurantId;
 
     @NotNull(message = "Discount percent should not be null")

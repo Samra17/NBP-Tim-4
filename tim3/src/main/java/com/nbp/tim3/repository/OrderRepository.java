@@ -5,6 +5,7 @@ import com.nbp.tim3.dto.order.OrderPaginatedResponse;
 import com.nbp.tim3.dto.order.OrderResponse;
 import com.nbp.tim3.dto.order.OrderUpdateDto;
 import com.nbp.tim3.enums.Status;
+import com.nbp.tim3.model.Order;
 import com.nbp.tim3.service.DBConnectionService;
 import com.nbp.tim3.util.exception.InvalidRequestException;
 import org.slf4j.Logger;
@@ -23,6 +24,9 @@ public class OrderRepository {
 
     @Autowired
     DBConnectionService dbConnectionService;
+
+    @Autowired
+    MenuItemRepository menuItemRepository;
 
     private String getOrderSelectSql(String where) {
         return "SELECT ord.id as ORD_ID, ord.customer_id as CUSTOMER_ID, " +
@@ -225,7 +229,7 @@ public class OrderRepository {
         }
     }
 
-    public int createOrder(OrderCreateRequest orderCreateRequest) {
+    public OrderResponse createOrder(OrderCreateRequest orderCreateRequest) {
 
         String checkAddressId =
                 "SELECT CASE " +
@@ -263,9 +267,11 @@ public class OrderRepository {
                 logger.error("Error checking address_id constraints.");
             }
 
+            LocalDateTime createdAt = LocalDateTime.now();
+            String code = UUID.randomUUID().toString();
             String[] returnCol = {"id"};
             preparedStatement = connection.prepareStatement(sql, returnCol);
-            preparedStatement.setString(1, UUID.randomUUID().toString());
+            preparedStatement.setString(1, code);
             preparedStatement.setString(2, Status.NEW.toString());
             preparedStatement.setInt(3, orderCreateRequest.getEstimatedDeliveryTime());
             preparedStatement.setFloat(4, orderCreateRequest.getDeliveryFee());
@@ -277,7 +283,7 @@ public class OrderRepository {
             }
             preparedStatement.setInt(7, orderCreateRequest.getCustomerId());
             preparedStatement.setInt(8, orderCreateRequest.getRestaurantId());
-            preparedStatement.setTimestamp(9, Timestamp.valueOf(LocalDateTime.now()));
+            preparedStatement.setTimestamp(9,Timestamp.valueOf(createdAt) );
 
             int rowCount = preparedStatement.executeUpdate();
 
@@ -291,6 +297,7 @@ public class OrderRepository {
                 }
             }
 
+            List<String> items = new ArrayList<>();
             var menuItems = orderCreateRequest.getMenuItemIds();
             for (int i = 0; i < menuItems.size(); i++) {
 
@@ -298,17 +305,24 @@ public class OrderRepository {
 
                 preparedStatementOrderMenuItems = connection.prepareStatement(orderMenuItemsSql);
 
+                var id = menuItems.get(i).getId();
+                var quantity = menuItems.get(i).getQuantity();
 
-                preparedStatementOrderMenuItems.setInt(1, menuItems.get(i).getQuantity());
-                preparedStatementOrderMenuItems.setInt(2, menuItems.get(i).getId());
+                preparedStatementOrderMenuItems.setInt(1, quantity);
+                preparedStatementOrderMenuItems.setInt(2, id);
                 preparedStatementOrderMenuItems.setInt(3, orderId);
                 preparedStatementOrderMenuItems.executeUpdate();
 
+                var name = menuItemRepository.findById(id).getName();
+                items.add(String.format("%s x %s",name, quantity));
             }
 
 
             connection.commit();
-            return orderId;
+            return new OrderResponse(orderId,orderCreateRequest.getCustomerId(),orderCreateRequest.getRestaurantId(),
+                    orderCreateRequest.getEstimatedDeliveryTime(),createdAt,orderCreateRequest.getCouponId(),Status.NEW,
+                    orderCreateRequest.getTotalPrice(),null,orderCreateRequest.getDeliveryFee(),code,
+                    items,null,null,null,null);
 
         } catch (SQLException e) {
             logger.error(e.getMessage());

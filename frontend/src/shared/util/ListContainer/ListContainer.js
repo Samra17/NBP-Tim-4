@@ -275,7 +275,9 @@ function ListContainer({
                 setOpen={setOpenReportDialog}
                 coupons={items}
                 setCoupons={setItems}
-                restaurantUuid={restaurantUuid}
+                alert={alert}
+                setAlert={setAlert}
+                setShowAlert={setShowAlert}
               ></AddCoupon>
             </Container>
           ) : (

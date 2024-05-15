@@ -13,10 +13,10 @@ class DiscountService {
     }
   }
 
-  getAllCouponsForRestaurant(id) {
+  getAllCouponsForRestaurant(page,perPage) {
     try {
       return api
-        .get("/api/coupon/res/" +id)
+        .get(`/api/coupon/res?page=${page}&size=${perPage}` )
         .then((response) => {
           return response;
         });
@@ -28,7 +28,19 @@ class DiscountService {
   addCoupon(coupon) {
     try {
       return api
-        .post("/coupon/add",coupon)
+        .post("/api/coupon/add",coupon)
+        .then((response) => {
+          return response;
+        });
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  getByCode(code,id) {
+    try {
+      return api
+        .get("/api/coupon/code?code=" + code + "&restaurantId=" + id)
         .then((response) => {
           return response;
         });
@@ -40,7 +52,7 @@ class DiscountService {
   deleteCoupon(id) {
     try {
       return api
-        .delete("/coupon/"+id)
+        .delete("/api/coupon/"+id)
         .then((response) => {
           return response;
         });
@@ -52,19 +64,6 @@ class DiscountService {
   applyCoupon(id) {
     return api.post("api/coupon/apply/"+id);
   }
-
-  incrementUserOrders(orders) {
-    return api.post("/score/update/incrementorders/" + orders).then(response => {
-      console.log(response);
-    });
-  }
-
-  incrementUserMoney(money) {
-    return api.post("/score/update/incrementmoney/" + money).then(response => {
-      console.log(response);
-    });
-  }
-
 
 
 }

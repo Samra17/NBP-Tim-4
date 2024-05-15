@@ -70,7 +70,7 @@ function CouponCard({ coupon, setCoupons }) {
                     Coupon code: {coupon.code}
                   </Card.Title>
                   <Card.Text style={{ clear: left, fontSize: "16px" }}>
-                    Discount percentage: {coupon.discount_percentage}%
+                    Discount percentage: {coupon.discountPercent}%
                     <br />
                     Amount left: {coupon.quantity}
                     <div

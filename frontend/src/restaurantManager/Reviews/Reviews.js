@@ -12,7 +12,7 @@ function Reviews() {
   const [favorites, setFavorites] = useState([]);
   const [alert,setAlert] = useState({});
   const [showAlert,setShowAlert] = useState(false);
-  const [average,setAverage] = useState(0);
+  const [average,setAverage] = useState();
   const perPage = 8;
 
   var mounted = false;
@@ -20,15 +20,6 @@ function Reviews() {
     if (!mounted) {
       mounted = true;
       setLoading(true);
-      restaurantService.getReviews(1, perPage).then((res) => {
-        setLoading(false);
-        if (res.status == 200) {
-          setReviews(res.data.reviews);
-        } else {
-            setAlert({msg:res.data,type:"error"})
-            setShowAlert(true)
-        }
-      });
       restaurantService.getNumberOfFavorites().then((res) => {
         if (res.status == 200) {
           setFavorites(res.data);
@@ -41,6 +32,7 @@ function Reviews() {
       restaurantService.getAvgRating().then((res) => {
         if (res.status == 200) {
           setAverage(res.data);
+          setLoading(false);
         } else {
             setAlert({msg:res.data,type:"error"})
             setShowAlert(true)
@@ -72,7 +64,7 @@ function Reviews() {
         show={showAlert}
         setShow={setShowAlert}
       ></CustomAlert>
-      {reviews ? (
+      {average ? (
         <>
           <h2 style={{ paddingLeft: "20px",paddingTop:"20px",paddingBottom:"10px" }}>
             Average rating:{" "}

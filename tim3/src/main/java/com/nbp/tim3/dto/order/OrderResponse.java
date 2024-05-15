@@ -2,12 +2,16 @@ package com.nbp.tim3.dto.order;
 
 import com.nbp.tim3.dto.address.AddressResponse;
 import com.nbp.tim3.enums.Status;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class OrderResponse {
 
     private Integer id;

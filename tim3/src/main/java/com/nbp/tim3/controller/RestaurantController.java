@@ -346,7 +346,7 @@ public class RestaurantController {
         return new ResponseEntity<>(restaurantService.deleteRestaurant(id),HttpStatus.OK);
     }*/
 
-    //@PreAuthorize("hasRole('RESTAURANT_MANAGER')")
+    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Set which categories will restaurant with given id contain")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully updated restaurant categories",
@@ -372,7 +372,7 @@ public class RestaurantController {
     }
 
 
-    //@PreAuthorize("hasRole('RESTAURANT_MANAGER')")
+    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
     @Operation(description = "Set restaurant opening hours")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully updated restaurant opening hours",
@@ -398,7 +398,7 @@ public class RestaurantController {
     }
 
 
-    //@PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasRole('CUSTOMER')")
     @Operation(description = "Add restaurant to user's favorite restaurants")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully added restaurant to favorites",
@@ -423,7 +423,7 @@ public class RestaurantController {
         return new ResponseEntity<>(favoriteRestaurant,HttpStatus.CREATED);
     }
 
-    //@PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasRole('CUSTOMER')")
     @Operation(description = "Remove restaurant from user's favorite restaurants")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Successfully removed restaurant from favorites"),

@@ -150,15 +150,6 @@ class RestaurantService {
     }
   }
 
-  getManagersRestaurantUUID() {
-    try {
-      return api.get("/restaurant/uuid/manager").then((response) => {
-        return response;
-      });
-    } catch (e) {
-      console.log(e);
-    }
-  }
 
   updateRestaurant(req, id) {
     try {

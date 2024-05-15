@@ -25,7 +25,7 @@ public class OrderService {
     @Autowired
     private UserRepository userRepository;
 
-    public int addNewOrder(OrderCreateRequest request) {
+    public OrderResponse addNewOrder(OrderCreateRequest request) {
         return orderRepository.createOrder(request);
     }
 

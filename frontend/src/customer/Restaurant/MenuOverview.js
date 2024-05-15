@@ -69,36 +69,20 @@ function MenuOverview({ restaurant, setAlert, setShowAlert }) {
   const checkCoupon = () => {
     setCheckingCoupon(true);
 
-    discountService
-      .getAllCouponsForRestaurant(restaurant.id)
-      .then((response) => {
-        console.log(response);
-        var coupon = undefined;
-        if (response.status == 200) {
-          var coupons = response.data.couponResponse;
-          for (var i = 0; i < coupons.length; i++) {
-            if (coupons[i].code === couponCode) {
-              coupon = coupons[i];
-              break;
-            }
-          }
-        }
-        if (coupon != undefined) {
-          setCouponValid(true);
-          setCouponCode("");
-          setCheckingCoupon(false);
-          setCheckedCoupon(true);
-          setCouponId(coupon.id);
-          setTotalDiscount(coupon.discountPercent);
-        } else {
-          setCouponValid(false);
-          setCouponCode("");
-          setCheckingCoupon(false);
-          setCheckedCoupon(true);
-          setCouponId(null);
-          setTotalDiscount(0);
-        }
-      });
+    discountService.getByCode(couponCode, restaurant.id).then((res)=> {
+      setCheckingCoupon(false);
+      setCheckedCoupon(true);
+      if(res.status == 200) {
+        setCouponValid(true);
+        setTotalDiscount(res.data.discountPercent);
+      } else if(res.status == 404) {
+        setCouponValid(false);
+      }
+      else {
+        setShowAlert(true);
+        setAlert({ msg: res.data, type: "error" });
+      } 
+    })
   };
 
 
@@ -179,7 +163,6 @@ function MenuOverview({ restaurant, setAlert, setShowAlert }) {
         }
         
       } else {
-        console.log(response);
         setShowAlert(true);
         setAlert({ msg: "Error creating order!", type: "error" });
       }

@@ -1,49 +1,70 @@
 import React, { useEffect, useState } from "react";
-import authService from "../../service/auth.service";
 import discountService from "../../service/discount.service";
-import restaurantService from "../../service/restaurant.service";
 import ListContainer from "../../shared/util/ListContainer/ListContainer";
-import Loader from "../../shared/util/Loader/Loader";
+import CustomAlert from "../../shared/util/Alert";
+
 
 function CouponList() {
-  const [loading, setLoading] = useState(true);
-  const [coupons, setCoupons] = useState();
-  const [restaurantUuid, setRestaurantUuid] = useState();
-  const user = authService.getCurrentUser();
+  const [coupons, setCoupons] = useState([]);
+  const [alert, setAlert] = useState({});
+  const [showAlert, setShowAlert] = useState(false);
+  const perPage = 5;
 
-  useEffect(() => {
-    restaurantService.getManagersRestaurantUUID().then((res) => {
-      console.log("ispod gledam");
-      setRestaurantUuid(res.data);
-      console.log(res.data);
-      console.log(user);
-      discountService.getAllCouponsForRestaurant(res.data).then((resp) => {
-        if (resp.status == 200) {
-          setCoupons(resp.data);
-          setLoading(false);
-          console.log(resp.data);
+  /*
+  useEffect(()=> {
+    if(!mounted) {
+      mounted = true;
+    }
+
+    discountService.getAllCouponsForRestaurant(1, perPage).then((res) => {
+      setLoading(false);
+      if (res.status == 200)  {
+      setCoupons(res.data.coupons);
+      }
+      else {
+        setAlert({ ...alert, msg: [res.data], type: "error" });
+        setShowAlert(true);
+      }
+    })
+
+  },[])
+    */
+  async function handlePagination(title, page, perPage, setTotalPages,setContainerLoad, filterData) {
+
+      discountService.getAllCouponsForRestaurant(page, perPage).then((res) => {
+        setContainerLoad(false);
+        if (res.status == 200)  {
+        setCoupons(res.data.couponResponse);
+        setTotalPages(res.data.totalPages);
         }
-      });
-    });
-  }, []);
+        else {
+          setAlert({ ...alert, msg: res.data, type: "error" });
+          setShowAlert(true);
+        }
+      })
+
+  }
+
+  
 
   return (
     <div>
-      <Loader isOpen={loading}>
-        {coupons ? (
+      <CustomAlert
+          setShow={setShowAlert}
+          show={showAlert}
+          type={alert.type}
+          msg={alert.msg}
+        ></CustomAlert>
           <ListContainer
             title={"Active coupons"}
             type="coupon"
             grid={false}
             items={coupons}
             setItems={setCoupons}
-            perPage={5}
-            restaurantUuid={restaurantUuid}
+            perPage={perPage}
+            pagination="server"
+            handlePagination={handlePagination}
           />
-        ) : (
-          <></>
-        )}
-      </Loader>
     </div>
   );
 }

@@ -48,7 +48,7 @@ public class CategoryController {
         return new ResponseEntity<>(category,HttpStatus.CREATED);
     }
 
-    //@PreAuthorize("hasRole('ADMINISTRATOR')")
+    @PreAuthorize("hasRole('ADMINISTRATOR')")
     @Operation(description = "Update category name")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully updated category name",

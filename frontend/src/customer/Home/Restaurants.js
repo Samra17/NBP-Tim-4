@@ -8,13 +8,13 @@ import Loader from "../../shared/util/Loader/Loader";
 
 function Restaurants() {
   var mounted = false;
-  const [favorites, setFavorites] = useState();
-  const [searchResults, setSearchResults] = useState();
+  const [favorites, setFavorites] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
   const [categories, setCategories] = useState();
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({});
   const [showAlert, setShowAlert] = useState(false);
-  const perPage = 2;
+  const perPage = 4;
 
   async function handlePagination(title, page, perPage, setTotalPages,setContainerLoad, filterData) {
 
@@ -62,33 +62,13 @@ function Restaurants() {
     if (!mounted) {
       mounted = true;
       setLoading(true);
-      restaurantService.searchRestaurants({
-        sortBy: "RATING",
-        ascending: false,
-      }, 1, perPage).then((res) => {
-        if (res.status == 200) {
-          setSearchResults(res.data.restaurants);
-          restaurantService.getUserFavorites(1, perPage).then((res) => {
-            if (res.status == 200) setFavorites(res.data.restaurants);
-            else {
-              setLoading(false);
-              setAlert({ ...alert, msg: [res.data], type: "error" });
-              setShowAlert(true);
-            }
-            restaurantService.getCategories().then((res) => {
-              setLoading(false);
-              if (res.status == 200) setCategories(res.data);
-              else {
-                setAlert({ ...alert, msg: [res.data], type: "error" });
-                setShowAlert(true);
-              }
-            });
-          });
-        } else {
-          setLoading(false);
+    
+      restaurantService.getCategories().then((res) => {
+        setLoading(false);
+        if (res.status == 200) setCategories(res.data);
+        else {
           setAlert({ ...alert, msg: [res.data], type: "error" });
           setShowAlert(true);
-          setSearchResults([]);
         }
       });
     }
@@ -103,7 +83,7 @@ function Restaurants() {
           type={alert.type}
           msg={alert.msg}
         ></CustomAlert>
-        {searchResults ? (
+        {categories ? (
           <>
             <Container
               style={{
@@ -115,7 +95,7 @@ function Restaurants() {
                 maxWidth: "95%",
               }}
             >
-              {favorites && favorites.length > 0 ? (
+              
                 <ListContainer
                   items={favorites}
                   title={"Favorite restaurants"}
@@ -124,10 +104,7 @@ function Restaurants() {
                   handlePagination={handlePagination}
                   pagination="server"
                 ></ListContainer>
-              ) : (
-                <></>
-              )}
-              {searchResults ? (
+            
                 <ListContainer
                   items={searchResults}
                   title={"All restaurants"}
@@ -138,14 +115,8 @@ function Restaurants() {
                   pagination="server"
                   handlePagination={handlePagination}
                 ></ListContainer>
-              ) : (
-                <div style={{ display: "flex", justifyContent: "center" }}>
-                  <Spinner
-                    animation="border"
-                    style={{ color: "white", marginTop: "20%" }}
-                  />
-                </div>
-              )}
+            
+              
               <Map2 restaurantLocations={searchResults}></Map2>
             </Container>
           </>

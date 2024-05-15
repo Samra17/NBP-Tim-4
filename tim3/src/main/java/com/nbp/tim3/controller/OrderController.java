@@ -43,8 +43,8 @@ public class OrderController {
     public @ResponseBody ResponseEntity<OrderResponse> addNewOrder(
             @Parameter(description = "Order information", required = true)
             @RequestBody OrderCreateRequest orderCreateRequest) {
-        int orderId = orderService.addNewOrder(orderCreateRequest);
-        return ResponseEntity.ok(orderService.getById(orderId));
+        var order = orderService.addNewOrder(orderCreateRequest);
+        return ResponseEntity.ok(order);
     }
 
     //    @Operation(description = "Update order by id")

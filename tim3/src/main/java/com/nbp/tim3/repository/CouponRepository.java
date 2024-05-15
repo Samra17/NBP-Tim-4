@@ -155,9 +155,9 @@ public class CouponRepository {
         }
     }
 
-    public boolean updateCoupon(Integer id, CouponCreateUpdateRequest data) {
+    public boolean updateCoupon(Integer id, Integer quantity) {
 
-        String sql = "UPDATE nbp_coupon SET code = ?, quantity = ?, discount_percent = ?, restaurant_id = ?" +
+        String sql = "UPDATE nbp_coupon SET quantity = ?" +
                 "WHERE id = ?";
 
         boolean exception = false;
@@ -168,11 +168,8 @@ public class CouponRepository {
             connection = dbConnectionService.getConnection();
 
             preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1, data.getCode());
-            preparedStatement.setInt(2, data.getQuantity());
-            preparedStatement.setFloat(3, data.getDiscountPercent());
-            preparedStatement.setInt(4, data.getRestaurantId());
-            preparedStatement.setInt(5, id);
+            preparedStatement.setInt(1, quantity);
+            preparedStatement.setInt(2, id);
 
             int rowCount = preparedStatement.executeUpdate();
             connection.commit();
@@ -183,11 +180,6 @@ public class CouponRepository {
             logger.error(e.getMessage());
             exception = true;
 
-            if (e.getSQLState().startsWith("23")) {
-                if (e.getMessage().contains("FK_COUPON_RESTAURANT")) {
-                    throw new InvalidRequestException(String.format("Restaurant with id %d does not exist!", data.getRestaurantId()));
-                }
-            }
             throw new RuntimeException(e);
         } catch (Exception e) {
             exception = true;
@@ -377,14 +369,15 @@ public class CouponRepository {
         return filteredRestaurants;
     }
 
-    public CouponResponse getByCode(String code) {
-        String sql = "SELECT * FROM nbp_coupon WHERE code=?";
+    public CouponResponse getByCode(String code, Integer restaurantId) {
+        String sql = "SELECT * FROM nbp_coupon WHERE code=? AND restaurant_id=?";
 
         PreparedStatement preparedStatement = null;
         try {
             Connection connection = dbConnectionService.getConnection();
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, code);
+            preparedStatement.setInt(2,restaurantId);
 
             ResultSet resultSet = preparedStatement.executeQuery();
 

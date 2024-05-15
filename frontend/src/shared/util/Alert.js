@@ -10,9 +10,11 @@ function CustomAlert({ type, msg={}, show, setShow }) {
             return message.errors.map(i => <span>{i}<br></br></span>)
         } else if(message.hasOwnProperty("error")) {
             return message.error;
+        } else if(message.length > 0 && message[0].hasOwnProperty("error")) {
+            return message.map(i => <span>{i.error}<br></br></span>)
         }
         else {
-            return message
+            return JSON.stringify(message)
         }
     }
 

@@ -63,7 +63,7 @@ function MenuItem({
   const handleDelete = () => {
     setLoading(true);
     menuService.deleteMenuItem(menuItem.id).then((res) => {
-      if (res.status == 200) {
+      if (res.status == 204) {
         const updatedMenuItems = menuItems.filter((item) => item !== menuItem);
         setLoading(false);
         setMenuItems(updatedMenuItems);

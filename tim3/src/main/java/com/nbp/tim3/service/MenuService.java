@@ -7,6 +7,8 @@ import com.nbp.tim3.dto.menu.MenuUpdateDto;
 import com.nbp.tim3.model.Category;
 import com.nbp.tim3.model.Menu;
 import com.nbp.tim3.repository.MenuRepository;
+import com.nbp.tim3.repository.RestaurantRepository;
+import com.nbp.tim3.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,8 +26,8 @@ public class MenuService {
     @Autowired
     private MenuRepository menuRepository;
 
-    //@Autowired
-    //private MenuItemRepository menuItemRepository;
+    @Autowired
+    private RestaurantRepository restaurantRepository;
 
     public Menu getMenu(int id) {
         var menu = menuRepository.findById(id);
@@ -34,11 +36,12 @@ public class MenuService {
         return menu;
     }
 
-    public MenuDto addNewMenu(MenuCreateRequest menuDto) {
+    public MenuDto addNewMenu(MenuCreateRequest menuDto, String username) {
+        Integer restaurantId = restaurantRepository.getRestaurantIdByManagerUsername(username);
         MenuDto menu = new MenuDto();
         menu.setName(menuDto.getName());
         menu.setActive(menuDto.isActive());
-        menu.setRestaurantID(menuDto.getRestaurantID());
+        menu.setRestaurantID(restaurantId);
         menuRepository.addMenu(menu);
         return menu;
 
@@ -72,8 +75,8 @@ public class MenuService {
        menuRepository.addMenuItemsToMenu(id, menuItemsDao);
     }
 
-    public List<MenuDto> getRestaurantMenus(int restaurantID) {
-        return menuRepository.getMenusForRestaurant(restaurantID);
+    public List<MenuDto> getRestaurantMenus(String username) {
+        return menuRepository.getMenusForRestaurant(restaurantRepository.getRestaurantIdByManagerUsername(username));
     }
 
 

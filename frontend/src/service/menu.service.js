@@ -15,7 +15,7 @@ class MenuService {
   }
   getAllRestaurantMenus() {
     try {
-      return api.get("/api/menu/restaurant-menus/id/" + 1).then((response) => {
+      return api.get("/api/menu/restaurant-menus").then((response) => {
         return response;
       });
     } catch (e) {
@@ -25,7 +25,7 @@ class MenuService {
 
   deleteMenu(id) {
     try {
-      return api.delete("/menu/" + id).then((response) => {
+      return api.delete("/api/menu/" + id).then((response) => {
         return response;
       });
     } catch (e) {
@@ -35,7 +35,7 @@ class MenuService {
 
   addMenu(menu) {
     try {
-      return api.post("/menu/add", menu).then((response) => {
+      return api.post("/api/menu/add", menu).then((response) => {
         return response;
       });
     } catch (e) {
@@ -45,7 +45,7 @@ class MenuService {
 
   getMenuById(id) {
     try {
-      return api.get("/menu/" + id).then((response) => {
+      return api.get("/api/menu/" + id).then((response) => {
         return response;
       });
     } catch (e) {
@@ -55,7 +55,7 @@ class MenuService {
 
   deleteMenuItem(id) {
     try {
-      return api.delete("/menu-item/" + id).then((response) => {
+      return api.delete("/api/menu-item/" + id).then((response) => {
         return response;
       });
     } catch (e) {
@@ -65,7 +65,7 @@ class MenuService {
 
   updateMenu(req, id) {
     try {
-      return api.put("/menu/update/" + id, req).then((response) => {
+      return api.put("/api/menu/update/" + id, req).then((response) => {
         return response;
       });
     } catch (e) {
@@ -76,7 +76,7 @@ class MenuService {
   setMenuItems(req, id) {
     try {
       return api
-        .put("/menu/" + id + "/set-menu-items", req)
+        .put("/api/menu/" + id + "/set-menu-items", req)
         .then((response) => {
           return response;
         });
@@ -87,7 +87,7 @@ class MenuService {
 
   getMenuItemById(id) {
     try {
-      return api.get("/menu-item/" + id).then((response) => {
+      return api.get("/api/menu-item/" + id).then((response) => {
         return response;
       });
     } catch (e) {
@@ -97,7 +97,7 @@ class MenuService {
 
   updateMenuItem(id, req) {
     try {
-      return api.put("/menu-item/update/" + id, req).then((response) => {
+      return api.put("/api/menu-item/update/" + id, req).then((response) => {
         return response;
       });
     } catch (e) {

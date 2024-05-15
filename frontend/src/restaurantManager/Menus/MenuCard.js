@@ -37,7 +37,7 @@ function MenuCard({
   const handleDelete = () => {
     setLoading(true);
     menuService.deleteMenu(menu.id).then((res) => {
-      if (res.status == 200) {
+      if (res.status == 204) {
         document.body.style.cursor = "default";
         setAlert({
           ...alert,

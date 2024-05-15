@@ -66,8 +66,10 @@ public class MenuController {
     @ResponseStatus(HttpStatus.CREATED)
     public @ResponseBody ResponseEntity<MenuDto> addNewMenu(
             @Parameter(description = "Information required for menu creation", required = true)
-            @Valid @RequestBody MenuCreateRequest menuDto) {
-        var menu = menuService.addNewMenu(menuDto);
+            @Valid @RequestBody MenuCreateRequest menuDto,
+            @Parameter(description = "User username", required = true)
+            @RequestHeader("username") String username) {
+        var menu = menuService.addNewMenu(menuDto,username);
 
         return new ResponseEntity<>(menu, HttpStatus.CREATED);
     }
@@ -153,11 +155,11 @@ public class MenuController {
                     content = @Content)}
     )
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(path = "/restaurant-menus/id/{restaurantID}")
+    @GetMapping(path = "/restaurant-menus")
     public  ResponseEntity<List<MenuDto>> getRestaurantMenus (
-            @Parameter(description = "Restaurant ID", required = true)
-            @PathVariable int restaurantID) {
-        var menus = menuService.getRestaurantMenus(restaurantID);
+            @Parameter(description = "User username", required = true)
+            @RequestHeader("username") String username) {
+        var menus = menuService.getRestaurantMenus(username);
         return new ResponseEntity<>(menus, HttpStatus.OK);
     }
 

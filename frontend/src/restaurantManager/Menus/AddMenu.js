@@ -56,11 +56,10 @@ function AddMenu() {
     const form = e.currentTarget;
     e.preventDefault();
     e.stopPropagation();
-    const restaurantUUID = restaurantService.getCurrentRestaurantUUID();
     document.body.style.cursor = "wait";
     if (idMenu) {
       menuService
-        .updateMenu({ ...formData, restaurant_uuid: restaurantUUID }, idMenu)
+        .updateMenu({ ...formData }, idMenu)
         .then((res) => {
           if (res.status == 201) {
             document.body.style.cursor = "default";
@@ -77,7 +76,7 @@ function AddMenu() {
         });
     } else {
       menuService
-        .addMenu({ ...formData, restaurant_uuid: restaurantUUID })
+        .addMenu({ ...formData })
         .then((res) => {
           if (res.status == 201) {
             document.body.style.cursor = "default";

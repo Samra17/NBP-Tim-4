@@ -19,30 +19,30 @@ public class MenuItemDto implements Serializable {
     private Double price;
 
     @Min(value = 0, message = "Discount price can not be negative")
-    private Double discount_price;
+    private Double discountPrice;
 
     @NotNull(message = "Prep time should not be null")
     @Min(value = 0, message = "Prep time can not be negative")
-    private Integer prep_time;
+    private Integer prepTime;
 
     private String image;
     public MenuItemDto() {
     }
 
-    public MenuItemDto(String name, String description, Double price, Double discount_price, Integer prep_time) {
+    public MenuItemDto(String name, String description, Double price, Double discountPrice, Integer prepTime) {
         this.name = name;
         this.description = description;
         this.price = price;
-        this.discount_price = discount_price;
-        this.prep_time = prep_time;
+        this.discountPrice = discountPrice;
+        this.prepTime = prepTime;
     }
 
-    public MenuItemDto(String name, String description, Double price, Double discount_price, Integer prep_time, String image) {
+    public MenuItemDto(String name, String description, Double price, Double discountPrice, Integer prepTime, String image) {
         this.name = name;
         this.description = description;
         this.price = price;
-        this.discount_price = discount_price;
-        this.prep_time = prep_time;
+        this.discountPrice = discountPrice;
+        this.prepTime = prepTime;
         this.image = image;
     }
 
@@ -78,25 +78,25 @@ public class MenuItemDto implements Serializable {
         this.price = price;
     }
 
-    public Double getDiscount_price() {
-        return discount_price;
+    public Double getDiscountPrice() {
+        return discountPrice;
     }
 
-    public void setDiscount_price(Double discount_price) {
-        this.discount_price = discount_price;
+    public void setDiscountPrice(Double discountPrice) {
+        this.discountPrice = discountPrice;
     }
 
-    public Integer getPrep_time() {
-        return prep_time;
+    public Integer getPrepTime() {
+        return prepTime;
     }
 
-    public void setPrep_time(Integer prep_time) {
-        this.prep_time = prep_time;
+    public void setPrepTime(Integer prepTime) {
+        this.prepTime = prepTime;
     }
 
     @AssertTrue(message = "Discounted price should not be higher than the regular price!")
     public boolean isDiscountedPriceLessThanRegular() {
-        if (discount_price != null && discount_price > price)
+        if (discountPrice != null && discountPrice > price)
             return false;
         return true;
     }

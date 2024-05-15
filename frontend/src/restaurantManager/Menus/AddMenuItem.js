@@ -37,8 +37,8 @@ export default function AddMenuItem({
     name: item?.name || "",
     description: item?.description || "",
     price: item?.price || 0,
-    discount_price: item?.discount_price || null,
-    prep_time: item?.prep_time || 0,
+    discountPrice: item?.discountPrice || null,
+    prepTime: item?.prepTime || 0,
     image: item?.image || null,
   });
 
@@ -53,15 +53,12 @@ export default function AddMenuItem({
         setMenuItemId(menuItemId1);
         setOpen(true);
         document.body.style.cursor = "wait";
-        console.log(menuItemId1);
-        console.log(mounted);
 
         menuService.getMenuItemById(menuItemId1).then((res) => {
           document.body.style.cursor = "default";
           setMenuItem(res.data);
         });
       } else {
-        console.log("blabla");
       }
     }
     /*   if (menuItemId1 != null && menuItemId1 != undefined) setOpen(true);
@@ -85,8 +82,8 @@ export default function AddMenuItem({
     name: true,
     description: true,
     price: true,
-    discount_price: true,
-    prep_time: true,
+    discountPrice: true,
+    prepTime: true,
     image: true,
   });
   const [valid, setValid] = useState(true);
@@ -97,16 +94,16 @@ export default function AddMenuItem({
       name: "",
       description: "",
       price: 0,
-      discount_price: 0,
-      prep_time: null,
+      discountPrice: 0,
+      prepTime: null,
       image: null,
     });
     setValidation({
       name: true,
       description: true,
       price: true,
-      discount_price: true,
-      prep_time: true,
+      discountPrice: true,
+      prepTime: true,
       image: true,
     });
     if (menuItemId != null) navigate("/menu/add?id=" + menuId);
@@ -148,35 +145,35 @@ export default function AddMenuItem({
       updatedValidation.price = true;
     }
 
-    if (i.prep_time != null && i.prep_time < 0) {
+    if (i.prepTime != null && i.prepTime < 0) {
       isValid = false;
-      updatedValidation.prep_time = false;
-      updatedValidation.prep_time_error_m = "Cooking time can not be negative!";
-    } else if (i.prep_time == null) {
+      updatedValidation.prepTime = false;
+      updatedValidation.prepTime_error_m = "Cooking time can not be negative!";
+    } else if (i.prepTime == null) {
       isValid = false;
-      updatedValidation.prep_time = false;
-      updatedValidation.prep_time_error_m = "Cooking time must be defined!";
+      updatedValidation.prepTime = false;
+      updatedValidation.prepTime_error_m = "Cooking time must be defined!";
     } else {
-      updatedValidation.prep_time = true;
+      updatedValidation.prepTime = true;
     }
 
-    if (i.discount_price != null && i.discount_price < 0) {
+    if (i.discountPrice != null && i.discountPrice < 0) {
       isValid = false;
-      updatedValidation.discount_price = false;
-      updatedValidation.discount_price_error_m =
+      updatedValidation.discountPrice = false;
+      updatedValidation.discountPrice_error_m =
         "Discount price cannot be negative";
     } else if (
       discount &&
-      i.discount_price != null &&
+      i.discountPrice != null &&
       i.price != null &&
-      i.discount_price >= i.price
+      i.discountPrice >= i.price
     ) {
       isValid = false;
-      updatedValidation.discount_price = false;
-      updatedValidation.discount_price_error_m =
+      updatedValidation.discountPrice = false;
+      updatedValidation.discountPrice_error_m =
         "Discounted price should not be higher than the regular price!";
     } else {
-      updatedValidation.discount_price = true;
+      updatedValidation.discountPrice = true;
     }
 
     setValidation(updatedValidation);
@@ -189,11 +186,10 @@ export default function AddMenuItem({
     if (isValid) {
       document.body.style.cursor = "wait";
       var req = { ...menuItem };
-      if (!discount) req.discount_price = null;
+      if (!discount) req.discountPrice = null;
       if (menuItemId != null && menuItemId != undefined) {
         menuService.updateMenuItem(menuItemId, req).then((res) => {
-          console.log(res);
-          if (res.status == 201) {
+          if (res.status == 200) {
             document.body.style.cursor = "default";
             setAlert({
               ...alert,
@@ -203,6 +199,10 @@ export default function AddMenuItem({
             setShowAlert(true);
             navigate("/menu/add?id=" + menuId);
             setMenuItemId(null);
+            const updatedItems = menuItems.map(item =>
+              item.id === menuItemId ? res.data : item
+            );
+            setMenuItems(updatedItems)
           } else {
             setAlert({ ...alert, msg: res.data, type: "error" });
             setShowAlert(true);
@@ -230,8 +230,8 @@ export default function AddMenuItem({
         name: "",
         description: "",
         price: 0,
-        discount_price: 0,
-        prep_time: null,
+        discountPrice: 0,
+        prepTime: null,
         image: null,
       });
       setOpen(false);
@@ -332,15 +332,15 @@ export default function AddMenuItem({
               type="number"
               label="Cooking time"
               variant="standard"
-              id="prep_time"
-              name="prep_time"
+              id="prepTime"
+              name="prepTime"
               required
-              error={!validation.prep_time}
+              error={!validation.prepTime}
               inputProps={{ min: 0 }}
               helperText={
-                !validation.prep_time ? validation.prep_time_error_m : ""
+                !validation.prepTime ? validation.prepTime_error_m : ""
               }
-              value={menuItem?.prep_time || 0}
+              value={menuItem?.prepTime || 0}
               onChange={(event) => {
                 const inputValue = event.target.value;
                 const formattedValue = Number(
@@ -348,7 +348,7 @@ export default function AddMenuItem({
                 );
                 setMenuItem({
                   ...menuItem,
-                  prep_time: formattedValue,
+                  prepTime: formattedValue,
                 });
               }}
             />
@@ -368,19 +368,19 @@ export default function AddMenuItem({
               variant="standard"
               id="discount"
               label="Discounted price"
-              name="discount_price"
+              name="discountPrice"
               disabled={!discount}
-              error={!validation.discount_price}
+              error={!validation.discountPrice}
               helperText={
-                discount && !validation.discount_price
-                  ? validation.discount_price_error_m
+                discount && !validation.discountPrice
+                  ? validation.discountPrice_error_m
                   : ""
               }
               inputProps={{
                 min: 0,
                 step: "0.5",
               }}
-              value={menuItem?.discount_price}
+              value={menuItem?.discountPrice}
               onChange={(event) => {
                 const inputValue = event.target.value;
                 const formattedValue = Number(
@@ -388,7 +388,7 @@ export default function AddMenuItem({
                 );
                 setMenuItem({
                   ...menuItem,
-                  discount_price: formattedValue,
+                  discountPrice: formattedValue,
                 });
               }}
             />
@@ -401,7 +401,7 @@ export default function AddMenuItem({
                   onChange={(e) => {
                     setDiscount(!discount);
                     if (!e.target.checked) {
-                      setMenuItem({ ...menuItem, discount_price: null });
+                      setMenuItem({ ...menuItem, discountPrice: null });
                     }
                   }}
                 />

@@ -15,7 +15,6 @@ public class MenuCreateRequest implements Serializable {
     @Size(min=0,max=100,message = "Name can contain a maximum of 100 characters!")
     private String name;
 
-    @NotNull(message="Menu restaurant should not be null")
     private Integer restaurantID;
 
     public MenuCreateRequest() {

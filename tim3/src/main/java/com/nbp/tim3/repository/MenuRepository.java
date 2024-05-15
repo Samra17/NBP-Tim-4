@@ -378,14 +378,14 @@ public class MenuRepository {
                 preparedStatement = connection.prepareStatement(sql, returnCols);
                 preparedStatement.setString(1, menuItemDao.getName());
                 preparedStatement.setString(2, menuItemDao.getDescription());
-                if (menuItemDao.getDiscount_price() == null)
+                if (menuItemDao.getDiscountPrice() == null)
                     preparedStatement.setNull(4, Types.FLOAT);
                 else
-                    preparedStatement.setDouble(4, menuItemDao.getDiscount_price());
-                if (menuItemDao.getPrep_time() == null)
+                    preparedStatement.setDouble(4, menuItemDao.getDiscountPrice());
+                if (menuItemDao.getPrepTime() == null)
                     preparedStatement.setNull(5, Types.NUMERIC);
                 else
-                    preparedStatement.setDouble(5, menuItemDao.getPrep_time());
+                    preparedStatement.setDouble(5, menuItemDao.getPrepTime());
                 preparedStatement.setDouble(3, menuItemDao.getPrice());
                 preparedStatement.setString(6, menuItemDao.getImage());
                 preparedStatement.setInt(7, id);

@@ -7,7 +7,7 @@ import authService from "../../service/auth.service";
 import discountService from "../../service/discount.service";
 import "./CouponCard.css";
 
-function CouponCard({ coupon, setCoupons }) {
+function CouponCard({ coupon, coupons, setCoupons }) {
   const user = authService.getCurrentUser();
   const [showModal, setshowModal] = useState(false);
 
@@ -16,7 +16,10 @@ function CouponCard({ coupon, setCoupons }) {
     setCoupons((current) => current.filter((coup) => coup.id !== coupon.id));
     discountService.deleteCoupon(coupon.id).then((res) => {
       if (res.status == 200) {
-        console.log(res.data);
+        const updatedItems = coupons.map(item =>
+          item.id === coupon.id ? { ...item, quantity: 0 } : item
+        );
+        setCoupons(updatedItems)
       } else console.log(res);
     });
   };
@@ -36,18 +39,17 @@ function CouponCard({ coupon, setCoupons }) {
             <Modal.Header closeButton>
               <Modal.Title>Confirmation</Modal.Title>
             </Modal.Header>
-            <Modal.Body>Are you sure you want to delete this coupon</Modal.Body>
+            <Modal.Body>Are you sure you want to deactivate this coupon?</Modal.Body>
             <Modal.Footer>
               <Button variant="secondary" onClick={closeModal}>
                 Cancel
               </Button>
               <Button variant="danger" onClick={deleteCoupon}>
-                Delete
+                Deactivate
               </Button>
             </Modal.Footer>
           </Modal>
           <Card
-            onClick={() => console.log(coupon.id)}
             style={{
               width: "100%",
               height: "10rem",
@@ -79,7 +81,7 @@ function CouponCard({ coupon, setCoupons }) {
                         bottom: "5%",
                         right: "5%",
                       }}
-                    >
+                    > {coupon.quantity > 0 ?
                       <Button
                         onClick={(e) => {
                           openModal();
@@ -93,8 +95,8 @@ function CouponCard({ coupon, setCoupons }) {
                         class="rounded"
                       >
                         {" "}
-                        Delete<Delete fontSize="small"></Delete>
-                      </Button>
+                        Deactivate<Delete fontSize="small"></Delete>
+                      </Button> : <></>}
                     </div>
                   </Card.Text>
                 </Card.Body>

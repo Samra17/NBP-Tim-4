@@ -338,6 +338,7 @@ function ListContainer({
                   ) : type == "coupon" ? (
                     <CouponCard
                       coupon={i}
+                      coupons={items}
                       setCoupons={setItems}
                       style={{ width: "100%" }}
                     />

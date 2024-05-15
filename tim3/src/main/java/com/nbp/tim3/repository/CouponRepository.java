@@ -227,7 +227,8 @@ public class CouponRepository {
     }
 
     public CouponPaginatedResponse getByRestaurantIdPage(Integer restaurantId, Integer page, Integer size) {
-        String sql = "SELECT nbp_coupon.*, COUNT(*) OVER() result_count FROM nbp_coupon WHERE restaurant_id=? OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        String sql = "SELECT nbp_coupon.*, COUNT(*) OVER() result_count FROM nbp_coupon WHERE restaurant_id=? " +
+                "ORDER BY quantity DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY ";
         return getByForeignKeyIdPage(restaurantId, page, size, sql);
     }
 

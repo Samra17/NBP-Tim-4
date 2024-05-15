@@ -38,7 +38,7 @@ export default function AddCoupon({
       if (res.status == 201) {
         setCoupons((oldArray) => [...oldArray, newCoupon]);
       } else {
-        //setAlert({ ...alert, msg: res.data, type: "error" });
+        setAlert({ ...alert, msg: res.data, type: "error" });
         setShowAlert(true);
       }
     });

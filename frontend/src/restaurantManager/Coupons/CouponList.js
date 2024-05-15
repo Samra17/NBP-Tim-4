@@ -56,7 +56,7 @@ function CouponList() {
           msg={alert.msg}
         ></CustomAlert>
           <ListContainer
-            title={"Active coupons"}
+            title={"Coupons"}
             type="coupon"
             grid={false}
             items={coupons}
@@ -64,6 +64,9 @@ function CouponList() {
             perPage={perPage}
             pagination="server"
             handlePagination={handlePagination}
+            setAlert={setAlert}
+            setShowAlert={setShowAlert}
+            alert={alert}
           />
     </div>
   );

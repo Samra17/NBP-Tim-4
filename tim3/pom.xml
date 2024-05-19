@@ -104,6 +104,11 @@
 			<artifactId>spring-security-core</artifactId>
 			<version>6.3.0-M3</version>
 		</dependency>
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports</artifactId>
+			<version>6.20.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>

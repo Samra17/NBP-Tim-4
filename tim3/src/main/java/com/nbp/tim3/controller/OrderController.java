@@ -11,12 +11,16 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.Year;
 import java.util.*;
 
 @RestController
@@ -240,6 +244,19 @@ public class OrderController {
             ) {
 
         return ResponseEntity.ok(orderService.getByRestaurantIdAndStatusPage(username, Status.fromString(status), page, perPage));
+    }
+
+    @PreAuthorize("hasRole('ADMINISTRATOR')")
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("annual-report")
+    public void getAnnualReportForCurrentYear(HttpServletResponse response) {
+        response.setContentType("application/pdf");
+
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=order_annual_report_pdf " + System.currentTimeMillis() + ".pdf";
+        response.setHeader(headerKey,headerValue);
+
+        orderService.getAnnualOrderReport(response, Year.now().getValue());
     }
 
 }

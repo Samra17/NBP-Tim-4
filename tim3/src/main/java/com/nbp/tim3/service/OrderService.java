@@ -7,9 +7,24 @@ import com.nbp.tim3.repository.OrderRepository;
 import com.nbp.tim3.repository.UserRepository;
 import com.nbp.tim3.util.exception.InvalidRequestException;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletResponse;
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.engine.export.JRPdfExporter;
+import net.sf.jasperreports.engine.util.JRSaver;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
+import net.sf.jasperreports.export.SimplePdfReportConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +39,18 @@ public class OrderService {
 
     @Autowired
     private UserRepository userRepository;
+
+    private JasperReport jasperReport;
+    @PostConstruct
+    public void init(){
+        try {
+            InputStream employeeReportStream
+                    = getClass().getResourceAsStream("/order_annual_report.jrxml");
+            jasperReport = JasperCompileManager.compileReport(employeeReportStream);
+        } catch (JRException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public OrderResponse addNewOrder(OrderCreateRequest request) {
         return orderRepository.createOrder(request);
@@ -79,4 +106,40 @@ public class OrderService {
     public OrderPaginatedResponse getReadyForDeliveryOrders(Integer page, Integer perPage) {
         return orderRepository.getReadyForDeliveryOrdersPage(page, perPage);
     }
+
+    public void getAnnualOrderReport(HttpServletResponse response, Integer year){
+        try {
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("year", year);
+            JRSaver.saveObject(jasperReport, "order_annual_report.jasper");
+            List<OrderReportResponse> orderAnnualReport = new ArrayList<>();
+            orderAnnualReport.add(new OrderReportResponse());
+            orderAnnualReport.addAll(orderRepository.getOrderAnnualReport(year));
+            JRBeanCollectionDataSource jrBeanCollectionDataSourceFirst = new JRBeanCollectionDataSource(orderAnnualReport);
+
+            List<OrderReportResponse> revenueAnnualReport = orderAnnualReport.subList(1,orderAnnualReport.size());
+            JRBeanCollectionDataSource jrBeanCollectionDataSourceRevenue = new JRBeanCollectionDataSource(revenueAnnualReport);
+
+            List<OrderCourierReportResponse> orderCourierAnnualReport = orderRepository.getOrderCourierAnnualReport(year);
+            JRBeanCollectionDataSource jrBeanCollectionDataSourceCourier = new JRBeanCollectionDataSource(orderCourierAnnualReport);
+
+            OrderTotalResponse totalOrderAnnualReport = orderRepository.getTotalOrderAnnualReport(2024);
+            parameters.put("datasetTable1", jrBeanCollectionDataSourceFirst);
+            parameters.put("datasetTable2", jrBeanCollectionDataSourceRevenue);
+            parameters.put("datasetTable3", jrBeanCollectionDataSourceCourier);
+            parameters.put("totalOrderCount", totalOrderAnnualReport.getTotalCount());
+            parameters.put("totalRevenue", totalOrderAnnualReport.getTotalRevenue());
+
+            JasperPrint jasperPrint = JasperFillManager.fillReport(
+                    jasperReport, parameters, jrBeanCollectionDataSourceFirst);
+
+            JasperExportManager.exportReportToPdfStream(jasperPrint, response.getOutputStream());
+
+        } catch (JRException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

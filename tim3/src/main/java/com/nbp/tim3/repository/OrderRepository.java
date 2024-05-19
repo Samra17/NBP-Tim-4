@@ -1,9 +1,6 @@
 package com.nbp.tim3.repository;
 
-import com.nbp.tim3.dto.order.OrderCreateRequest;
-import com.nbp.tim3.dto.order.OrderPaginatedResponse;
-import com.nbp.tim3.dto.order.OrderResponse;
-import com.nbp.tim3.dto.order.OrderUpdateDto;
+import com.nbp.tim3.dto.order.*;
 import com.nbp.tim3.enums.Status;
 import com.nbp.tim3.model.Order;
 import com.nbp.tim3.service.DBConnectionService;
@@ -229,6 +226,209 @@ public class OrderRepository {
         }
     }
 
+    public List<OrderReportResponse> getOrderAnnualReport(Integer year) {
+        String sql = "SELECT restaurant," +
+                "       restaurant_name," +
+                "       max(decode(Month, 1, counted, 0)) january," +
+                "       max(decode(Month, 2, counted, 0)) february," +
+                "       max(decode(Month, 3, counted, 0)) march," +
+                "       max(decode(Month, 4, counted, 0)) april," +
+                "       max(decode(Month, 5, counted, 0)) may," +
+                "       max(decode(Month, 6, counted, 0)) june," +
+                "       max(decode(Month, 7, counted, 0)) july," +
+                "       max(decode(Month, 8, counted, 0)) august," +
+                "       max(decode(Month, 9, counted, 0)) september," +
+                "       max(decode(Month, 10, counted, 0)) october," +
+                "       max(decode(Month, 11, counted, 0)) november," +
+                "       max(decode(Month, 12, counted, 0)) december," +
+                "       (SELECT COUNT(*) FROM NBP_ORDER ord WHERE ord.RESTAURANT_ID = restaurant AND extract(year from ord.CREATED_AT) = ? AND ord.STATUS = 'DELIVERED') total_count," +
+                "       (" +
+                "           (((SELECT COUNT(*) FROM NBP_ORDER ord WHERE ord.RESTAURANT_ID = restaurant AND extract(year from ord.CREATED_AT) = ? AND ord.STATUS = 'DELIVERED')" +
+                "               -(SELECT COUNT(*) FROM NBP_ORDER ord WHERE ord.RESTAURANT_ID = restaurant AND extract(year from ord.CREATED_AT) = ? - 1 AND ord.STATUS = 'DELIVERED'))" +
+                "               /NVL(NULLIF((SELECT COUNT(*) FROM NBP_ORDER ord WHERE ord.RESTAURANT_ID = restaurant AND extract(year from ord.CREATED_AT) = ? - 1 AND ord.STATUS = 'DELIVERED'), 0), 1))*100" +
+                "        ) as order_increase," +
+                "       max(decode(Month, 1, rev, 0)) january_rev," +
+                "       max(decode(Month, 2, rev, 0)) february_rev," +
+                "       max(decode(Month, 3, rev, 0)) march_rev," +
+                "       max(decode(Month, 4, rev, 0)) april_rev," +
+                "       max(decode(Month, 5, rev, 0)) may_rev," +
+                "       max(decode(Month, 6, rev, 0)) june_rev," +
+                "       max(decode(Month, 7, rev, 0)) july_rev," +
+                "       max(decode(Month, 8, rev, 0)) august_rev," +
+                "       max(decode(Month, 9, rev, 0)) september_rev," +
+                "       max(decode(Month, 10, rev, 0)) october_rev," +
+                "       max(decode(Month, 11, rev, 0)) november_rev," +
+                "       max(decode(Month, 12, rev, 0)) december_rev," +
+                "       (SELECT SUM(TOTAL_PRICE) FROM NBP_ORDER ord WHERE ord.RESTAURANT_ID = restaurant AND extract(year from ord.CREATED_AT) = ? AND ord.STATUS = 'DELIVERED') total_rev," +
+                "       (" +
+                "           (((SELECT SUM(TOTAL_PRICE) FROM NBP_ORDER ord WHERE ord.RESTAURANT_ID = restaurant AND extract(year from ord.CREATED_AT) = ? AND ord.STATUS = 'DELIVERED')" +
+                "               -NVL((SELECT SUM(TOTAL_PRICE) FROM NBP_ORDER ord WHERE ord.RESTAURANT_ID = restaurant AND extract(year from ord.CREATED_AT) = ? - 1 AND ord.STATUS = 'DELIVERED'), 0))" +
+                "               /NVL((SELECT SUM(TOTAL_PRICE) FROM NBP_ORDER ord WHERE ord.RESTAURANT_ID = restaurant AND extract(year from ord.CREATED_AT) = ? - 1 AND ord.STATUS = 'DELIVERED'), 1))*100" +
+                "           ) as rev_increase" +
+                "    FROM (" +
+                "        SELECT ord.RESTAURANT_ID restaurant," +
+                "               res.NAME restaurant_name" +
+                "        ,extract(month from ord.CREATED_AT) Month" +
+                "        ,COUNT(*) as counted" +
+                "        ,SUM(TOTAL_PRICE) as rev" +
+                "        FROM NBP_ORDER ord" +
+                "        JOIN NBP_RESTAURANT res ON res.ID = ord.RESTAURANT_ID" +
+                "        WHERE extract(year from ord.CREATED_AT) = ? AND ord.STATUS = 'DELIVERED'" +
+                "        GROUP BY res.NAME, ord.RESTAURANT_ID, extract(month from ord.CREATED_AT)" +
+                "    )" +
+                "group by restaurant, restaurant_name";
+
+        List<OrderReportResponse> orderReportResponses = new ArrayList<>();
+        PreparedStatement preparedStatement = null;
+        try {
+            Connection connection = dbConnectionService.getConnection();
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, year);
+            preparedStatement.setInt(2, year);
+            preparedStatement.setInt(3, year);
+            preparedStatement.setInt(4, year);
+            preparedStatement.setInt(5, year);
+            preparedStatement.setInt(6, year);
+            preparedStatement.setInt(7, year);
+            preparedStatement.setInt(8, year);
+            preparedStatement.setInt(9, year);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                OrderReportResponse orderReportResponse = new OrderReportResponse();
+                mapOrderReportResponse(orderReportResponse, resultSet);
+                orderReportResponses.add(orderReportResponse);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return orderReportResponses;
+    }
+
+    public OrderTotalResponse getTotalOrderAnnualReport(Integer year) {
+        String sql = "SELECT COUNT(*) as total_count, SUM(TOTAL_PRICE) as total_revenue FROM NBP_ORDER ord WHERE extract(year from ord.CREATED_AT) = ? AND ord.STATUS = 'DELIVERED'";
+
+        PreparedStatement preparedStatement = null;
+        try {
+            Connection connection = dbConnectionService.getConnection();
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, year);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                OrderTotalResponse orderReportResponse = new OrderTotalResponse();
+                orderReportResponse.setTotalCount(resultSet.getInt("total_count"));
+                orderReportResponse.setTotalRevenue(resultSet.getFloat("total_revenue"));
+                return orderReportResponse;
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return null;
+    }
+
+    public List<OrderCourierReportResponse> getOrderCourierAnnualReport(Integer year) {
+        String sql = "SELECT courier," +
+                "       courier_name," +
+                "       max(decode(Month, 1, counted, 0)) january," +
+                "       max(decode(Month, 2, counted, 0)) february," +
+                "       max(decode(Month, 3, counted, 0)) march," +
+                "       max(decode(Month, 4, counted, 0)) april," +
+                "       max(decode(Month, 5, counted, 0)) may," +
+                "       max(decode(Month, 6, counted, 0)) june," +
+                "       max(decode(Month, 7, counted, 0)) july," +
+                "       max(decode(Month, 8, counted, 0)) august," +
+                "       max(decode(Month, 9, counted, 0)) september," +
+                "       max(decode(Month, 10, counted, 0)) october," +
+                "       max(decode(Month, 11, counted, 0)) november," +
+                "       max(decode(Month, 12, counted, 0)) december," +
+                "       (SELECT COUNT(*) FROM NBP_ORDER ord WHERE ord.COURIER_ID = courier AND extract(year from ord.CREATED_AT) = ?) total_count" +
+                "    FROM (" +
+                "        SELECT ord.COURIER_ID courier" +
+                "        ,cour.USERNAME courier_name" +
+                "        ,extract(month from ord.CREATED_AT) Month" +
+                "        ,COUNT(*) as counted" +
+                "        FROM NBP_ORDER ord" +
+                "        JOIN NBP.NBP_USER cour ON cour.ID = ord.COURIER_ID" +
+                "        WHERE extract(year from ord.CREATED_AT) = ?" +
+                "        GROUP BY cour.USERNAME, ord.COURIER_ID, extract(month from ord.CREATED_AT)" +
+                "    )" +
+                "group by courier, courier_name";
+
+        List<OrderCourierReportResponse> orderReportResponses = new ArrayList<>();
+        PreparedStatement preparedStatement = null;
+        try {
+            Connection connection = dbConnectionService.getConnection();
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, year);
+            preparedStatement.setInt(2, year);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                OrderCourierReportResponse orderReportResponse = new OrderCourierReportResponse();
+                mapOrderCourierReportResponse(orderReportResponse, resultSet);
+                orderReportResponses.add(orderReportResponse);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return orderReportResponses;
+    }
+
+    public int getTotalOrdersPerYear(Integer year) {
+        String sql = "SELECT COUNT(*) total_orders FROM NBP_ORDER WHERE extract(year from CREATED_AT) = ?";
+
+        PreparedStatement preparedStatement = null;
+        try {
+            Connection connection = dbConnectionService.getConnection();
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, year);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                return resultSet.getInt("total_orders");
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return 0;
+    }
+
     public OrderResponse createOrder(OrderCreateRequest orderCreateRequest) {
 
         String checkAddressId =
@@ -366,6 +566,8 @@ public class OrderRepository {
         }
     }
 
+
+
     private void mapOrder(OrderResponse orderResponse, ResultSet resultSet) throws SQLException {
         orderResponse.setId(resultSet.getInt("ord_id"));
         orderResponse.setOrderCode(resultSet.getString("ord_code"));
@@ -388,6 +590,57 @@ public class OrderRepository {
 
         orderResponse.setItems(items);
 
+    }
+
+    private void mapOrderReportResponse(OrderReportResponse orderReportResponse, ResultSet resultSet) throws SQLException {
+        orderReportResponse.setRestaurantId(resultSet.getInt("restaurant"));
+        orderReportResponse.setRestaurantName(resultSet.getString("restaurant_name"));
+        orderReportResponse.setJanuary(resultSet.getInt("january"));
+        orderReportResponse.setFebruary(resultSet.getInt("february"));
+        orderReportResponse.setMarch(resultSet.getInt("march"));
+        orderReportResponse.setApril(resultSet.getInt("april"));
+        orderReportResponse.setMay(resultSet.getInt("may"));
+        orderReportResponse.setJune(resultSet.getInt("june"));
+        orderReportResponse.setJuly(resultSet.getInt("july"));
+        orderReportResponse.setAugust(resultSet.getInt("august"));
+        orderReportResponse.setSeptember(resultSet.getInt("september"));
+        orderReportResponse.setOctober(resultSet.getInt("october"));
+        orderReportResponse.setNovember(resultSet.getInt("november"));
+        orderReportResponse.setDecember(resultSet.getInt("december"));
+        orderReportResponse.setTotalCount(resultSet.getInt("total_count"));
+        orderReportResponse.setOrderIncrease(resultSet.getFloat("order_increase"));
+        orderReportResponse.setJanuaryRev(resultSet.getFloat("january_rev"));
+        orderReportResponse.setFebruaryRev(resultSet.getFloat("february_rev"));
+        orderReportResponse.setMarchRev(resultSet.getFloat("march_rev"));
+        orderReportResponse.setAprilRev(resultSet.getFloat("april_rev"));
+        orderReportResponse.setMayRev(resultSet.getFloat("may_rev"));
+        orderReportResponse.setJuneRev(resultSet.getFloat("june_rev"));
+        orderReportResponse.setJulyRev(resultSet.getFloat("july_rev"));
+        orderReportResponse.setAugustRev(resultSet.getFloat("august_rev"));
+        orderReportResponse.setSeptemberRev(resultSet.getFloat("september_rev"));
+        orderReportResponse.setOctoberRev(resultSet.getFloat("october_rev"));
+        orderReportResponse.setNovemberRev(resultSet.getFloat("november_rev"));
+        orderReportResponse.setDecemberRev(resultSet.getFloat("december_rev"));
+        orderReportResponse.setTotalRev(resultSet.getFloat("total_rev"));
+        orderReportResponse.setRevIncrease(resultSet.getFloat("rev_increase"));
+    }
+
+    private void mapOrderCourierReportResponse(OrderCourierReportResponse orderReportResponse, ResultSet resultSet) throws SQLException {
+        orderReportResponse.setCourierId(resultSet.getInt("courier"));
+        orderReportResponse.setCourierName(resultSet.getString("courier_name"));
+        orderReportResponse.setJanuaryCour(resultSet.getInt("january"));
+        orderReportResponse.setFebruaryCour(resultSet.getInt("february"));
+        orderReportResponse.setMarchCour(resultSet.getInt("march"));
+        orderReportResponse.setAprilCour(resultSet.getInt("april"));
+        orderReportResponse.setMayCour(resultSet.getInt("may"));
+        orderReportResponse.setJuneCour(resultSet.getInt("june"));
+        orderReportResponse.setJulyCour(resultSet.getInt("july"));
+        orderReportResponse.setAugustCour(resultSet.getInt("august"));
+        orderReportResponse.setSeptemberCour(resultSet.getInt("september"));
+        orderReportResponse.setOctoberCour(resultSet.getInt("october"));
+        orderReportResponse.setNovemberCour(resultSet.getInt("november"));
+        orderReportResponse.setDecemberCour(resultSet.getInt("december"));
+        orderReportResponse.setTotalCountCour(resultSet.getInt("total_count"));
     }
 
     public void updateOrder(Integer orderId, OrderUpdateDto orderUpdateDto){

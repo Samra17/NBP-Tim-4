@@ -15,7 +15,7 @@ function OrderHistory() {
   var mounted = false;
   const perPage = 5;
 
-  const role = authService.getCurrentUser().role;
+  const role = authService.getCurrentUser().Role;
   
 
   async function handlePagination(title, page, perPage, setTotalPages,setContainerLoad, filterData) {

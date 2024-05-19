@@ -278,11 +278,11 @@ function Actions({
 
   return (
     <div>
-      {user.role == "RESTAURANT_MANAGER"
+      {user.Role == "RESTAURANT_MANAGER"
         ? restaurantManagerActions()
-        : user.role == "COURIER"
+        : user.Role == "COURIER"
         ? courierActions()
-        : user.role == "CUSTOMER"
+        : user.Role == "CUSTOMER"
         ? customerActions()
         : setNoActions(true)}
     </div>

@@ -47,7 +47,7 @@ instance.interceptors.response.use(
           const rs = await axios.post("/api/auth/refresh-token", null, config);
 
           var accessToken = rs.data.accessToken;
-          TokenService.updateLocalAccessToken(accessToken);
+          TokenService.setAccessToken(accessToken);
 
           return instance(originalConfig);
         } catch (_error) {

@@ -78,16 +78,16 @@ public class OrderController {
             @ApiResponse(responseCode = "403", description = "Unauthorized access",
                     content = @Content)}
     )
-    @GetMapping(path = "/get/customer/{customerId}")
+    @GetMapping(path = "/get/customer")
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody ResponseEntity<OrderPaginatedResponse> GetAllCustomerOrders(
-            @Parameter(description = "Customer ID", required = true)
-            @PathVariable("customerId") Integer customerId,
             @Parameter(description = "Page number", required = true)
             @RequestParam(value = "page", defaultValue = "1") Integer page,
             @Parameter(description = "Number of records per page", required = true)
-            @RequestParam(value = "perPage", defaultValue = "10") Integer perPage) {
-        return ResponseEntity.ok(orderService.getOrdersByCustomerId(customerId, page, perPage));
+            @RequestParam(value = "perPage", defaultValue = "10") Integer perPage,
+            @Parameter(description = "User username", required = false)
+            @RequestHeader(value = "username", required = false) String username) {
+        return ResponseEntity.ok(orderService.getOrdersByCustomerId(username, page, perPage));
     }
 
     @Operation(description = "Get all orders by courier")

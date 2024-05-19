@@ -29,6 +29,7 @@ export default function AddMenuItem({
   setAlert,
 }) {
   const [menuItemId, setMenuItemId] = useState();
+  const [image, setImage] = useState();
   const location = useLocation();
   const navigate = useNavigate();
   const url = new URLSearchParams(location);
@@ -61,20 +62,7 @@ export default function AddMenuItem({
       } else {
       }
     }
-    /*   if (menuItemId1 != null && menuItemId1 != undefined) setOpen(true);
-        /*  menuService.getMenuById(id).then((res) => {
-          if (res.status == 200) {
-            setFormData(res.data);
-            setLoading(false);
-            setActive(res.data.active);
-            setMenuItems(res.data.menuItems);
-          } else {
-            setAlert({ ...alert, msg: res.data, type: "error" });
-            setShowAlert(true);
-          }
-        });
-      }
-    } else setLoading(false);*/
+   
   }, [location.search]);
 
   const [discount, setDiscount] = useState(false);
@@ -188,42 +176,64 @@ export default function AddMenuItem({
       var req = { ...menuItem };
       if (!discount) req.discountPrice = null;
       if (menuItemId != null && menuItemId != undefined) {
-        menuService.updateMenuItem(menuItemId, req).then((res) => {
-          if (res.status == 200) {
-            document.body.style.cursor = "default";
-            setAlert({
-              ...alert,
-              msg: "Successfully updated menu-item!",
-              type: "success",
-            });
-            setShowAlert(true);
-            navigate("/menu/add?id=" + menuId);
-            setMenuItemId(null);
-            const updatedItems = menuItems.map(item =>
-              item.id === menuItemId ? res.data : item
-            );
-            setMenuItems(updatedItems)
-          } else {
-            setAlert({ ...alert, msg: res.data, type: "error" });
-            setShowAlert(true);
-          }
-        });
+        if(image) {
+          handleUpload().then((res1)=>{
+            if(res1.status==201) {
+              setMenuItem({...menuItem,image: res1.data});
+              req.image = res1.data;
+              menuService.updateMenuItem(menuItemId, req).then((res) => {
+                if (res.status == 200) {
+                  document.body.style.cursor = "default";
+                  setAlert({
+                    ...alert,
+                    msg: "Successfully updated menu-item!",
+                    type: "success",
+                  });
+                  setShowAlert(true);
+                  navigate("/menu/add?id=" + menuId);
+                  setMenuItemId(null);
+                  const updatedItems = menuItems.map(item =>
+                    item.id === menuItemId ? res.data : item
+                  );
+                  setMenuItems(updatedItems)
+                } else {
+                  setAlert({ ...alert, msg: res.data, type: "error" });
+                  setShowAlert(true);
+                }
+              });
+            } else {
+              setAlert({ ...alert, type: "error", msg: res1.data });
+              setShowAlert(true);
+            }
+          })
+        }
+        
       } else {
-        menuService.setMenuItems([req], menuId).then((res) => {
-          if (res.status == 200) {
-            setMenuItems(res.data.menuItems);
-            document.body.style.cursor = "default";
-            setAlert({
-              ...alert,
-              msg: "Successfully added menu-item!",
-              type: "success",
-            });
-            setShowAlert(true);
-          } else {
-            setAlert({ ...alert, msg: res.data, type: "error" });
-            setShowAlert(true);
-          }
-        });
+        if(image) {
+          handleUpload().then((res1)=>{
+            setMenuItem({...menuItem,image: res1.data});
+            req.image = res1.data;
+            if(res1.status==201) {
+              menuService.setMenuItems([req], menuId).then((res) => {
+                if (res.status == 200) {
+                  setMenuItems(res.data.menuItems);
+                  document.body.style.cursor = "default";
+                  setAlert({
+                    ...alert,
+                    msg: "Successfully added menu-item!",
+                    type: "success",
+                  });
+                  setShowAlert(true);
+              
+                } else {
+                  setAlert({ ...alert, msg: res.data, type: "error" });
+                  setShowAlert(true);
+                }
+               });
+        } else {
+          setAlert({ ...alert, type: "error", msg: res1.data });
+          setShowAlert(true);
+        }});
       }
 
       setMenuItem({
@@ -235,6 +245,7 @@ export default function AddMenuItem({
         image: null,
       });
       setOpen(false);
+      }
     }
   };
 
@@ -246,11 +257,20 @@ export default function AddMenuItem({
     let files = e.target.files;
     let fileReader = new FileReader();
     fileReader.readAsDataURL(files[0]);
+    setImage(files[0])
 
     fileReader.onload = (event) => {
       setMenuItem({ ...menuItem, image: event.target.result });
     };
   };
+
+  const handleUpload = () => {
+
+    const formDataImage = new FormData();
+    formDataImage.append('file', image);
+
+    return menuService.uploadImage(formDataImage);
+};
 
   return (
     <div>

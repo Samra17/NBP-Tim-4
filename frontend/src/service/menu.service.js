@@ -104,6 +104,20 @@ class MenuService {
       console.log(e);
     }
   }
+
+  uploadImage(image) {
+    try {
+      return api.post("/api/menu-item/image/add", image, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }).then((response) => {
+        return response;
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  }
 }
 
 export default new MenuService();

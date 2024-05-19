@@ -4,13 +4,31 @@ import { LocationOn } from '@mui/icons-material'
 import authService from '../../service/auth.service'
 import MapModal from '../../shared/MapModal/MapModal'
 import CustomAlert from '../../shared/util/Alert'
+import { useEffect } from 'react'
+import Loader from '../../shared/util/Loader/Loader'
 
 function UserInformation() {
     const [validated, setValidated] = useState()
-    const [formData, setFormData] = useState(authService.getCurrentUser())
+    const [formData, setFormData] = useState()
     const [showMap, setShowMap] = useState(false)
     const [alert, setAlert] = useState({})
     const [showAlert, setShowAlert] = useState(false)
+    const [loading, setLoading] = useState(true)
+    var mounted = false;
+
+    useEffect( ()=> {
+        if(!mounted){
+            mounted=true
+            authService.getLoggedInUser().then(res=> {
+                if(res.status == 200) {
+                    setFormData(res.data)
+                    setLoading(false)
+                }
+            }
+            )
+            
+        }
+    }, [])
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -76,6 +94,8 @@ function UserInformation() {
         <>
             <MapModal show={showMap} setShow={setShowMap} setAddress={setAddress} ></MapModal>
             <CustomAlert setShow={setShowAlert} show={showAlert} type={alert.type} msg={alert.msg}></CustomAlert>
+            {loading ? <Loader></Loader> : <></>}
+            {formData ? (
             <Form validated={validated} onSubmit={e => handleSubmit(e)} style={{ padding: "20px" }}>
                 <Form.Group className="mb-3" controlId="formGroupFirstname">
                     <Form.Label>Firstname</Form.Label>
@@ -118,7 +138,7 @@ function UserInformation() {
                     Submit changes
                 </Button>
             </Form>
-
+            ) : <></>}
         </>
     )
 }

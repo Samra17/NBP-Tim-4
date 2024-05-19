@@ -61,6 +61,14 @@ function ListContainer({
     goToPage(page);
   }, [page,trigger]);
 
+  useEffect(()=> {
+    if(pagination == "client")
+      setCurrentPage(
+        items.slice((page - 1) * perPage, (page - 1) * perPage + perPage)
+      );
+    
+  }, [items])
+
   const goToPage = (p) => {
     if (pagination == "server") {
       setLoading(true);
@@ -219,7 +227,7 @@ function ListContainer({
           className="container-fluid"
         >
           <h2 style={{ textAlign: "start", float: left }}>{title}</h2>
-          {user.role == "ADMINISTRATOR" && type == "restaurant" ? (
+          {user.Role == "ADMINISTRATOR" && type == "restaurant" ? (
             <Container
               style={{
                 display: "flex",
@@ -246,7 +254,7 @@ function ListContainer({
           ) : (
             <></>
           )}
-          {user.role == "RESTAURANT_MANAGER" && type == "coupon" ? (
+          {user.Role == "RESTAURANT_MANAGER" && type == "coupon" ? (
             <Container
               style={{
                 display: "flex",
@@ -283,7 +291,7 @@ function ListContainer({
           ) : (
             <></>
           )}
-          {user.role == "RESTAURANT_MANAGER" && type == "menus" ? (
+          {user.Role == "RESTAURANT_MANAGER" && type == "menus" ? (
             <Container
               style={{
                 display: "flex",

@@ -82,9 +82,11 @@ public class ReviewController {
     @ResponseStatus(HttpStatus.CREATED)
     public @ResponseBody ResponseEntity<ReviewResponse> addNewReview (
             @Parameter(description = "Information required for review creation", required = true)
-            @Valid @RequestBody ReviewCreateRequest request) {
+            @Valid @RequestBody ReviewCreateRequest request,
+            @Parameter(description = "User username", required = false)
+            @RequestHeader(value = "username", required = false) String username) {
 
-        Integer reviewId = reviewService.addNewReview(request);
+        Integer reviewId = reviewService.addNewReview(request, username);
         return new ResponseEntity<>(reviewService.getReviewById(reviewId),HttpStatus.CREATED);
     }
 

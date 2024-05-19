@@ -4,6 +4,7 @@ import com.nbp.tim3.auth.dto.AuthResponse;
 import com.nbp.tim3.auth.dto.UserResponse;
 import com.nbp.tim3.auth.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -74,6 +75,22 @@ public class UserController {
     public ResponseEntity<String> deleteUser(@PathVariable Integer id) {
         return ResponseEntity.ok(userService.deleteUser(id));
     }*/
+
+    @Operation(description = "Get logged in user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully fetched user",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = List.class)) }),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
+                    content = @Content)})
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/current")
+    public ResponseEntity<UserResponse> getLoggedInUser(
+            @Parameter(description = "User username", required = false)
+            @RequestHeader(value = "username", required = false) String username
+    ) {
+        return ResponseEntity.ok(userService.getLoggedInUser(username));
+    }
 
 
 }

@@ -43,7 +43,7 @@ function RestaurantCard({ res, grid = true }) {
                 >
                   {res.name}
                 </Card.Title>
-                {user.role == "ADMINISTRATOR" ? (
+                {user.Role == "ADMINISTRATOR" ? (
                   <Container
                     style={{
                       display: "flex",

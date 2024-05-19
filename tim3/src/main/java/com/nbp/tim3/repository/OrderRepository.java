@@ -363,13 +363,13 @@ public class OrderRepository {
                 "       (SELECT COUNT(*) FROM NBP_ORDER ord WHERE ord.COURIER_ID = courier AND extract(year from ord.CREATED_AT) = ?) total_count" +
                 "    FROM (" +
                 "        SELECT ord.COURIER_ID courier" +
-                "        ,cour.USERNAME courier_name" +
+                "        ,cour.first_name || ' ' || cour.last_name courier_name" +
                 "        ,extract(month from ord.CREATED_AT) Month" +
                 "        ,COUNT(*) as counted" +
                 "        FROM NBP_ORDER ord" +
                 "        JOIN NBP.NBP_USER cour ON cour.ID = ord.COURIER_ID" +
                 "        WHERE extract(year from ord.CREATED_AT) = ?" +
-                "        GROUP BY cour.USERNAME, ord.COURIER_ID, extract(month from ord.CREATED_AT)" +
+                "        GROUP BY cour.first_name || ' ' || cour.last_name, ord.COURIER_ID, extract(month from ord.CREATED_AT)" +
                 "    )" +
                 "group by courier, courier_name";
 

@@ -88,7 +88,7 @@ function AddMenu() {
             setShowAlert(true);
             const timeout = setTimeout(() => {
               navigate("/restaurant/menus");
-            }, 3000);
+            }, 2000);
           } else {
             setAlert({ ...alert, msg: res.data, type: "error" });
             setShowAlert(true);

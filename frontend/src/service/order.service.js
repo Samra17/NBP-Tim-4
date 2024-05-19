@@ -4,10 +4,10 @@ import tokenService from "./token.service";
 class OrderService {
 
     getUserOrders(page,perPage) {
-      var id = tokenService.getUserId();
+      
         try {
           return api
-              .get("/api/order/get/customer/" + id + "?page=" + page + "&perPage=" + perPage)
+              .get("/api/order/get/customer?page=" + page + "&perPage=" + perPage)
               .then(response=> {
                 return response;
               })
@@ -137,6 +137,10 @@ class OrderService {
 
       createOrder(orderCreateRequest) {
         return api.post("/api/order/add", orderCreateRequest)
+      }
+
+      getAnnualReport() {
+        return api.get("/api/order/annual-report",{responseType:"blob"})
       }
 
 }

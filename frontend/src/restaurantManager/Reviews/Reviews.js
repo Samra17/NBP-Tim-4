@@ -64,7 +64,7 @@ function Reviews() {
         show={showAlert}
         setShow={setShowAlert}
       ></CustomAlert>
-      {average ? (
+      {average != undefined ? (
         <>
           <h2 style={{ paddingLeft: "20px",paddingTop:"20px",paddingBottom:"10px" }}>
             Average rating:{" "}

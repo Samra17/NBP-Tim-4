@@ -40,7 +40,7 @@ function Header() {
           </Nav.Link>
           <div className="vr text-white"></div>
           <Nav.Link className="text-white" onClick={customerInfoPage}>
-            {user.username}
+            {user.sub}
           </Nav.Link>
           <div className="vr text-white"></div>
           <Nav.Link className="text-white" onClick={logout}>
@@ -127,7 +127,7 @@ function Header() {
           </Nav.Link>
           <div className="vr text-white"></div>
           <Nav.Link className="text-white" onClick={scores}>
-            Scores
+            Reports
           </Nav.Link>
           <div className="vr text-white"></div>
           <Nav.Link className="text-white" onClick={couriers}>
@@ -197,11 +197,11 @@ function Header() {
 
           {user == null ? (
             <></>
-          ) : user.role == "CUSTOMER" ? (
+          ) : user.Role == "CUSTOMER" ? (
             customerOptions()
-          ) : user.role == "ADMINISTRATOR" ? (
+          ) : user.Role == "ADMINISTRATOR" ? (
             administratorOptions()
-          ) : user.role == "RESTAURANT_MANAGER" ? (
+          ) : user.Role == "RESTAURANT_MANAGER" ? (
             restaurantOptions()
           ) : (
             courierOptions()

@@ -125,7 +125,7 @@ function MenuItem({
               >
                 {menuItem.name}
               </Card.Title>
-              {user.role == "RESTAURANT_MANAGER" ? (
+              {user.Role == "RESTAURANT_MANAGER" ? (
                 <div
                   class="btn-group"
                   role="group"
@@ -271,7 +271,7 @@ function MenuItem({
                         color: "#606060",
                       }}
                     >
-                      {menuItem.prep_time}
+                      {menuItem.prepTime}
                     </div>
                     <div
                       style={{

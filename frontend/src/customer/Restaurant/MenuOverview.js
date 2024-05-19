@@ -214,7 +214,7 @@ function MenuOverview({ restaurant, setAlert, setShowAlert }) {
                             items={menus.menuItems}
                             title={""}
                             showFilters={false}
-                            perPage={2}
+                            perPage={5}
                             type={"menu"}
                             grid={false}
                             orderList={orderList}

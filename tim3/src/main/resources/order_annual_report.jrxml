@@ -648,7 +648,7 @@
                             <textField>
                                 <reportElement style="Detail" x="0" y="0" width="41" height="30" uuid="dd370075-7bdc-4a5e-b7f6-f9ea0e364adb"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle"/>
-                                <textFieldExpression><![CDATA[$F{januaryRev} + "KM"]]></textFieldExpression>
+                                <textFieldExpression><![CDATA[$F{januaryRev} + " KM"]]></textFieldExpression>
                             </textField>
                         </jr:detailCell>
                     </jr:column>
@@ -668,7 +668,7 @@
                             <textField>
                                 <reportElement style="Detail" x="0" y="0" width="41" height="30" uuid="dd370075-7bdc-4a5e-b7f6-f9ea0e364adb"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle"/>
-                                <textFieldExpression><![CDATA[$F{februaryRev} + "KM"]]></textFieldExpression>
+                                <textFieldExpression><![CDATA[$F{februaryRev} + " KM"]]></textFieldExpression>
                             </textField>
                         </jr:detailCell>
                     </jr:column>
@@ -688,7 +688,7 @@
                             <textField>
                                 <reportElement style="Detail" x="0" y="0" width="41" height="30" uuid="dd370075-7bdc-4a5e-b7f6-f9ea0e364adb"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle"/>
-                                <textFieldExpression><![CDATA[$F{marchRev} + "KM"]]></textFieldExpression>
+                                <textFieldExpression><![CDATA[$F{marchRev} + " KM"]]></textFieldExpression>
                             </textField>
                         </jr:detailCell>
                     </jr:column>
@@ -708,7 +708,7 @@
                             <textField>
                                 <reportElement style="Detail" x="0" y="0" width="41" height="30" uuid="dd370075-7bdc-4a5e-b7f6-f9ea0e364adb"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle"/>
-                                <textFieldExpression><![CDATA[$F{aprilRev}]]></textFieldExpression>
+                                <textFieldExpression><![CDATA[$F{aprilRev} + " KM"]]></textFieldExpression>
                             </textField>
                         </jr:detailCell>
                     </jr:column>
@@ -728,7 +728,7 @@
                             <textField>
                                 <reportElement style="Detail" x="0" y="0" width="41" height="30" uuid="dd370075-7bdc-4a5e-b7f6-f9ea0e364adb"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle"/>
-                                <textFieldExpression><![CDATA[$F{mayRev}]]></textFieldExpression>
+                                <textFieldExpression><![CDATA[$F{mayRev} + " KM"]]></textFieldExpression>
                             </textField>
                         </jr:detailCell>
                     </jr:column>
@@ -748,7 +748,7 @@
                             <textField>
                                 <reportElement style="Detail" x="0" y="0" width="41" height="30" uuid="dd370075-7bdc-4a5e-b7f6-f9ea0e364adb"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle"/>
-                                <textFieldExpression><![CDATA[$F{juneRev}]]></textFieldExpression>
+                                <textFieldExpression><![CDATA[$F{juneRev} + " KM"]]></textFieldExpression>
                             </textField>
                         </jr:detailCell>
                     </jr:column>
@@ -768,7 +768,7 @@
                             <textField>
                                 <reportElement style="Detail" x="0" y="0" width="41" height="30" uuid="dd370075-7bdc-4a5e-b7f6-f9ea0e364adb"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle"/>
-                                <textFieldExpression><![CDATA[$F{julyRev}]]></textFieldExpression>
+                                <textFieldExpression><![CDATA[$F{julyRev} + " KM"]]></textFieldExpression>
                             </textField>
                         </jr:detailCell>
                     </jr:column>
@@ -788,7 +788,7 @@
                             <textField>
                                 <reportElement style="Detail" x="0" y="0" width="41" height="30" uuid="dd370075-7bdc-4a5e-b7f6-f9ea0e364adb"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle"/>
-                                <textFieldExpression><![CDATA[$F{augustRev}]]></textFieldExpression>
+                                <textFieldExpression><![CDATA[$F{augustRev} + " KM"]]></textFieldExpression>
                             </textField>
                         </jr:detailCell>
                     </jr:column>
@@ -808,7 +808,7 @@
                             <textField>
                                 <reportElement style="Detail" x="0" y="0" width="40" height="30" uuid="dd370075-7bdc-4a5e-b7f6-f9ea0e364adb"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle"/>
-                                <textFieldExpression><![CDATA[$F{septemberRev}]]></textFieldExpression>
+                                <textFieldExpression><![CDATA[$F{septemberRev} + " KM"]]></textFieldExpression>
                             </textField>
                         </jr:detailCell>
                     </jr:column>
@@ -828,7 +828,7 @@
                             <textField>
                                 <reportElement style="Detail" x="0" y="0" width="40" height="30" uuid="dd370075-7bdc-4a5e-b7f6-f9ea0e364adb"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle"/>
-                                <textFieldExpression><![CDATA[$F{octoberRev}]]></textFieldExpression>
+                                <textFieldExpression><![CDATA[$F{octoberRev} + " KM"]]></textFieldExpression>
                             </textField>
                         </jr:detailCell>
                     </jr:column>
@@ -848,7 +848,7 @@
                             <textField>
                                 <reportElement style="Detail" x="0" y="0" width="40" height="30" uuid="dd370075-7bdc-4a5e-b7f6-f9ea0e364adb"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle"/>
-                                <textFieldExpression><![CDATA[$F{novemberRev}]]></textFieldExpression>
+                                <textFieldExpression><![CDATA[$F{novemberRev} + " KM"]]></textFieldExpression>
                             </textField>
                         </jr:detailCell>
                     </jr:column>
@@ -868,7 +868,7 @@
                             <textField>
                                 <reportElement style="Detail" x="0" y="0" width="40" height="30" uuid="dd370075-7bdc-4a5e-b7f6-f9ea0e364adb"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle"/>
-                                <textFieldExpression><![CDATA[$F{decemberRev}]]></textFieldExpression>
+                                <textFieldExpression><![CDATA[$F{decemberRev} + " KM"]]></textFieldExpression>
                             </textField>
                         </jr:detailCell>
                     </jr:column>
@@ -888,7 +888,7 @@
                             <textField>
                                 <reportElement style="Detail" x="0" y="0" width="40" height="30" uuid="dd370075-7bdc-4a5e-b7f6-f9ea0e364adb"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle"/>
-                                <textFieldExpression><![CDATA[$F{totalRev}]]></textFieldExpression>
+                                <textFieldExpression><![CDATA[$F{totalRev} + " KM"]]></textFieldExpression>
                             </textField>
                         </jr:detailCell>
                     </jr:column>
@@ -908,7 +908,7 @@
                             <textField>
                                 <reportElement style="Detail" x="0" y="0" width="40" height="30" uuid="dd370075-7bdc-4a5e-b7f6-f9ea0e364adb"/>
                                 <textElement textAlignment="Center" verticalAlignment="Middle"/>
-                                <textFieldExpression><![CDATA[$F{revIncrease}]]></textFieldExpression>
+                                <textFieldExpression><![CDATA[$F{revIncrease} + "%"]]></textFieldExpression>
                             </textField>
                         </jr:detailCell>
                     </jr:column>
@@ -947,7 +947,7 @@
                 <textElement verticalAlignment="Middle">
                     <paragraph leftIndent="5"/>
                 </textElement>
-                <textFieldExpression><![CDATA[$P{totalRevenue} + "KM"]]></textFieldExpression>
+                <textFieldExpression><![CDATA[$P{totalRevenue} + " KM"]]></textFieldExpression>
             </textField>
             <image hAlign="Center">
                 <reportElement x="0" y="0" width="65" height="60" uuid="e00525b9-f5e2-4d43-9612-9904d5b684a1"/>

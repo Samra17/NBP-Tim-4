@@ -5,6 +5,7 @@ import com.nbp.tim3.dto.review.ReviewPaginatedResponse;
 import com.nbp.tim3.dto.review.ReviewResponse;
 import com.nbp.tim3.repository.RestaurantRepository;
 import com.nbp.tim3.repository.ReviewRepository;
+import com.nbp.tim3.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,12 @@ public class ReviewService {
     @Autowired
     private RestaurantRepository restaurantRepository;
 
-    public Integer addNewReview(ReviewCreateRequest request) {
+    @Autowired
+    private UserRepository userRepository;
+
+    public Integer addNewReview(ReviewCreateRequest request, String username) {
+        var id = userRepository.getIdByUsername(username);
+        request.setUserId(id);
         return reviewRepository.createReview(request);
     }
 

@@ -1,8 +1,9 @@
-import { Button, Container, Form, Row } from "react-bootstrap"
+import { Button, ButtonGroup, Container, Form, Row } from "react-bootstrap"
 import React, { useEffect, useState } from 'react'
 import { Chart } from "react-google-charts";
 import orderService from "../../service/order.service";
 import Loader from "../../shared/util/Loader/Loader";
+import { Download } from "react-bootstrap-icons";
 
 
 function AdminOverview() {
@@ -68,12 +69,51 @@ function AdminOverview() {
         title: "Restaurant revenue (KM)",
     };
 
+    const downloadAnnualReport =  ()=> {
+        orderService.getAnnualReport().then( res => {
+            if(res.status == 200) {
+                const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', 'annual-report.pdf');
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+            }
+        })
+    }
+
     
     return (
         <>
         <Loader isOpen={loading} >
             <Container style={{ backgroundColor: "#D9D9D9",  margin: "auto", marginTop: "20px", marginBottom: "20px", width:"100%"}}>
                 <h1>Admin overview</h1>
+                <ButtonGroup
+                style={{
+                    float:'right'
+                }}>
+                <Button style={{
+                borderTopLeftRadius: 5,
+                borderTopRightRadius: 0,
+                borderBottomLeftRadius: 5,
+                borderBottomRightRadius: 0,
+                border: "#FE724C",
+                width: "200px",
+              }}
+              variant="secondary"
+              onClick={downloadAnnualReport}>Annual Report  <Download></Download></Button>
+                <Button style={{
+                borderTopLeftRadius: 0,
+                borderTopRightRadius: 5,
+                borderBottomLeftRadius: 0,
+                borderBottomRightRadius: 5,
+                border: "#FE724C",
+                width: "200px",
+              }}
+              variant="secondary"
+              >User Analysis Reports  <Download></Download></Button>
+                </ButtonGroup>
                 <hr/>
                 <h3>Amount spent to date: {totalSpending} KM</h3>
                 <hr/>

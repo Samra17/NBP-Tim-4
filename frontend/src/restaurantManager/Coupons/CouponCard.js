@@ -8,7 +8,6 @@ import discountService from "../../service/discount.service";
 import "./CouponCard.css";
 
 function CouponCard({ coupon, coupons, setCoupons }) {
-  const user = authService.getCurrentUser();
   const [showModal, setshowModal] = useState(false);
 
   const deleteCoupon = () => {

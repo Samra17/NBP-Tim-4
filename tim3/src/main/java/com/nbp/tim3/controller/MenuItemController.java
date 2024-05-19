@@ -1,7 +1,9 @@
 package com.nbp.tim3.controller;
 import com.nbp.tim3.dto.menu.MenuItemDto;
+import com.nbp.tim3.dto.restaurantimage.RestaurantImageResponse;
 import com.nbp.tim3.model.Menu;
 import com.nbp.tim3.model.MenuItem;
+import com.nbp.tim3.service.FirebaseService;
 import com.nbp.tim3.service.MenuItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -15,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @RestController
@@ -23,6 +26,9 @@ public class MenuItemController {
 
     @Autowired
     private MenuItemService menuItemService;
+
+    @Autowired
+    private FirebaseService firebaseService;
 
     @GetMapping("/{id}")
     public ResponseEntity<MenuItem> getItemById(@PathVariable int id) {
@@ -72,6 +78,24 @@ public class MenuItemController {
     }
 
 
+    @PreAuthorize("hasRole('RESTAURANT_MANAGER')")
+    @Operation(description = "Upload image for menu item")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Successfully added menu item image",
+                    content = { @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = RestaurantImageResponse.class)) }),
+            @ApiResponse(responseCode = "400", description = "Invalid information supplied",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Unauthorized access",
+                    content = @Content)})
+    @PostMapping(path="/image/add")
+    @ResponseStatus(HttpStatus.CREATED)
+    public @ResponseBody ResponseEntity<String> addMenuItemImage (
+            @Parameter(description = "Image file", required = true)
+            @Valid @RequestParam("file") MultipartFile file)
+    {
+        return new ResponseEntity<> (firebaseService.upload(file), HttpStatus.CREATED);
+    }
 
 
 }

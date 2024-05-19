@@ -56,7 +56,8 @@ public class OrderService {
         return orderRepository.createOrder(request);
     }
 
-    public OrderPaginatedResponse getOrdersByCustomerId(Integer customerId, Integer page, Integer size) {
+    public OrderPaginatedResponse getOrdersByCustomerId(String username, Integer page, Integer size) {
+        var customerId = userRepository.getIdByUsername(username);
         return orderRepository.getByCustomerIdPage(customerId, page, size);
     }
 

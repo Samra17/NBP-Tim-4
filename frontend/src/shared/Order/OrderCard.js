@@ -28,7 +28,7 @@ function OrderCard({ order,moveOrder,changeOrder,setAlert,setShowAlert,alert }) 
     }
 
     const additionalInfo = () => {
-        switch (user.role) {
+        switch (user.Role) {
             case "CUSTOMER":
                 return (
                     <>

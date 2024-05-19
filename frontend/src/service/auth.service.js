@@ -10,7 +10,8 @@ class AuthService {
       })
       .then((response) => {
         if (response.status === 200) {
-          TokenService.setUser(response.data);
+          TokenService.setAccessToken(response.data.accessToken);
+          TokenService.setRefreshToken(response.data.refreshToken);
         }
 
         return response;
@@ -21,7 +22,8 @@ class AuthService {
     try {
       return api.post("/api/auth/register", req).then((response) => {
         if (response.status == 201) {
-          TokenService.setUser(response.data);
+          TokenService.setAccessToken(response.data.accessToken);
+          TokenService.setRefreshToken(response.data.refreshToken);
         }
 
         return response;
@@ -34,10 +36,7 @@ class AuthService {
   updateUserInformation(req) {
     try {
       return api.post("/api/auth/user/update", req).then((response) => {
-        if (response.status == 200) {
-          TokenService.setUser(response.data);
-        }
-
+       
         return response;
       });
     } catch (e) {
@@ -59,14 +58,14 @@ class AuthService {
 
   getCurrentUser() {
     let user = TokenService.getUser();
-    if (user != null) return user.user;
-    return null;
+    return user;
   }
 
-  getCurrentRestaurantUUID() {
-    let restaurantUUID = TokenService.getRestaurantUUID();
-    return restaurantUUID;
+   async getLoggedInUser() {
+    return api.get('/api/user/current')
+
   }
+ 
 }
 
 export default new AuthService();

@@ -1,35 +1,36 @@
+import { jwtDecode } from "jwt-decode";
 class TokenService {
   getLocalRefreshToken() {
-    const user = JSON.parse(localStorage.getItem("user"));
-    return user?.refreshToken;
+    return localStorage.getItem("refresh-token")
   }
 
   getLocalAccessToken() {
-    const user = JSON.parse(localStorage.getItem("user"));
-    return user?.accessToken;
+    return localStorage.getItem("access-token")
   }
 
-  getUserId() {
-    const user = JSON.parse(localStorage.getItem("user"));
-    return user?.user.id;
-  }
-
-  updateLocalAccessToken(token) {
-    let user = JSON.parse(localStorage.getItem("user"));
-    user.accessToken = token;
-    localStorage.setItem("user", JSON.stringify(user));
-  }
 
   getUser() {
-    return JSON.parse(localStorage.getItem("user"));
+    var token = this.getLocalAccessToken()
+    try {
+      return jwtDecode(token)
+    } catch{
+      return null
+    }
+    
   }
 
-  setUser(user) {
-    localStorage.setItem("user", JSON.stringify(user));
+  setAccessToken(token) {
+    localStorage.setItem("access-token", token);
+  }
+
+  setRefreshToken(token) {
+    localStorage.setItem("refresh-token", token);
   }
 
   removeUser() {
-    localStorage.removeItem("user");
+    localStorage.removeItem("access-token");
+    localStorage.removeItem("refresh-token");
+
   }
 }
 

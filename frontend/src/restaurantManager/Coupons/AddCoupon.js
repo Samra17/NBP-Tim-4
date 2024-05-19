@@ -20,7 +20,6 @@ export default function AddCoupon({
   setAlert,
   alert
 }) {
-  const user = authService.getCurrentUser();
   const [newCoupon, setnewCoupon] = useState({
     code: "",
     discountPercent: 0,

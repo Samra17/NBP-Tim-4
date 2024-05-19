@@ -25,7 +25,7 @@ function CustomerDetails() {
 
   return (
     <div>
-      {user.role != "CUSTOMER" ? (
+      {user.Role != "CUSTOMER" ? (
         <NotFound />
       ) : (
         <Sidebar

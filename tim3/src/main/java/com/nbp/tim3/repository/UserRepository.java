@@ -77,7 +77,7 @@ public class UserRepository {
     }
 
     public User getByUsername(String username) {
-        String sql = "SELECT * FROM nbp.nbp_user WHERE username=?";
+        String sql = "SELECT * FROM nbp.nbp_user WHERE username = ?";
 
         PreparedStatement preparedStatement = null;
         try {
@@ -111,6 +111,37 @@ public class UserRepository {
                 }
 
                 return user;
+            }
+
+            return  null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public Integer getIdByUsername(String username) {
+        String sql = "SELECT id FROM nbp.nbp_user WHERE username=?";
+
+        PreparedStatement preparedStatement = null;
+        try {
+            Connection connection = dbConnectionService.getConnection();
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1,username);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+
+            if (resultSet.next()) {
+                int id = resultSet.getInt("id");
+
+                return id;
             }
 
             return  null;

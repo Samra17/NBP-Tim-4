@@ -36,8 +36,7 @@ function AddReviewPopup({
       var req = {
         restaurantId: restaurantId,
         rating: rating,
-        comment: comment,
-        userId: tokenService.getUserId()
+        comment: comment
       };
     document.body.style.cursor = "wait";
     restaurantService.addReview(req).then((res) => {

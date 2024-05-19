@@ -34,7 +34,7 @@ function RestaurantDetails() {
 
   return (
     <div>
-      {user.role != "RESTAURANT_MANAGER" ? (
+      {user.Role != "RESTAURANT_MANAGER" ? (
         <NotFound />
       ) : (
         <Sidebar

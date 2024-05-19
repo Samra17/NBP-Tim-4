@@ -1,4 +1,5 @@
 import api from "./api";
+import authService from "./auth.service";
 
 class UserService {
   getAllUsers() {
@@ -56,9 +57,10 @@ class UserService {
   }
 
   getDistanceToRestaurant(restaurant) {
-    var user = JSON.parse(localStorage.getItem("user")).user;
-    if (user == null || user.mapCoordinates == null) return -1;
-    var c1 = restaurant.mapCoordinates
+    authService.getLoggedInUser().then(res => {
+      if(res.status == 200) {
+        let user = res.data
+        var c1 = restaurant.mapCoordinates
       .split(", ")
       .map((x) => (parseFloat(x) / 180) * Math.PI);
     var c2 = user.mapCoordinates
@@ -72,7 +74,11 @@ class UserService {
       6371 *
       10;
     return Math.round(d) / 10;
+    }
+       else return -1;
+    })
   }
+    
 }
 
 export default new UserService();

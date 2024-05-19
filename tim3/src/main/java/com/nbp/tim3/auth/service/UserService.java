@@ -47,4 +47,7 @@ public class UserService {
         return "Something";
     }
 
+    public UserResponse getLoggedInUser(String username) {
+        return  new UserResponse(userRepository.getByUsername(username));
+    }
 }

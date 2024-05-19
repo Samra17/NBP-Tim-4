@@ -160,11 +160,11 @@
                 <text><![CDATA[Bosnia and Herzegovina]]></text>
             </staticText>
             <staticText>
-                <reportElement x="10" y="80" width="251" height="31" uuid="0df514a1-9374-47d0-8c22-8a4d3e0023d6"/>
+                <reportElement x="10" y="80" width="350" height="31" uuid="0df514a1-9374-47d0-8c22-8a4d3e0023d6"/>
                 <textElement>
                     <font size="20"/>
                 </textElement>
-                <text><![CDATA[Annual revenue report]]></text>
+                <text><![CDATA[Annual restaurant order report]]></text>
             </staticText>
             <componentElement>
                 <reportElement x="0" y="126" width="800" height="354" uuid="b05b4a22-2493-483c-ab91-a11a79c950b3">
@@ -527,7 +527,7 @@
                 </reportElement>
             </rectangle>
             <staticText>
-                <reportElement x="605" y="490" width="130" height="21" forecolor="#FFFFFF"
+                <reportElement x="605" y="490" width="300" height="21" forecolor="#FFFFFF"
                                uuid="bc70af9e-d2c1-4582-b741-c9b038bf92ca">
                     <property name="com.jaspersoft.studio.unit.y" value="px"/>
                     <property name="com.jaspersoft.studio.unit.x" value="px"/>
@@ -535,7 +535,7 @@
                 <textElement>
                     <font size="12" isBold="true"/>
                 </textElement>
-                <text><![CDATA[Total annual revenue:]]></text>
+                <text><![CDATA[Total annual order count:]]></text>
             </staticText>
             <textField>
                 <reportElement x="740" y="489" width="61" height="22" uuid="96f990ea-fa4c-4a80-9ec9-2abf8aa0cdea">
@@ -543,7 +543,7 @@
                     <property name="com.jaspersoft.studio.unit.height" value="px"/>
                 </reportElement>
                 <box leftPadding="15"/>
-                <textFieldExpression><![CDATA[$P{totalRevenue}]]></textFieldExpression>
+                <textFieldExpression><![CDATA[$P{totalOrderCount}]]></textFieldExpression>
             </textField>
         </band>
     </title>
@@ -910,7 +910,7 @@
                                 <textElement textAlignment="Center">
                                     <font isBold="true" size="9"/>
                                 </textElement>
-                                <text><![CDATA[Total Orders]]></text>
+                                <text><![CDATA[Total Revenue]]></text>
                             </staticText>
                         </jr:columnHeader>
                         <jr:detailCell style="Table_TD" height="30">
@@ -931,7 +931,7 @@
                                 <textElement textAlignment="Center">
                                     <font isBold="true" size="9"/>
                                 </textElement>
-                                <text><![CDATA[Order Growth (%)]]></text>
+                                <text><![CDATA[Revenue Growth (%)]]></text>
                             </staticText>
                         </jr:columnHeader>
                         <jr:detailCell style="Table_TD" height="30">
@@ -973,7 +973,7 @@
                     <property name="com.jaspersoft.studio.unit.height" value="px"/>
                 </reportElement>
                 <box leftPadding="15"/>
-                <textFieldExpression><![CDATA[$P{totalOrderCount}]]></textFieldExpression>
+                <textFieldExpression><![CDATA[$P{totalRevenue}]]></textFieldExpression>
             </textField>
         </band>
         <band height="555">
@@ -1039,11 +1039,11 @@
                 <text><![CDATA[Bosnia and Herzegovina]]></text>
             </staticText>
             <staticText>
-                <reportElement x="10" y="80" width="251" height="31" uuid="6c1b31f0-aaf0-42ed-a3e1-9e456387225d"/>
+                <reportElement x="10" y="80" width="350" height="31" uuid="6c1b31f0-aaf0-42ed-a3e1-9e456387225d"/>
                 <textElement>
                     <font size="20"/>
                 </textElement>
-                <text><![CDATA[Annual revenue report]]></text>
+                <text><![CDATA[Annual courier order report]]></text>
             </staticText>
             <componentElement>
                 <reportElement x="-1" y="130" width="800" height="350" uuid="444943e0-4fd4-40a9-b346-66af4e5a6bee">

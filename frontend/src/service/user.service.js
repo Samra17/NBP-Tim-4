@@ -56,11 +56,9 @@ class UserService {
     }
   }
 
-  getDistanceToRestaurant(restaurant) {
-    authService.getLoggedInUser().then(res => {
-      if(res.status == 200) {
-        let user = res.data
-        var c1 = restaurant.mapCoordinates
+  getDistanceToRestaurant(user,restaurant) {
+    
+    var c1 = restaurant.mapCoordinates
       .split(", ")
       .map((x) => (parseFloat(x) / 180) * Math.PI);
     var c2 = user.mapCoordinates
@@ -74,9 +72,11 @@ class UserService {
       6371 *
       10;
     return Math.round(d) / 10;
-    }
-       else return -1;
-    })
+    
+  }
+
+  getUserAnalysisReport() {
+    return api.get("/api/admin/user-analysis-report",{responseType:"blob"})
   }
     
 }

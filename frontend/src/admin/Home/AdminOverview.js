@@ -4,6 +4,7 @@ import { Chart } from "react-google-charts";
 import orderService from "../../service/order.service";
 import Loader from "../../shared/util/Loader/Loader";
 import { Download } from "react-bootstrap-icons";
+import userService from "../../service/user.service";
 
 
 function AdminOverview() {
@@ -83,6 +84,20 @@ function AdminOverview() {
         })
     }
 
+    const downloadUserAnalysisReport =  ()=> {
+        userService.getUserAnalysisReport().then( res => {
+            if(res.status == 200) {
+                const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', 'user-analsysis-report.pdf');
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+            }
+        })
+    }
+
     
     return (
         <>
@@ -112,6 +127,7 @@ function AdminOverview() {
                 width: "200px",
               }}
               variant="secondary"
+              onClick={downloadUserAnalysisReport}
               >User Analysis Reports  <Download></Download></Button>
                 </ButtonGroup>
                 <hr/>

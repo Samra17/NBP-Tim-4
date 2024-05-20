@@ -210,7 +210,7 @@
                                 <reportElement x="0" y="0" width="41" height="30" uuid="497fd6f4-4056-43db-8084-511f8ed27379">
                                     <property name="com.jaspersoft.studio.unit.tabStopWidth" value="px"/>
                                 </reportElement>
-                                <textElement textAlignment="Center">
+                                <textElement textAlignment="Center" verticalAlignment="Middle">
                                     <paragraph tabStopWidth="40"/>
                                 </textElement>
                                 <textFieldExpression><![CDATA[$F{january}]]></textFieldExpression>

@@ -16,6 +16,7 @@ import orderService from "../../service/order.service";
 import Alert from "../../shared/util/Alert";
 import CustomAlert from "../../shared/util/Alert";
 import shoppingCart from "../../images/Shopping cart.svg"
+import authService from "../../service/auth.service";
 
 function MenuOverview({ restaurant, setAlert, setShowAlert }) {
   const [menus, setMenus] = useState([]);
@@ -38,16 +39,10 @@ function MenuOverview({ restaurant, setAlert, setShowAlert }) {
   const [hasFreeDelivery, setHasFreeDelivery] = useState(false);
   const [freeDeliveryType, setFreeDeliveryType] = useState("");
   const [placingOrder, setPlacingOrder] = useState(false);
+  const [user, setUser] = useState();
 
   const marginBetweenOrderItems = "10px";
 
-  useEffect(() => {
-    //var c1 = restaurant.mapCoordinates.split(", ").map(x => parseFloat(x) / 180 * Math.PI);
-    //var c2 = tokenService.getUser().user.mapCoordinates.split(", ").map(x => parseFloat(x) / 180 * Math.PI);
-    //var d = Math.acos(Math.sin(c1[0])*Math.sin(c2[0])+Math.cos(c1[0] )*Math.cos(c2[0])*Math.cos(c2[1]-c1[1])) * 6371 * 10;
-    setDeliveryPrice(userService.getDistanceToRestaurant(restaurant));
-    
-  }, []);
 
   useEffect(() => {
     var price = 0;
@@ -130,7 +125,6 @@ function MenuOverview({ restaurant, setAlert, setShowAlert }) {
 
   const placeOrder = () => {
     setPlacingOrder(true);
-    var user = tokenService.getUser();
     var orderRequest = {};
 
     orderRequest.totalPrice =
@@ -148,10 +142,10 @@ function MenuOverview({ restaurant, setAlert, setShowAlert }) {
       orderRequest.menuItemIds.push({id: orderList[i].menuItem.id, quantity: orderList[i].count})
     }
     orderRequest.restaurantName = restaurant.name;
-    orderRequest.customerPhoneNumber = user.user.phoneNumber;
-    orderRequest.customerAddress = user.user.address;
+    orderRequest.customerPhoneNumber = user.phoneNumber;
+    orderRequest.customerAddress = user.address;
     orderRequest.restaurantAddress = restaurant.address;
-    orderRequest.customerId =user.user.id;
+    orderRequest.customerId =user.id;
     orderService.createOrder(orderRequest).then((response) => {
       if (response.status < 300) {
         setOrderCreated(true);
@@ -174,18 +168,26 @@ function MenuOverview({ restaurant, setAlert, setShowAlert }) {
   useEffect(() => {
     
       menuService.getActiveRestaurantMenus(restaurant.id).then((res) => {
-        setLoading(false);
         if (res.status == 200) {
           setMenus(res.data);
-          setLoading(false);
         }
       });
+
+      
+      authService.getLoggedInUser().then(res => {
+        if(res.status == 200) {
+          setUser(res.data)
+          setDeliveryPrice(userService.getDistanceToRestaurant(res.data,restaurant));
+        }
+        setLoading(false)
+      })
     
     }, []);
 
   return (
     <>
       <Loader isOpen={loading}>
+        {user ? (
         <div style={{ overflowY: "auto" }}>
           <hr className="tab-separator" />
           <Tabs defaultActiveKey={0} id="my-tabs" style={{ padding: 10 }}>
@@ -256,7 +258,7 @@ function MenuOverview({ restaurant, setAlert, setShowAlert }) {
                           }}
                         >
                           {restaurant.open ? (
-                            tokenService.getUser().user.mapCoordinates !=
+                            user.address !=
                             null ? (
                               orderList.length > 0 ? (
                                 <>
@@ -475,7 +477,7 @@ function MenuOverview({ restaurant, setAlert, setShowAlert }) {
               </Tab>
             ))}
           </Tabs>
-        </div>
+        </div>) : (<></>)}
       </Loader>
     </>
   );

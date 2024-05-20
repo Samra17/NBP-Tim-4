@@ -12,8 +12,9 @@ class TokenService {
   getUser() {
     var token = this.getLocalAccessToken()
     try {
-      return jwtDecode(token)
-    } catch{
+      var user = jwtDecode(token)
+      return user
+    } catch(e){
       return null
     }
     

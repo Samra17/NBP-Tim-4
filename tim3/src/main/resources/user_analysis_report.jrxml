@@ -1,17 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.21.2.final using JasperReports Library version 6.21.2-8434a0bd7c3bbc37cbf916f2968d35e4b165821a  -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Invoice_Table_Based" pageWidth="842" pageHeight="595" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="4eedbb89-b4f6-4469-9ab6-f642a1688cf7">
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Invoice_Table_Based" pageWidth="842" pageHeight="650" orientation="Landscape" whenNoDataType="AllSectionsNoDetail" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="4eedbb89-b4f6-4469-9ab6-f642a1688cf7">
 	<property name="template.engine" value="tabular_template"/>
-	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
-	<property name="com.jaspersoft.studio.unit." value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="NO_DATA_ADAPTER"/>
 	<style name="Title" forecolor="#FFFFFF" fontName="Times New Roman" fontSize="50" isBold="false" pdfFontName="Times-Bold"/>
 	<style name="SubTitle" forecolor="#CCCCCC" fontName="Times New Roman" fontSize="18" isBold="false" pdfFontName="Times-Roman"/>
 	<style name="Column header" forecolor="#666666" fontName="Times New Roman" fontSize="14" isBold="true" pdfFontName="Times-Roman"/>
@@ -65,9 +56,10 @@
 	<parameter name="totalCustomers" class="java.lang.Integer"/>
 	<parameter name="datasetTable1" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
 	<title>
-		<band height="555" splitType="Stretch">
+		<band height="121" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<line>
-				<reportElement x="0" y="111" width="791" height="1" uuid="806ce5df-1219-4876-ae0c-ca7405b1f246">
+				<reportElement x="0" y="120" width="791" height="1" uuid="806ce5df-1219-4876-ae0c-ca7405b1f246">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
@@ -115,8 +107,112 @@
 				</textElement>
 				<text><![CDATA[Active User Analysis Report Ć]]></text>
 			</staticText>
+		</band>
+	</title>
+	<detail>
+		<band height="120">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<rectangle>
+				<reportElement x="0" y="10" width="280" height="30" backcolor="#2B2B2B" uuid="67fb4590-160f-4253-8a1d-805882eedd80"/>
+				<graphicElement>
+					<pen lineColor="#FFFFFF"/>
+				</graphicElement>
+			</rectangle>
+			<rectangle>
+				<reportElement x="0" y="40" width="280" height="30" backcolor="#2B2B2B" uuid="1a3a2951-3c22-4986-b7d0-0711a062691a"/>
+				<graphicElement>
+					<pen lineColor="#FFFFFF"/>
+				</graphicElement>
+			</rectangle>
+			<rectangle>
+				<reportElement x="0" y="70" width="280" height="30" backcolor="#2B2B2B" uuid="86b3236e-a719-4155-a688-eab6226c0875"/>
+				<graphicElement>
+					<pen lineColor="#FFFFFF"/>
+				</graphicElement>
+			</rectangle>
+			<rectangle>
+				<reportElement x="280" y="10" width="500" height="30" backcolor="#F0F0F0" uuid="f7d2edf6-c016-4ac6-8ba8-5c64056e8d1d"/>
+				<graphicElement>
+					<pen lineColor="#FFFFFF"/>
+				</graphicElement>
+			</rectangle>
+			<rectangle>
+				<reportElement x="280" y="40" width="500" height="30" backcolor="#F0F0F0" uuid="109e0afc-a56c-4ff6-8d94-d284507da36f"/>
+				<graphicElement>
+					<pen lineColor="#FFFFFF"/>
+				</graphicElement>
+			</rectangle>
+			<rectangle>
+				<reportElement x="280" y="70" width="500" height="30" backcolor="#F0F0F0" uuid="bb69e824-636e-4166-b34a-b20660bba8ac"/>
+				<graphicElement>
+					<pen lineColor="#FFFFFF"/>
+				</graphicElement>
+			</rectangle>
+			<staticText>
+				<reportElement x="0" y="10" width="280" height="31" forecolor="#FFFFFF" uuid="c8854f5a-5bd3-4ae2-bd52-8c5013179eec">
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+					<paragraph leftIndent="10" rightIndent="10"/>
+				</textElement>
+				<text><![CDATA[Total number of active restaurants:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="40" width="280" height="31" forecolor="#FFFFFF" uuid="0ca83569-03bc-4331-96e4-2e5c6d8ad5db">
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+					<paragraph leftIndent="10" rightIndent="10"/>
+				</textElement>
+				<text><![CDATA[Total number of active customers:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="71" width="280" height="31" forecolor="#FFFFFF" uuid="52425a04-7a87-4955-8ad9-65ba551adf8c">
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font isBold="true"/>
+					<paragraph leftIndent="10" rightIndent="10"/>
+				</textElement>
+				<text><![CDATA[Total number of active couriers:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="280" y="10" width="501" height="31" uuid="0f3011c9-ff80-4dd3-a6ef-199b68bf3afa">
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<paragraph leftIndent="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{totalRestaurantManagers}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="280" y="40" width="501" height="31" uuid="4c2754ef-7d03-49aa-82f9-0f1700fa869d">
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<paragraph leftIndent="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{totalCustomers}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="280" y="70" width="501" height="31" uuid="6193f906-8734-4313-8390-5afb426924f6">
+					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
+				</reportElement>
+				<textElement verticalAlignment="Middle">
+					<paragraph leftIndent="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{totalCouriers}]]></textFieldExpression>
+			</textField>
+		</band>
+		<band height="295">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<componentElement>
-				<reportElement x="1" y="340" width="800" height="215" uuid="b05b4a22-2493-483c-ab91-a11a79c950b3">
+				<reportElement x="0" y="15" width="800" height="280" uuid="b05b4a22-2493-483c-ab91-a11a79c950b3">
 					<property name="com.jaspersoft.studio.table.style.table_header" value="Table_TH"/>
 					<property name="com.jaspersoft.studio.table.style.column_header" value="Table_CH"/>
 					<property name="com.jaspersoft.studio.table.style.detail" value="Table_TD"/>
@@ -242,150 +338,26 @@
 					</jr:column>
 				</jr:table>
 			</componentElement>
-			<rectangle>
-				<reportElement x="0" y="140" width="280" height="30" backcolor="#2B2B2B" uuid="5a9af440-8331-4ecc-96b4-7bb4c1a7d0c9"/>
-				<graphicElement>
-					<pen lineColor="#FFFFFF"/>
-				</graphicElement>
-			</rectangle>
-			<rectangle>
-				<reportElement x="0" y="170" width="280" height="30" backcolor="#2B2B2B" uuid="67fb4590-160f-4253-8a1d-805882eedd80"/>
-				<graphicElement>
-					<pen lineColor="#FFFFFF"/>
-				</graphicElement>
-			</rectangle>
-			<rectangle>
-				<reportElement x="0" y="200" width="280" height="30" backcolor="#2B2B2B" uuid="1a3a2951-3c22-4986-b7d0-0711a062691a"/>
-				<graphicElement>
-					<pen lineColor="#FFFFFF"/>
-				</graphicElement>
-			</rectangle>
-			<rectangle>
-				<reportElement x="0" y="230" width="280" height="30" backcolor="#2B2B2B" uuid="86b3236e-a719-4155-a688-eab6226c0875"/>
-				<graphicElement>
-					<pen lineColor="#FFFFFF"/>
-				</graphicElement>
-			</rectangle>
-			<rectangle>
-				<reportElement x="280" y="140" width="500" height="30" backcolor="#F0F0F0" uuid="49358d41-70e3-4cc8-8fe1-6ef6796cc90a"/>
-				<graphicElement>
-					<pen lineColor="#FFFFFF"/>
-				</graphicElement>
-			</rectangle>
-			<rectangle>
-				<reportElement x="280" y="170" width="500" height="30" backcolor="#F0F0F0" uuid="f7d2edf6-c016-4ac6-8ba8-5c64056e8d1d"/>
-				<graphicElement>
-					<pen lineColor="#FFFFFF"/>
-				</graphicElement>
-			</rectangle>
-			<rectangle>
-				<reportElement x="280" y="200" width="500" height="30" backcolor="#F0F0F0" uuid="109e0afc-a56c-4ff6-8d94-d284507da36f"/>
-				<graphicElement>
-					<pen lineColor="#FFFFFF"/>
-				</graphicElement>
-			</rectangle>
-			<rectangle>
-				<reportElement x="280" y="230" width="500" height="30" backcolor="#F0F0F0" uuid="bb69e824-636e-4166-b34a-b20660bba8ac"/>
-				<graphicElement>
-					<pen lineColor="#FFFFFF"/>
-				</graphicElement>
-			</rectangle>
-			<staticText>
-				<reportElement x="0" y="140" width="280" height="31" forecolor="#FFFFFF" uuid="8cd161af-bbe2-4b60-a9b7-74cd82a07f56">
-					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
-					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font isBold="true"/>
-					<paragraph leftIndent="10" rightIndent="10"/>
-				</textElement>
-				<text><![CDATA[Total number of registered users:]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="0" y="170" width="280" height="31" forecolor="#FFFFFF" uuid="c8854f5a-5bd3-4ae2-bd52-8c5013179eec">
-					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
-					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font isBold="true"/>
-					<paragraph leftIndent="10" rightIndent="10"/>
-				</textElement>
-				<text><![CDATA[Total number of active restaurants:]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="0" y="200" width="280" height="31" forecolor="#FFFFFF" uuid="0ca83569-03bc-4331-96e4-2e5c6d8ad5db">
-					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
-					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font isBold="true"/>
-					<paragraph leftIndent="10" rightIndent="10"/>
-				</textElement>
-				<text><![CDATA[Total number of active customers:]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="0" y="231" width="280" height="31" forecolor="#FFFFFF" uuid="52425a04-7a87-4955-8ad9-65ba551adf8c">
-					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
-					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Left" verticalAlignment="Middle">
-					<font isBold="true"/>
-					<paragraph leftIndent="10" rightIndent="10"/>
-				</textElement>
-				<text><![CDATA[Total number of active couriers:]]></text>
-			</staticText>
-			<textField>
-				<reportElement x="280" y="140" width="501" height="31" uuid="4a9b28ce-fd47-4a20-88a6-f93b4969d147">
-					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
-				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<paragraph leftIndent="10"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{totalUsers}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="280" y="170" width="501" height="31" uuid="0f3011c9-ff80-4dd3-a6ef-199b68bf3afa">
-					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
-				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<paragraph leftIndent="10"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{totalRestaurantManagers}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="280" y="200" width="501" height="31" uuid="4c2754ef-7d03-49aa-82f9-0f1700fa869d">
-					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
-				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<paragraph leftIndent="10"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{totalCustomers}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="280" y="230" width="501" height="31" uuid="6193f906-8734-4313-8390-5afb426924f6">
-					<property name="com.jaspersoft.studio.unit.leftIndent" value="px"/>
-				</reportElement>
-				<textElement verticalAlignment="Middle">
-					<paragraph leftIndent="10"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{totalCouriers}]]></textFieldExpression>
-			</textField>
 		</band>
-	</title>
+	</detail>
 	<summary>
-		<band height="100" splitType="Stretch">
+		<band height="50" splitType="Stretch">
 			<property name="local_mesure_unitheight" value="pixel"/>
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 			<staticText>
-				<reportElement positionType="Float" mode="Opaque" x="0" y="70" width="800" height="30" backcolor="#2B2B2B" uuid="36aa233d-4305-48e6-974a-1bbf89bb3c8f"/>
+				<reportElement positionType="Float" mode="Opaque" x="0" y="20" width="800" height="30" backcolor="#2B2B2B" uuid="36aa233d-4305-48e6-974a-1bbf89bb3c8f"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font fontName="Serif" size="9" isItalic="true"/>
 				</textElement>
 				<text><![CDATA[]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="700" y="70" width="100" height="30" forecolor="#FFFFFF" uuid="21a9c9e6-136d-4d38-8da8-4041b70357dc"/>
-				<textElement textAlignment="Right"/>
+				<reportElement x="700" y="20" width="100" height="30" forecolor="#FFFFFF" uuid="21a9c9e6-136d-4d38-8da8-4041b70357dc">
+					<property name="com.jaspersoft.studio.unit.rightIndent" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<paragraph rightIndent="10"/>
+				</textElement>
 				<textFieldExpression><![CDATA["Page " + $V{PAGE_NUMBER}]]></textFieldExpression>
 			</textField>
 		</band>

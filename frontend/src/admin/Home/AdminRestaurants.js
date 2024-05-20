@@ -45,16 +45,15 @@ function AdminRestaurants() {
                         //setLoading(false)
                         if (mng.status == 200){
                             mng.data.forEach(el => {
-                                var uuid = el.uuid
+                                var id = el.id
                                 var managerName = el.firstname +" " +el.lastname
                                 res.data.forEach(element => {
-                                    if(element.managerUuid == uuid){
+                                    if(element.managerId == id){
                                         element.manager = managerName
                                     } 
                                 });
                             });
                             setSearchResults(res.data)
-                            console.log(mng.data)
                             setLoading(false)
                         }
                     })

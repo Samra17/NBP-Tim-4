@@ -1,13 +1,13 @@
 package com.nbp.tim3.controller;
 
-import com.nbp.tim3.dto.coupon.CouponPaginatedResponse;
 import com.nbp.tim3.service.AdminInformationService;
-import com.nbp.tim3.service.CouponService;
+import com.nbp.tim3.service.UserAnalysisService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +28,9 @@ public class AdminInformationController {
 
     @Autowired
     private AdminInformationService adminInformationService;
+
+    @Autowired
+    private UserAnalysisService userAnalysisService;
 
     @Operation(description = "Get all orders by restaurant")
     @ApiResponses(value = {
@@ -69,6 +72,19 @@ public class AdminInformationController {
     @GetMapping("/adminrestaurantrevenue")
     public ResponseEntity<Map<String, Long>> getAdminRestaurantRevenue(){
         return ResponseEntity.ok(adminInformationService.getAdminRestaurantRevenue());
+    }
+
+    @PreAuthorize("hasRole('ADMINISTRATOR')")
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("user-analysis-report")
+    public void getUserAnalysisReport(HttpServletResponse response) {
+        response.setContentType("application/pdf");
+
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=user_analysis_report_pdf " + System.currentTimeMillis() + ".pdf";
+        response.setHeader(headerKey,headerValue);
+
+        userAnalysisService.getUserReport(response);
     }
 
 }

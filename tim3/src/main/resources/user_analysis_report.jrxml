@@ -53,15 +53,17 @@
 			<bottomPen lineWidth="0.5" lineColor="#000000"/>
 		</box>
 	</style>
-	<subDataset name="tableDataset" uuid="762a7d87-058d-441f-9330-580d3fb9671b">
-		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
-		<queryString>
-			<![CDATA[]]>
-		</queryString>
+	<subDataset name="Dataset1" uuid="70370722-01b1-41a5-a681-3d6a28fa2f84">
+		<field name="customerName" class="java.lang.String"/>
+		<field name="restaurantName" class="java.lang.String"/>
+		<field name="customerAddress" class="java.lang.String"/>
+		<field name="numOfOrders" class="java.lang.Integer"/>
 	</subDataset>
-	<queryString>
-		<![CDATA[]]>
-	</queryString>
+	<parameter name="totalUsers" class="java.lang.Integer"/>
+	<parameter name="totalRestaurantManagers" class="java.lang.Integer"/>
+	<parameter name="totalCouriers" class="java.lang.Integer"/>
+	<parameter name="totalCustomers" class="java.lang.Integer"/>
+	<parameter name="datasetTable1" class="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
 	<title>
 		<band height="555" splitType="Stretch">
 			<line>
@@ -121,8 +123,8 @@
 					<property name="com.jaspersoft.studio.components.autoresize.proportional" value="true"/>
 				</reportElement>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
-					<datasetRun subDataset="tableDataset" uuid="10168dbf-ad69-45db-a514-9eb6c6a08ee1">
-						<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+					<datasetRun subDataset="Dataset1" uuid="7f03ad97-fa43-4b82-94c5-19a674ac7d7e">
+						<dataSourceExpression><![CDATA[$P{datasetTable1}]]></dataSourceExpression>
 					</datasetRun>
 					<jr:column width="242" uuid="741c1f03-832e-42c0-8de1-fd938298a292">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
@@ -150,7 +152,7 @@
 									<font fontName="SansSerif" size="12"/>
 									<paragraph leftIndent="10"/>
 								</textElement>
-								<textFieldExpression><![CDATA["test"]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{restaurantName}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -177,7 +179,7 @@
 									<font fontName="SansSerif" size="12"/>
 									<paragraph leftIndent="10"/>
 								</textElement>
-								<textFieldExpression><![CDATA["test"]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{customerName}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -207,7 +209,7 @@
 									<font fontName="SansSerif" size="12"/>
 									<paragraph leftIndent="10"/>
 								</textElement>
-								<textFieldExpression><![CDATA["test"]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{customerAddress}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -234,7 +236,7 @@
 									<font fontName="SansSerif" size="12"/>
 									<paragraph leftIndent="10"/>
 								</textElement>
-								<textFieldExpression><![CDATA["test"]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{numOfOrders}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
@@ -339,7 +341,7 @@
 				<textElement verticalAlignment="Middle">
 					<paragraph leftIndent="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Text Field"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{totalUsers}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="280" y="170" width="501" height="31" uuid="0f3011c9-ff80-4dd3-a6ef-199b68bf3afa">
@@ -348,7 +350,7 @@
 				<textElement verticalAlignment="Middle">
 					<paragraph leftIndent="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Text Field"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{totalRestaurantManagers}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="280" y="200" width="501" height="31" uuid="4c2754ef-7d03-49aa-82f9-0f1700fa869d">
@@ -357,7 +359,7 @@
 				<textElement verticalAlignment="Middle">
 					<paragraph leftIndent="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Text Field"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{totalCustomers}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="280" y="230" width="501" height="31" uuid="6193f906-8734-4313-8390-5afb426924f6">
@@ -366,7 +368,7 @@
 				<textElement verticalAlignment="Middle">
 					<paragraph leftIndent="10"/>
 				</textElement>
-				<textFieldExpression><![CDATA["Text Field"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{totalCouriers}]]></textFieldExpression>
 			</textField>
 		</band>
 	</title>

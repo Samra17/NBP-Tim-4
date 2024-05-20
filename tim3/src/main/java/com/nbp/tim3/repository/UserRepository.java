@@ -1,5 +1,6 @@
 package com.nbp.tim3.repository;
 
+import com.nbp.tim3.dto.customer.NumberOfOrdersPerRestaurantResponse;
 import com.nbp.tim3.model.*;
 import com.nbp.tim3.service.DBConnectionService;
 import com.nbp.tim3.util.exception.InvalidRequestException;
@@ -523,5 +524,177 @@ public class UserRepository {
             user.setAddress(address);
         }
         return user;
+    }
+
+    public List<NumberOfOrdersPerRestaurantResponse> getNumberOfOrdersPerRestaurant() {
+        String sql = "SELECT " +
+                "    NVL(NR2.NAME, '-') AS restaurantName, " +
+                "    NVL(NU2.USERNAME, '-') AS customerName," +
+                "    NVL(NA.STREET, '-') AS customerAddress," +
+                "    COUNT(CASE WHEN NU2.USERNAME IS NOT NULL THEN 1 END) AS numOfOrders " +
+                "FROM nbp.NBP_USER nu " +
+                "JOIN " +
+                "    NBP_RESTAURANT nr2 ON nr2.MANAGER_ID = NU.ID " +
+                "JOIN " +
+                "    NBP_ORDER no2 ON NO2.RESTAURANT_ID = NR2.ID " +
+                "LEFT JOIN " +
+                "    NBP.NBP_USER nu2 ON NU2.ID = NO2.CUSTOMER_ID " +
+                "LEFT JOIN " +
+                "    NBP_ADDRESS na ON NA.ID = NU2.ADDRESS_ID " +
+                "GROUP BY " +
+                "    NR2.NAME, " +
+                "    NU2.USERNAME, " +
+                "    NA.STREET " +
+                "ORDER BY restaurantName ASC, numOfOrders DESC";
+
+        List<NumberOfOrdersPerRestaurantResponse> restaurantResponses = new ArrayList<>();
+
+        PreparedStatement preparedStatement = null;
+        try {
+            Connection connection = dbConnectionService.getConnection();
+            preparedStatement = connection.prepareStatement(sql);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+
+            while (resultSet.next()) {
+                NumberOfOrdersPerRestaurantResponse response = new NumberOfOrdersPerRestaurantResponse();
+                mapNumberOfOrdersPerRestaurant(response, resultSet);
+                restaurantResponses.add(response);
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return restaurantResponses;
+    }
+
+    public int getNumberOfRegisteredUsers() {
+        String sql = "SELECT COUNT(*) as totalUsers FROM nbp.NBP_LOG nl WHERE DB_USER = 'NBP24T4'";
+
+        PreparedStatement preparedStatement = null;
+        int totalUsers = 0;
+        try {
+            Connection connection = dbConnectionService.getConnection();
+            preparedStatement = connection.prepareStatement(sql);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                totalUsers = resultSet.getInt("totalUsers");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return totalUsers;
+    }
+
+    public int getNumberOfRestaurantManagers() {
+        String sql = "SELECT COUNT(*) as totalRestaurantsManagers FROM nbp.NBP_USER nu " +
+                "JOIN nbp.NBP_ROLE nr ON NR.ID = NU.ROLE_ID " +
+                "WHERE nr.NAME = 'RESTAURANT_MANAGER'";
+
+        PreparedStatement preparedStatement = null;
+        int totalRestaurantManagers = 0;
+        try {
+            Connection connection = dbConnectionService.getConnection();
+            preparedStatement = connection.prepareStatement(sql);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                totalRestaurantManagers = resultSet.getInt("totalRestaurantsManagers");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return totalRestaurantManagers;
+    }
+
+    public int getNumberOfCouriers() {
+        String sql = "SELECT COUNT(*) as totalCouriers FROM nbp.NBP_USER nu " +
+                "JOIN nbp.NBP_ROLE nr ON NR.ID = NU.ROLE_ID " +
+                "WHERE nr.NAME = 'COURIER'";
+
+        PreparedStatement preparedStatement = null;
+        int totalCouriers = 0;
+        try {
+            Connection connection = dbConnectionService.getConnection();
+            preparedStatement = connection.prepareStatement(sql);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                totalCouriers = resultSet.getInt("totalCouriers");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return totalCouriers;
+    }
+
+    public int getNumberOfCustomers() {
+        String sql = "SELECT COUNT(*) as totalCustomers FROM nbp.NBP_USER nu " +
+                "JOIN nbp.NBP_ROLE nr ON NR.ID = NU.ROLE_ID " +
+                "WHERE nr.NAME = 'CUSTOMER'";
+
+        PreparedStatement preparedStatement = null;
+        int totalCustomers = 0;
+        try {
+            Connection connection = dbConnectionService.getConnection();
+            preparedStatement = connection.prepareStatement(sql);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                totalCustomers = resultSet.getInt("totalCustomers");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                Objects.requireNonNull(preparedStatement).close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return totalCustomers;
+    }
+
+
+    private void mapNumberOfOrdersPerRestaurant(NumberOfOrdersPerRestaurantResponse response, ResultSet resultSet) throws SQLException {
+        response.setRestaurantName(resultSet.getString("restaurantName"));
+        response.setCustomerName(resultSet.getString("customerName"));
+        response.setNumOfOrders(resultSet.getInt("numOfOrders"));
+        response.setCustomerAddress(resultSet.getString("customerAddress"));
     }
 }

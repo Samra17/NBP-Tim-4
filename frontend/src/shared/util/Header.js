@@ -9,7 +9,6 @@ function Header() {
   const navigate = useNavigate();
   const location = useLocation();
 
-
   const customerOptions = () => {
     const logout = () => {
       document.body.style.cursor = "wait";
@@ -162,9 +161,9 @@ function Header() {
       <>
         <Nav className="me-auto"></Nav>
         <Nav>
-          <Nav.Link className="text-white" onClick={courierInfoPage}>
+          {/*  <Nav.Link className="text-white" onClick={courierInfoPage}>
             My profile
-          </Nav.Link>
+          </Nav.Link>*/}
           <div className="vr text-white"></div>
           <Nav.Link className="text-white" onClick={logout}>
             Logout
